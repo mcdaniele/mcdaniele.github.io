@@ -25,11 +25,10 @@ var main_state = {
     preload: function() { 
 		this.game.load.image('bgworld', 'assets/background.png');
         this.game.load.spritesheet('hero', 'assets/heropot.png', 30, 42);
-        this.game.load.spritesheet('touchb', 'assets/touch.png',300,300);
         this.game.load.image('meteor', 'assets/meteor.png');
         this.game.load.image('coin', 'assets/coin.png');
         this.game.load.image('ground', 'assets/grnd.png');
-//        this.game.load.image('touchb', 'assets/touch.png');
+        this.game.load.image('touchb', 'assets/touch.png');
         this.game.load.image('indicator', 'assets/indicator.png');
         this.game.load.audio('coin', 'assets/coin.wav');
         this.game.load.audio('music', 'assets/appleseed.ogg');
@@ -38,20 +37,6 @@ var main_state = {
     },
     create: function() { 
 
-                buttonleft = game.add.button(0, 0, 'touchb', null, this, 0, 0, 0, 0);
-//                buttonleft.anchor.setTo(0.5, 0.5);
-                buttonleft.fixedToCamera = true;
-                buttonleft.events.onInputOver.add(function(){leftb=true;});
-                buttonleft.events.onInputOut.add(function(){leftb=false;});
-                buttonleft.events.onInputDown.add(function(){leftb=true;});
-                buttonleft.events.onInputUp.add(function(){leftb=false;});
-                buttonright = game.add.button(300, 0, 'touchb', null, this, 0, 0, 0, 0);
-//                buttonright.anchor.setTo(0.5, 0.5);
-                buttonright.fixedToCamera = true;
-                buttonright.events.onInputOver.add(function(){rightb=true;});
-                buttonright.events.onInputOut.add(function(){rightb=false;});
-                buttonright.events.onInputDown.add(function(){rightb=true;});
-                buttonright.events.onInputUp.add(function(){rightb=false;});
         this.bgworld = this.game.add.sprite(0, 0, 'bgworld');
         
         this.hero = this.game.add.sprite(game.world.centerX, 240,'hero');
@@ -127,9 +112,8 @@ var main_state = {
 
         // MOVEMENT
         // Setting up hero movement. Defining the cursor keys
-//		this.lefttouch = this.game.add.sprite(0, 0, 'touchb');
-//		this.righttouch = this.game.add.sprite(300, 0, 'touchb');
-		
+		this.lefttouch = this.game.add.sprite(0, 0, 'touchb');
+		this.righttouch = this.game.add.sprite(300, 0, 'touchb');
 		this.cursors = this.game.input.keyboard.createCursorKeys();
 
         // SOUND
@@ -158,7 +142,7 @@ var main_state = {
         this.hero.body.velocity.x = this.heroSpeed;
         // If hero is alive AND player is holding down LEFT key then:
         if (this.hero.alive == true){
-            if (this.cursors.left.isDown||leftb)		//(this.lefttouch.onInputDown||this.lefttouch.onInputOver))
+            if (this.cursors.left.isDown||(this.lefttouch.onInputDown||this.lefttouch.onInputOver))
             {
                 // Change player's velocity to -300
                 this.hero.body.velocity.x = -300;
@@ -170,7 +154,7 @@ var main_state = {
                 }
             // If not, then check if hero is alive AND player is holding down RIGHT key
             } 
-            else if (this.cursors.right.isDown||rightb)		//(this.righttouch.onInputDown||this.righttouch.onInputOver)) 
+            else if (this.cursors.right.isDown||(this.righttouch.onInputDown||this.righttouch.onInputOver)) 
             {
                 // Change player's velocity to 300
                 this.hero.body.velocity.x = 300;
