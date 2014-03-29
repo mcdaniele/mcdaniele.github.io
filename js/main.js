@@ -38,6 +38,20 @@ var main_state = {
     },
     create: function() { 
 
+                buttonleft = game.add.button(0, 0, 'touchb', null, this, 0, 0, 0, 0);
+//                buttonleft.anchor.setTo(0.5, 0.5);
+                buttonleft.fixedToCamera = true;
+                buttonleft.events.onInputOver.add(function(){leftb=true;});
+                buttonleft.events.onInputOut.add(function(){leftb=false;});
+                buttonleft.events.onInputDown.add(function(){leftb=true;});
+                buttonleft.events.onInputUp.add(function(){leftb=false;});
+                buttonright = game.add.button(300, 0, 'touchb', null, this, 0, 0, 0, 0);
+//                buttonright.anchor.setTo(0.5, 0.5);
+                buttonright.fixedToCamera = true;
+                buttonright.events.onInputOver.add(function(){rightb=true;});
+                buttonright.events.onInputOut.add(function(){rightb=false;});
+                buttonright.events.onInputDown.add(function(){rightb=true;});
+                buttonright.events.onInputUp.add(function(){rightb=false;});
         this.bgworld = this.game.add.sprite(0, 0, 'bgworld');
         
         this.hero = this.game.add.sprite(game.world.centerX, 240,'hero');
@@ -115,21 +129,6 @@ var main_state = {
         // Setting up hero movement. Defining the cursor keys
 //		this.lefttouch = this.game.add.sprite(0, 0, 'touchb');
 //		this.righttouch = this.game.add.sprite(300, 0, 'touchb');
-		
-                buttonleft = game.add.button(0, 0, 'touchb', null, this, 0, 0, 0, 0);
-//                buttonleft.anchor.setTo(0.5, 0.5);
-                buttonleft.fixedToCamera = true;
-                buttonleft.events.onInputOver.add(function(){leftb=true;});
-                buttonleft.events.onInputOut.add(function(){leftb=false;});
-                buttonleft.events.onInputDown.add(function(){leftb=true;});
-                buttonleft.events.onInputUp.add(function(){leftb=false;});
-                buttonright = game.add.button(300, 0, 'touchb', null, this, 0, 0, 0, 0);
-//                buttonright.anchor.setTo(0.5, 0.5);
-                buttonright.fixedToCamera = true;
-                buttonright.events.onInputOver.add(function(){rightb=true;});
-                buttonright.events.onInputOut.add(function(){rightb=false;});
-                buttonright.events.onInputDown.add(function(){rightb=true;});
-                buttonright.events.onInputUp.add(function(){rightb=false;});
 		
 		this.cursors = this.game.input.keyboard.createCursorKeys();
 
