@@ -1,5 +1,7 @@
 var game = new Phaser.Game(600, 300, Phaser.AUTO, 'gamecontainer');
 
+var leftt = false;
+var rightt = false;
 var sfxbool = true;
 var musicbool = true;
 var first = true;
@@ -28,7 +30,8 @@ var main_state = {
         this.game.load.image('meteor', 'assets/meteor.png');
         this.game.load.image('coin', 'assets/coin.png');
         this.game.load.image('ground', 'assets/grnd.png');
-        this.game.load.image('touchb', 'assets/touch.png');
+        this.game.load.spritesheet('touchb', 'assets/touch.png',300,300);
+//        this.game.load.image('touchb', 'assets/touch.png');
         this.game.load.image('indicator', 'assets/indicator.png');
         this.game.load.audio('coin', 'assets/coin.wav');
         this.game.load.audio('music', 'assets/appleseed.ogg');
@@ -112,9 +115,23 @@ var main_state = {
 
         // MOVEMENT
         // Setting up hero movement. Defining the cursor keys
-		this.lefttouch = this.game.add.sprite(0, 0, 'touchb');
-		this.righttouch = this.game.add.sprite(300, 0, 'touchb');
 		this.cursors = this.game.input.keyboard.createCursorKeys();
+		//TOUCH
+		if (!game.device.desktop)
+		{
+		this.buttonleft = this.game.add.button(0, 0, 'touchb', null, this, 0, 0, 0, 0);
+        this.buttonleft.fixedToCamera = true;
+        this.buttonleft.events.onInputOver.add(function(){leftt=true;});
+        this.buttonleft.events.onInputOut.add(function(){leftt=false;});
+        this.buttonleft.events.onInputDown.add(function(){leftt=true;});
+        this.buttonleft.events.onInputUp.add(function(){leftt=false;});
+        this.buttonright = this.game.add.button(300, 0, 'touchb', null, this, 0, 0, 0, 0);
+        this.buttonright.fixedToCamera = true;
+        this.buttonright.events.onInputOver.add(function(){rightt=true;});
+        this.buttonright.events.onInputOut.add(function(){rightt=false;});
+        this.buttonright.events.onInputDown.add(function(){rightt=true;});
+        this.buttonright.events.onInputUp.add(function(){rightt=false;});
+		}
 
         // SOUND
         this.coin_s = game.add.sound('coin');
@@ -142,7 +159,7 @@ var main_state = {
         this.hero.body.velocity.x = this.heroSpeed;
         // If hero is alive AND player is holding down LEFT key then:
         if (this.hero.alive == true){
-            if (this.cursors.left.isDown||(this.lefttouch.onInputDown||this.lefttouch.onInputOver))
+            if (this.cursors.left.isDown||leftt)
             {
                 // Change player's velocity to -300
                 this.hero.body.velocity.x = -300;
@@ -154,7 +171,7 @@ var main_state = {
                 }
             // If not, then check if hero is alive AND player is holding down RIGHT key
             } 
-            else if (this.cursors.right.isDown||(this.righttouch.onInputDown||this.righttouch.onInputOver)) 
+            else if (this.cursors.right.isDown||rightt) 
             {
                 // Change player's velocity to 300
                 this.hero.body.velocity.x = 300;
