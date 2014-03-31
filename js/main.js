@@ -83,30 +83,31 @@ var main_state = {
         switch (true)
         {
             case (highscore > 9999):
-                this.highscoreLabelShadow = this.game.add.text(507, 13, "0", styleShadow);
-                this.highscoreLabel = this.game.add.text(507, 10, "0", style);
+                this.highscoreLabelShadow = this.game.add.text(497, 13, "0", styleShadow);
+                this.highscoreLabel = this.game.add.text(497, 10, "0", style);
                 break;
             case (highscore > 999):
-                this.highscoreLabelShadow = this.game.add.text(524, 13, "0", styleShadow);
-                this.highscoreLabel = this.game.add.text(524, 10, "0", style);
+                this.highscoreLabelShadow = this.game.add.text(514, 13, "0", styleShadow);
+                this.highscoreLabel = this.game.add.text(514, 10, "0", style);
                 break;
             case (highscore > 99):
-                this.highscoreLabelShadow = this.game.add.text(541, 13, "0", styleShadow);
-                this.highscoreLabel = this.game.add.text(541, 10, "0", style);
+                this.highscoreLabelShadow = this.game.add.text(531, 13, "0", styleShadow);
+                this.highscoreLabel = this.game.add.text(531, 10, "0", style);
                 break;
             case (highscore > 9):
-                this.highscoreLabelShadow = this.game.add.text(558, 13, "0", styleShadow);
-                this.highscoreLabel = this.game.add.text(558, 10, "0", style);
+                this.highscoreLabelShadow = this.game.add.text(548, 13, "0", styleShadow);
+                this.highscoreLabel = this.game.add.text(548, 10, "0", style);
                 break;
             default:
-                this.highscoreLabelShadow = this.game.add.text(575, 13, "0", styleShadow);
-                this.highscoreLabel = this.game.add.text(575, 10, "0", style);
+                this.highscoreLabelShadow = this.game.add.text(565, 13, "0", styleShadow);
+                this.highscoreLabel = this.game.add.text(565, 10, "0", style);
                 break;
-        }
-        this.highscoreLabelShadow.content = highscore;
+		}
+		this.highscoreLabelShadow.content = highscore;
         this.highscoreLabel.content = highscore;
-        
-        // INDICATOR
+		
+
+		// INDICATOR
         // Create indicator that will help with player's death animation
         // So, only alive if hero is alive
         this.indicator = this.game.add.sprite(-30,0, 'indicator');
@@ -131,6 +132,10 @@ var main_state = {
         	this.buttonright.events.onInputOut.add(function(){rightt=false;});
         	this.buttonright.events.onInputDown.add(function(){rightt=true;});
         	this.buttonright.events.onInputUp.add(function(){rightt=false;});
+		
+game.stage.scaleMode = Phaser.StageScaleMode.EXACT_FIT; //resize your window to see the stage resize too
+game.stage.scale.setShowAll();
+game.stage.scale.refresh();		
 		}
 
         // SOUND

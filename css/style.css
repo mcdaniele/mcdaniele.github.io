@@ -16,7 +16,6 @@ header h2 {
 }
 
 .container {
-	width: 600px;
 	margin-top: 50px;
 	margin-left: auto;
 	margin-right: auto;
@@ -28,7 +27,6 @@ header h2 {
 	color: #353535;
 }
 #gamecontainer {
-	width: 600px;
 	margin-top: 30px;
 	margin-left: auto;
 	margin-right: auto;
