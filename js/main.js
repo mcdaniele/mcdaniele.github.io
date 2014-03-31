@@ -119,18 +119,21 @@ var main_state = {
 		//TOUCH
 		if (!game.device.desktop)
 		{
-		this.buttonleft = this.game.add.button(0, 0, 'touchb', null, this, 0, 0, 0, 0);
-        this.buttonleft.fixedToCamera = true;
-        this.buttonleft.events.onInputOver.add(function(){leftt=true;});
-        this.buttonleft.events.onInputOut.add(function(){leftt=false;});
-        this.buttonleft.events.onInputDown.add(function(){leftt=true;});
-        this.buttonleft.events.onInputUp.add(function(){leftt=false;});
-        this.buttonright = this.game.add.button(300, 0, 'touchb', null, this, 0, 0, 0, 0);
-        this.buttonright.fixedToCamera = true;
-        this.buttonright.events.onInputOver.add(function(){rightt=true;});
-        this.buttonright.events.onInputOut.add(function(){rightt=false;});
-        this.buttonright.events.onInputDown.add(function(){rightt=true;});
-        this.buttonright.events.onInputUp.add(function(){rightt=false;});
+			this.buttonleft = this.game.add.button(0, 0, 'touchb', null, this, 0, 0, 0, 0);
+        	this.buttonleft.fixedToCamera = true;
+        	this.buttonleft.events.onInputOver.add(function(){leftt=true;});
+        	this.buttonleft.events.onInputOut.add(function(){leftt=false;});
+        	this.buttonleft.events.onInputDown.add(function(){leftt=true;});
+        	this.buttonleft.events.onInputUp.add(function(){leftt=false;});
+        	this.buttonright = this.game.add.button(300, 0, 'touchb', null, this, 0, 0, 0, 0);
+        	this.buttonright.fixedToCamera = true;
+        	this.buttonright.events.onInputOver.add(function(){rightt=true;});
+        	this.buttonright.events.onInputOut.add(function(){rightt=false;});
+        	this.buttonright.events.onInputDown.add(function(){rightt=true;});
+        	this.buttonright.events.onInputUp.add(function(){rightt=false;});
+			game.stage.scaleMode = Phaser.StageScaleMode.EXACT_FIT; //resize your window to see the stage resize too
+			game.stage.scale.setShowAll();
+			game.stage.scale.refresh();
 		}
 
         // SOUND
