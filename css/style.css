@@ -7,7 +7,6 @@ body {
 	text-align: center;
 }
 #gamecontainer {
-	margin: 0 auto;
 	position: relative;
 	display: inline-block;
 }
