@@ -131,14 +131,6 @@ var main_state = {
         	this.buttonright.events.onInputOut.add(function(){rightt=false;});
         	this.buttonright.events.onInputDown.add(function(){rightt=true;});
         	this.buttonright.events.onInputUp.add(function(){rightt=false;});
-game.stage.fullScreenScaleMode = Phaser.StageScaleMode.SHOW_ALL;
-game.stage.scale.setShowAll();
-game.stage.scale.pageAlignHorizontally = true;
-game.stage.scale.pageAlignVeritcally = true;
-game.stage.scale.refresh();
-window.addEventListener('resize', function(event){
-    resizeGame();
-});
 		}
 
         // SOUND
@@ -151,11 +143,6 @@ window.addEventListener('resize', function(event){
         if (musicbool) this.music_s.play('', 0, 0.5, true);
 
     },
-    
-	resizeGame: function () {
-    	game.stage.scale.setShowAll();
-    	game.stage.scale.refresh();
-	},
     
 	update: function() {
 
