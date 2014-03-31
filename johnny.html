@@ -4,9 +4,26 @@
 	<meta charset="UTF-8">
 	<title>Johnny</title>
     <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
-	<link rel="stylesheet" type="text/css" href="css/style.css">
 	<script type="text/javascript" src="js/phaser.min.js"></script>
 	<script type="text/javascript" src="js/main.js"></script>
+	<script>
+		if (!game.device.desktop)
+		{
+			<style>
+				.container {
+					position: relative;
+					text-align: center;
+				}
+				#gamecontainer {
+					position: relative;
+					display: inline-block;
+				}
+			</style>
+		}
+		else
+		{
+		}
+	</script>
 </head>
 <body>
 <div class="container">
