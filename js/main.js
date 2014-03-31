@@ -131,7 +131,7 @@ var main_state = {
         	this.buttonright.events.onInputOut.add(function(){rightt=false;});
         	this.buttonright.events.onInputDown.add(function(){rightt=true;});
         	this.buttonright.events.onInputUp.add(function(){rightt=false;});
-			game.stage.scaleMode = Phaser.StageScaleMode.EXACT_FIT; //resize your window to see the stage resize too
+			game.stage.scaleMode = Phaser.StageScaleMode.SHOW_ALL; //resize your window to see the stage resize too
 			game.stage.scale.setShowAll();
 			game.stage.scale.refresh();
 		}
