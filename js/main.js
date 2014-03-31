@@ -131,9 +131,14 @@ var main_state = {
         	this.buttonright.events.onInputOut.add(function(){rightt=false;});
         	this.buttonright.events.onInputDown.add(function(){rightt=true;});
         	this.buttonright.events.onInputUp.add(function(){rightt=false;});
-			game.stage.scaleMode = Phaser.StageScaleMode.SHOW_ALL; //resize your window to see the stage resize too
-			game.stage.scale.setShowAll();
-			game.stage.scale.refresh();
+game.stage.fullScreenScaleMode = Phaser.StageScaleMode.SHOW_ALL;
+game.stage.scale.setShowAll();
+game.stage.scale.pageAlignHorizontally = true;
+game.stage.scale.pageAlignVeritcally = true;
+game.stage.scale.refresh();
+window.addEventListener('resize', function(event){
+    resizeGame();
+});
 		}
 
         // SOUND
@@ -147,7 +152,12 @@ var main_state = {
 
     },
     
-    update: function() {
+	resizeGame: function () {
+    	game.stage.scale.setShowAll();
+    	game.stage.scale.refresh();
+	},
+    
+	update: function() {
 
         // PHYSICS
         // Check collision between(key, key)
