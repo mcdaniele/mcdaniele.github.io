@@ -1,47 +1,16 @@
-var game = new Phaser.Game(600, 300, Phaser.AUTO, 'gamecontainer');
+Game.Play = function (game) { };
 
 var leftt = false;
 var rightt = false;
-var sfxbool = true;
-var musicbool = true;
 var first = true;
 var dee = 0;
-var highscore = 0;
-var previoushigh = 0;
 var timer2;
-//var menu_state = {
-//	create: function () {
-//		this.cursor = this.game.input.keyboard.createCursorKeys();
-//		var this.label = this.game.add.text(300, 250, "press the UP arrow key to start", { font: "25px Arial", fill: "#333333" });
-//		this.label.anchor.setTo(0.5, 0.5);
-//		this.label.alpha = 0;
-//		this.game.add.tween(label).delay(500).to({ alpha: 1}, 500).start();		
-//		this.game.add.tween(label).to({ angle:1 }, 500).to({ angle:-1 }, 500).loop().start();
-//	},
-//	update: function() {
-//		if (this.cursor.up.isDown)
-//			this.game.state.start('main');		
-//	},
-//};
-var main_state = {
-    preload: function() { 
-		this.game.load.image('bgworld', 'assets/background.png');
-        this.game.load.spritesheet('hero', 'assets/heropot.png', 30, 42);
-        this.game.load.image('meteor', 'assets/meteor.png');
-        this.game.load.image('coin', 'assets/coin.png');
-        this.game.load.image('ground', 'assets/grnd.png');
-        this.game.load.spritesheet('touchb', 'assets/touch.png',300,300);
-//        this.game.load.image('touchb', 'assets/touch.png');
-        this.game.load.image('indicator', 'assets/indicator.png');
-        this.game.load.audio('coin', 'assets/coin.wav');
-        this.game.load.audio('music', 'assets/appleseed.ogg');
-        this.game.load.audio('death', 'assets/death.wav');
-        
-    },
+
+Game.Play.prototype = {
+
     create: function() { 
 
         this.bgworld = this.game.add.sprite(0, 0, 'bgworld');
-        
         this.hero = this.game.add.sprite(game.world.centerX, 240,'hero');
         this.hero.anchor.setTo(0.5, 0.5);
         this.hero.body.gravity.y = 300;
@@ -52,14 +21,11 @@ var main_state = {
         this.hero.animations.add('right', [5, 6, 5, 7], 6, true);
         this.hero.animations.add('dead', [0, 0], 2, true);
         this.hero.animations.add('alive', [1, 1], 2, true);
-
         this.meteors = game.add.group();
         this.meteors.createMultiple(20, 'meteor');
         this.timer = this.game.time.events.loop(1000, this.spawnMeteors, this);
-        
         this.ground = this.game.add.sprite(0, 250, 'ground');
         this.ground.body.immovable = true;
-        
         this.coin = this.game.add.emitter(game.world.centerX, -10);
         this.coin.makeParticles('coin', 0, 100, true, false);
         this.coin.minParticleSpeed.setTo(-200, -300);
@@ -70,7 +36,7 @@ var main_state = {
         
         // SCORE
         // Create variable score with default 0
-        this.score = 0;
+        score = 0;
         // Score shadow
         // Must be declared before "highlight text" since this is read first
         // Create var styleShadow which will handle the text's styling
@@ -105,7 +71,6 @@ var main_state = {
 		}
 		this.highscoreLabelShadow.content = highscore;
         this.highscoreLabel.content = highscore;
-		
 
 		// INDICATOR
         // Create indicator that will help with player's death animation
@@ -132,10 +97,9 @@ var main_state = {
         	this.buttonright.events.onInputOut.add(function(){rightt=false;});
         	this.buttonright.events.onInputDown.add(function(){rightt=true;});
         	this.buttonright.events.onInputUp.add(function(){rightt=false;});
-		
-game.stage.scaleMode = Phaser.StageScaleMode.EXACT_FIT; //resize your window to see the stage resize too
-game.stage.scale.setShowAll();
-game.stage.scale.refresh();		
+			game.stage.scaleMode = Phaser.StageScaleMode.EXACT_FIT; //resize your window to see the stage resize too
+			game.stage.scale.setShowAll();
+			game.stage.scale.refresh();		
 		}
 
         // SOUND
@@ -196,14 +160,13 @@ game.stage.scale.refresh();
                 this.hero.frame = 1;
             }
         }
-        if (game.time.now - timer2 > 3500 && !(this.hero.alive)) {this.music_s.stop();this.music_s=null;game.state.start('main')};
+        if (game.time.now - timer2 > 3500 && !(this.hero.alive)) {this.music_s.stop();this.music_s=null;game.state.start('Menu')};
     },
 
 // FUNCTIONS
 
     // Function that can be called to create one meteor
     spawnSingleMeteor: function(x, y){
-        
         // Create var getmeteor
         // .getFirstDead will grab the first meteor from the meteors group (that is dead). 
         var getMeteor = this.meteors.getFirstDead();
@@ -218,19 +181,16 @@ game.stage.scale.refresh();
         getMeteor.anchor.setTo(0.5, 0.5);
         // Destroy meteor if it is out of bounds, this in turn adds to the dead pool of meteors
         getMeteor.outOfBoundsKill = true;
-
     },
 
     // Function that spawns several meteors
     spawnMeteors: function(){
-
         // Loop 6 times, this in turn creates 6 meteors at a time
         // So the timer defined above will now spawn 6 meteors every 1.5 seconds
         for(var i = 0; i < 4; i++){
             // Here we pass the spawnSingleMeteor 2 attributes for it to modify (x, y)
             //this.spawnSingleMeteor(x,y)
             this.spawnSingleMeteor(Math.floor((Math.random()*580)+1), Math.floor((Math.random()*-100)-10));
-
         }
     },
 
@@ -240,21 +200,19 @@ game.stage.scale.refresh();
         coin.kill();
         if (sfxbool) this.coin_s.play();
         // Add 1 to the score
-        this.score += 1;
+        score += 1;
         // Update the scoreLabel content to the new score
-        this.scoreLabel.content = this.score;
+        this.scoreLabel.content = score;
         // Idem for the shadow
-        this.scoreLabelShadow.content = this.score;
+        this.scoreLabelShadow.content = score;
     },
 
     // Function called when hero overlaps with meteors
     playerHit: function(hero, coin) {
-
         // If hero is still alive then 'return' or exit the function
         if (this.hero.alive == false) {
             return;
         };
-
         this.hero.animations.play('dead');
         if (sfxbool) this.death_s.play();
 		game.add.tween(this.music_s).to({volume:0}, 2500, Phaser.Easing.Linear.None, true, 0, false);
@@ -293,16 +251,8 @@ game.stage.scale.refresh();
         // Set previous high score
         previoushigh = highscore;
         // If appropriate update high score
-        if (this.score > highscore) highscore=this.score;
+        if (score > highscore) highscore = score;
         timer2 = game.time.now;
-        
     }
 
-
 };
-
-// Add the 'main' and 'menu' states
-//game.state.add('menu', menu_state); 
-game.state.add('main', main_state); 
-// Start the 'main' state to start the game
-game.state.start('main'); 
