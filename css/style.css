@@ -20,7 +20,7 @@ html {
   -o-background-size: cover;
   background-size: cover;
 } */
-body { 
+html { 
   background-image:url('assets/rotate.png');
   background-repeat:no-repeat;
   background-attachment:fixed;
