@@ -1,16 +1,9 @@
-body {
-   background-color:#000000;
- 
-  background-image: url('assets/rotate.png') no-repeat center center fixed;
+html {
+	background-image: url('assets/rotate.png') no-repeat center center fixed;
 }
 @media screen and (orientation:portrait) {
-
-    h1 { opacity: 0; }
-
+	body { opacity: 0; }
 }
-
 @media screen and (orientation:landscape) {
-
-    h1 { opacity: 1; }
-
+	body { opacity: 1; }
 }
