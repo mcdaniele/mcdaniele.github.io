@@ -1,36 +1,19 @@
-/*
-body {
-	background-color: #fff;
-}
+html {
+   background-color:#000;
 
-.container {
-	position: relative;
-	text-align: center;
-}
-#gamecontainer {
-	position: relative;
-	display: inline-block;
-}
-*/
-/*
-html { 
-  background: url(assets/bg.jpg) no-repeat center center fixed; 
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-} */
-html { 
-  background-image:url('assets/rotate.png');
-  background-repeat:no-repeat;
-  background-attachment:fixed;
-  background-position:center; 
-  background-color:#000;
-}
 
-@media screen and (orientation:portrait) {
+
+ 
+  background: url(assets/rotate.png) no-repeat center center fixed;
+} 
+@media screen and (orientation:portrait) {
+
     body { opacity: 0; }
+
 }
+
 @media screen and (orientation:landscape) {
+
     body { opacity: 1; }
+
 }
