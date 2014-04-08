@@ -11,7 +11,7 @@ Game.Play.prototype = {
     create: function() { 
 
         this.bgworld = this.game.add.sprite(0, 0, 'bgworld');
-        this.hero = this.game.add.sprite(game.world.centerX, 240,'hero');
+        this.hero = this.game.add.sprite(game.world.centerX, 235,'hero');
         this.hero.anchor.setTo(0.5, 0.5);
         this.hero.body.gravity.y = 300;
         this.hero.body.collideWorldBounds = true;
@@ -97,10 +97,11 @@ Game.Play.prototype = {
         	this.buttonright.events.onInputOut.add(function(){rightt=false;});
         	this.buttonright.events.onInputDown.add(function(){rightt=true;});
         	this.buttonright.events.onInputUp.add(function(){rightt=false;});
-			game.stage.scaleMode = Phaser.StageScaleMode.EXACT_FIT; //resize your window to see the stage resize too
-			game.stage.scale.setShowAll();
-			game.stage.scale.refresh();		
+//			game.stage.scaleMode = Phaser.StageScaleMode.EXACT_FIT; //resize your window to see the stage resize too
+//			game.stage.scale.setShowAll();
+//			game.stage.scale.refresh();		
 		}
+//		game,stage.scale.startFullScreen();
 
         // SOUND
         this.coin_s = game.add.sound('coin');
@@ -160,7 +161,7 @@ Game.Play.prototype = {
                 this.hero.frame = 1;
             }
         }
-        if (game.time.now - timer2 > 3500 && !(this.hero.alive)) {this.music_s.stop();this.music_s=null;game.state.start('Menu')};
+        if (game.time.now - timer2 > 3600 && !(this.hero.alive)) {this.music_s.stop();this.music_s=null;game.state.start('Menu')};
     },
 
 // FUNCTIONS

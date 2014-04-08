@@ -1,3 +1,4 @@
+/*
 body {
 	background-color: #fff;
 }
@@ -9,4 +10,27 @@ body {
 #gamecontainer {
 	position: relative;
 	display: inline-block;
+}
+*/
+/*
+html { 
+  background: url(assets/bg.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+} */
+body { 
+  background-image:url('assets/rotate.png');
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+  background-position:center; 
+  background-color:#000;
+}
+
+@media screen and (orientation:portrait) {
+    body { opacity: 0; }
+}
+@media screen and (orientation:landscape) {
+    body { opacity: 1; }
 }
