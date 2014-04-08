@@ -46,9 +46,9 @@ Game.Load.prototype = {
         game.load.image('ground', 'assets/grnd.png');
         game.load.spritesheet('touchb', 'assets/touch.png',300,300);
         game.load.image('indicator', 'assets/indicator.png');
-        game.load.audio('coin', 'assets/coin.wav');
+        game.load.audio('coin', 'assets/coin.ogg');
         game.load.audio('music', 'assets/appleseed.ogg');
-        game.load.audio('death', 'assets/death.wav');
+        game.load.audio('death', 'assets/death.ogg');
 		game.load.spritesheet('sound', 'assets/sound.png', 28, 22);
 
 	},
