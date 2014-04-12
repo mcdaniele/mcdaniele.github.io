@@ -14,13 +14,13 @@
 		body {
 			margin: 0;
 			padding: 0;
-			text-align: center; /* Takes care of horizontal alignment in Internet Explorer */
+			text-align: center;
 			background-image: url('assets/rotate.png') center fixed no-repeat;
             background-color: #000;
 		}
 		#content {
-			position: relative; /* Needed for Safari */
-			margin: auto; /* Takes care of horizontal alignment in standards compliant browsers */
+			position: relative;
+			margin: auto;
 			text-align: left;
 			background-color: #000;
 		}
@@ -66,6 +66,24 @@
 				}
 			}
 		}
+	}
+	function getCookie(cname)
+	{
+		var name = cname + "=";
+		var ca = document.cookie.split(';');
+		for(var i=0; i<ca.length; i++) 
+		{
+			var c = ca[i].trim();
+			if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+  		}
+		return "0";
+	}
+	function setCookie(cname,cvalue,exdays)
+	{
+		var d = new Date();
+		d.setTime(d.getTime()+(exdays*24*60*60*1000));
+		var expires = "expires="+d.toGMTString();
+		document.cookie = cname + "=" + cvalue + "; " + expires;
 	}
 	window.onload = function() {
 		setContent();
