@@ -3,21 +3,82 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Johnny</title>
-    <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
-	<link rel="stylesheet" href="css/style.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
 	<script type="text/javascript" src="js/phaser116.min.js"></script>
 	<script type="text/javascript" src="js/load.js"></script>
 	<script type="text/javascript" src="js/main.js"></script>
 	<script type="text/javascript" src="js/menu.js"></script>
 	<script type="text/javascript" src="js/game.js"></script>
-	<style>
+
+	<style type="text/css">
 		body {
-			background-color: #000000;
-			background: url('assets/rotate.png') center center fixed no-repeat;
+			margin: 0;
+			padding: 0;
+			text-align: center; /* Takes care of horizontal alignment in Internet Explorer */
+			background-image: url('assets/rotate.png') center fixed no-repeat;
+            background-color: #000;
 		}
+		#content {
+			position: relative; /* Needed for Safari */
+			margin: auto; /* Takes care of horizontal alignment in standards compliant browsers */
+			text-align: left;
+			background-color: #000;
+		}
+		@media screen and (orientation:portrait) {
+			div { opacity: 0; }
+		}
+		@media screen and (orientation:landscape) {
+    		div { opacity: 1; }
+		}
+
 	</style>
+
+	<script type="text/javascript">
+	function getWindowHeight() {
+		var windowHeight = 0;
+		if (typeof(window.innerHeight) == 'number') {
+			windowHeight = window.innerHeight;
+		}
+		else {
+			if (document.documentElement && document.documentElement.clientHeight) {
+				windowHeight = document.documentElement.clientHeight;
+			}
+			else {
+				if (document.body && document.body.clientHeight) {
+					windowHeight = document.body.clientHeight;
+				}
+			}
+		}
+		return windowHeight;
+	}
+	function setContent() {
+		if (document.getElementById) {
+			var windowHeight = getWindowHeight();
+			if (windowHeight > 0) {
+				var contentElement = document.getElementById('content');
+				var contentHeight = contentElement.offsetHeight;
+				if (windowHeight - contentHeight > 0) {
+					contentElement.style.position = 'relative';
+					contentElement.style.top = ((windowHeight / 2) - (contentHeight / 2)) + 'px';
+				}
+				else {
+					contentElement.style.position = 'static';
+				}
+			}
+		}
+	}
+	window.onload = function() {
+		setContent();
+	}
+	window.onresize = function() {
+		setContent();
+	}
+	</script>
 </head>
+
 <body>
+<div id="content">
 	<div id="gamecontainer"></div>
+</div>
 </body>
 </html>

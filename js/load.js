@@ -15,9 +15,9 @@ Game.Boot = function (game) { };
 
 Game.Boot.prototype = {
 	preload: function () {
-		game.stage.backgroundColor = '#777777';
-		game.load.image('loading', 'images/loading.png');
-		game.load.image('loading2', 'images/loading2.png');
+		game.stage.backgroundColor = '#000';
+		game.load.image('loading', 'assets/loading.png');
+		game.load.image('loading2', 'assets/loading2.png');
 	},
 	create: function() {
 		this.game.state.start('Load');
@@ -46,10 +46,11 @@ Game.Load.prototype = {
         game.load.image('ground', 'assets/grnd.png');
         game.load.spritesheet('touchb', 'assets/touch.png',300,300);
         game.load.image('indicator', 'assets/indicator.png');
-        game.load.audio('coin', 'assets/coin.ogg');
-        game.load.audio('music', 'assets/appleseed.ogg');
-        game.load.audio('death', 'assets/death.ogg');
-		game.load.spritesheet('sound', 'assets/sound.png', 28, 22);
+        game.load.audio('scoin', 'assets/coin.ogg');
+        game.load.audio('smusic', 'assets/appleseed.ogg');
+        game.load.audio('sdeath', 'assets/death.ogg');
+		game.load.spritesheet('music', 'assets/music.png', 88, 22);
+		game.load.spritesheet('sfx', 'assets/sfx.png', 63, 22);
 
 	},
 	create: function () {

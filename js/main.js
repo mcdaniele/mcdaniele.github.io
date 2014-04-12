@@ -11,7 +11,7 @@ Game.Play.prototype = {
     create: function() { 
 
         this.bgworld = this.game.add.sprite(0, 0, 'bgworld');
-        this.hero = this.game.add.sprite(game.world.centerX, 235,'hero');
+        this.hero = this.game.add.sprite(game.world.centerX, 230,'hero');
         this.hero.anchor.setTo(0.5, 0.5);
         this.hero.body.gravity.y = 300;
         this.hero.body.collideWorldBounds = true;
@@ -28,12 +28,15 @@ Game.Play.prototype = {
         this.ground.body.immovable = true;
         this.coin = this.game.add.emitter(game.world.centerX, -10);
         this.coin.makeParticles('coin', 0, 100, true, false);
-        this.coin.minParticleSpeed.setTo(-200, -300);
-        this.coin.maxParticleSpeed.setTo(300, -400);
+        this.coin.minParticleSpeed.setTo(-200, -200);
+        this.coin.maxParticleSpeed.setTo(200, -300);
         this.coin.gravity = 300;
         this.coin.bounce.setTo(0.5,0.4);
+//		this.coin.minRotation = 0;
+//		this.coin.maxRotation = 0;
         this.coin.start(false, 6000, 400);  
         
+		game.stage.backgroundColor = '#000';
         // SCORE
         // Create variable score with default 0
         score = 0;
@@ -41,10 +44,12 @@ Game.Play.prototype = {
         // Must be declared before "highlight text" since this is read first
         // Create var styleShadow which will handle the text's styling
         var styleShadow = {font: "30px Arial", fill: "#000000"};
+//        var styleShadow2 = {font: "30px Arial", fill: "#000000"};
         this.scoreLabelShadow = this.game.add.text(290, 13, "0", styleShadow);
         // Score highlight
         // Item
         var style = {font: "30px Arial", fill: "#ffffff"};
+//        var style2 = {font: "30px Arial", fill: "#ffffff"};
         this.scoreLabel = this.game.add.text(290, 10, "0", style);
         switch (true)
         {
@@ -66,8 +71,10 @@ Game.Play.prototype = {
                 break;
             default:
                 this.highscoreLabelShadow = this.game.add.text(565, 13, "0", styleShadow);
+//				this.highscoreLabelShadow.align = 'right';
                 this.highscoreLabel = this.game.add.text(565, 10, "0", style);
-                break;
+//				this.highscoreLabel.align = 'right';
+//                break;
 		}
 		this.highscoreLabelShadow.content = highscore;
         this.highscoreLabel.content = highscore;
@@ -104,14 +111,13 @@ Game.Play.prototype = {
 //		game,stage.scale.startFullScreen();
 
         // SOUND
-        this.coin_s = game.add.sound('coin');
-    	this.coin_s.volume = 0.2;
-        this.death_s = game.add.sound('death');
-    	this.death_s.volume = 0.2;
-    	this.music_s = game.add.sound('music'); 
-    	this.music_s.volume = 0.2;
+        this.coin_s = game.add.sound('scoin');
+    	this.coin_s.volume = 1;
+        this.death_s = game.add.sound('sdeath');
+    	this.death_s.volume = 1;
+    	this.music_s = game.add.sound('smusic'); 
+    	this.music_s.volume = 1;
         if (musicbool) this.music_s.play('', 0, 0.5, true);
-
     },
     
 	update: function() {
@@ -161,7 +167,7 @@ Game.Play.prototype = {
                 this.hero.frame = 1;
             }
         }
-        if (game.time.now - timer2 > 3600 && !(this.hero.alive)) {this.music_s.stop();this.music_s=null;game.state.start('Menu')};
+        if (game.time.now - timer2 > 3600 && !(this.hero.alive)) {this.hero.body.angularVelocity=0;this.music_s.stop();this.coin=null;this.music_s=null;game.state.start('Menu')};
     },
 
 // FUNCTIONS
