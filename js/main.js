@@ -171,6 +171,25 @@ Game.Play.prototype = {
     },
 
 // FUNCTIONS
+	enterIncorrectOrientation: function () {
+ 
+        game.orientated = false;
+ 
+//        document.getElementById('orientation').style.display = 'block';
+        //INSERT PAUSE LOGIC HERE
+		game.paused=true;
+ 
+    },
+ 
+    leaveIncorrectOrientation: function () {
+ 
+        game.orientated = true;
+ 
+//        document.getElementById('orientation').style.display = 'none';
+        //INSERT UNPAUSE LOGIC HERE
+		game.paused=false;
+ 
+    },
 
     // Function that can be called to create one meteor
     spawnSingleMeteor: function(x, y){
