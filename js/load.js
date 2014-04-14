@@ -36,7 +36,18 @@ Game.Load.prototype = {
 		preloading = game.add.sprite(w/2, h/2+19, 'loading');
 		preloading.x -= preloading.width/2;
 		game.load.setPreloadSprite(preloading);
-
+		if(game.device.desktop)
+		{
+        	game.load.audio('scoin', 'assets/coin.ogg');
+        	game.load.audio('smusic', 'assets/appleseed.ogg');
+        	game.load.audio('sdeath', 'assets/death.ogg');
+		}
+		else
+		{
+        	game.load.audio('scoin', 'assets/coin.mp3');
+        	game.load.audio('smusic', 'assets/appleseed.mp3');
+			game.load.audio('sdeath', 'assets/death.mp3');
+		}
 		game.load.image('bgworld', 'assets/background.png');
         game.load.spritesheet('hero', 'assets/heropot.png', 30, 42);
         game.load.image('meteor', 'assets/meteor.png');
@@ -46,14 +57,14 @@ Game.Load.prototype = {
         game.load.image('ground', 'assets/grnd.png');
         game.load.spritesheet('touchb', 'assets/touch.png',300,300);
         game.load.image('indicator', 'assets/indicator.png');
-        game.load.audio('scoin', 'assets/coin.ogg');
-        game.load.audio('smusic', 'assets/appleseed.ogg');
-        game.load.audio('sdeath', 'assets/death.ogg');
 		game.load.spritesheet('music', 'assets/music.png', 88, 22);
 		game.load.spritesheet('sfx', 'assets/sfx.png', 63, 22);
 
 	},
 	create: function () {
-		game.state.start('Menu');
+//		if (this.cache.isSoundDecoded('smusic') && this.cache.isSoundDecoded('scoin') && this.cache.isSoundDecoded('sdeath'))
+		{
+			game.state.start('Menu');
+		}
 	}
 };
