@@ -16,18 +16,18 @@ Game.Menu.prototype = {
 			highscore=oldhigh;
 			previoushigh=oldhigh;
 		}
-		var labelscore = game.add.text(80, 50, 'Score: '+score, { font: '18px Arial', fill: '#000', align: 'left', font-weight: 'bold' });
-		var labelhighscore = game.add.text(80, 80, 'Previous Highscore: '+previoushigh, { font: '18px Arial', fill: '#000', align: 'left', font-weight: 'bold' });
+		var labelscore = game.add.text(80, 50, 'Score: '+score, { font: '18px Arial', fill: '#000', align: 'left' });
+		var labelhighscore = game.add.text(80, 80, 'Previous Highscore: '+previoushigh, { font: '18px Arial', fill: '#000', align: 'left' });
 		if (game.device.desktop) {
-			var label = game.add.text(300, 135, 'Arrows to control', { font: '18px Arial', fill: '#000', align: 'center', font-weight: 'bold' });
+			var label = game.add.text(300, 135, 'Arrows to control', { font: '18px Arial', fill: '#000', align: 'center' });
 			label.anchor.setTo(0.5, 0.5);
-			var label22 = game.add.text(300, 160, '(UP arrow to start)', { font: '18px Arial', fill: '#000', align: 'center', font-weight: 'bold' });
+			var label22 = game.add.text(300, 160, '(UP arrow to start)', { font: '18px Arial', fill: '#000', align: 'center' });
 			label22.anchor.setTo(0.5, 0.5);
 		}
 		else {
-			var controllabel = game.add.text(300, 135, 'Touch left half of game screen to move left', { font: '18px Arial', fill: '#000', align: 'center', font-weight: 'bold' });
+			var controllabel = game.add.text(300, 135, 'Touch left half of game screen to move left', { font: '18px Arial', fill: '#000', align: 'center' });
 			controllabel.anchor.setTo(0.5, 0.5);
-			var controllabel2 = game.add.text(300, 160, 'Right half to move right', { font: '18px Arial', fill: '#000', align: 'center', font-weight: 'bold' });
+			var controllabel2 = game.add.text(300, 160, 'Right half to move right', { font: '18px Arial', fill: '#000', align: 'center' });
 			controllabel2.anchor.setTo(0.5, 0.5);
 		}
 		this.music_toggle = this.game.add.button(w-168, 50, 'music', this.toggle_music, this);
