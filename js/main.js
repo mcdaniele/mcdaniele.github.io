@@ -266,13 +266,17 @@ Game.Play.prototype = {
         {
             this.heroSpeed = 70;
             // Velocity angular rotation set positive
-            this.hero.body.angularVelocity = 300;
+//            this.hero.body.angularVelocity = 300;
+//			this.hero.angle = 180;
+game.add.tween(this.hero).to({angle: 180}, 2000, Phaser.Easing.Linear.None, true, 0, false);
         }
         else 
         {
             this.heroSpeed = -70;
             // Velocity angular rotation set negative
-            this.hero.body.angularVelocity = -300;
+//            this.hero.body.angularVelocity = -300;
+//			this.hero.angle = 180;
+game.add.tween(this.hero).to({angle: 180}, 2000, Phaser.Easing.Linear.None, true, 0, false);
         }
         // Set previous high score
         previoushigh = highscore;
