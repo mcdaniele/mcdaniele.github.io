@@ -1,0 +1,10 @@
+html { 
+  background-color: #000;
+  background: url('../assets/rotate.png') no-repeat center center fixed; 
+} 
+@media screen and (orientation:portrait) {
+    div { opacity: 0; }
+}
+@media screen and (orientation:landscape) {
+    div { opacity: 1; }
+}
