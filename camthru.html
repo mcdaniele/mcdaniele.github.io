@@ -11,13 +11,6 @@ body, html {
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 window.URL      = window.URL || window.webkitURL;
 
-screen.lockOrientationUniversal = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
-if (screen.lockOrientationUniversal("portrait-primary")) {
-  // orientation was locked
-} else {
-  // orientation lock failed
-}
-
 ;(function(){
 
         'use strict;'
