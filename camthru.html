@@ -29,32 +29,32 @@ window.URL      = window.URL || window.webkitURL;
          */
         function onResize(){
                 // is the size of the video available ?
-                if( video.videoHeight === 0 )   return
+//                if( video.videoHeight === 0 )   return
 
-                var videoAspect = video.videoWidth / video.videoHeight
-                var windowAspect = window.innerWidth / window.innerHeight
+//                var videoAspect = video.videoWidth / video.videoHeight
+//                var windowAspect = window.innerWidth / window.innerHeight
 
                 // var video = document.querySelector('video')
-                video.style.position = 'absolute'
+//                video.style.position = 'absolute'
 
-                if( videoAspect < windowAspect ){
-                        video.style.left        = '0%'
-                        video.style.width       = window.innerWidth + 'px'
-                        video.style.marginLeft  = '0px'
+//                if( videoAspect < windowAspect ){
+//                        video.style.left        = '0%'
+//                        video.style.width       = window.innerWidth + 'px'
+//                        video.style.marginLeft  = '0px'
 
-                        video.style.top         = '50%'
-                        video.style.height      =  (window.innerWidth/videoAspect) + 'px'
-                        video.style.marginTop   = -(window.innerWidth/videoAspect) /2 + 'px'
-                }else{
-                        video.style.top         = '0%'
-                        video.style.height      = window.innerHeight+'px'
-                        video.style.marginTop   =  '0px'
+//                        video.style.top         = '50%'
+//                        video.style.height      =  (window.innerWidth/videoAspect) + 'px'
+//                        video.style.marginTop   = -(window.innerWidth/videoAspect) /2 + 'px'
+//                }else{
+//                        video.style.top         = '0%'
+//                        video.style.height      = window.innerHeight+'px'
+//                        video.style.marginTop   =  '0px'
 
-                        video.style.left        = '50%'
-                        video.style.width       =  (window.innerHeight*videoAspect) + 'px'
-                        video.style.marginLeft  = -(window.innerHeight*videoAspect)/2 + 'px'
-                }
-        }
+//                        video.style.left        = '50%'
+//                        video.style.width       =  (window.innerHeight*videoAspect) + 'px'
+//                        video.style.marginLeft  = -(window.innerHeight*videoAspect)/2 + 'px'
+//                }
+//        }
 
         window.addEventListener('resize', function(event){
                 onResize()
