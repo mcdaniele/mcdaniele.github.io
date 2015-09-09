@@ -75,14 +75,14 @@ window.URL      = window.URL || window.webkitURL;
 //                }
         }
 
-        window.addEventListener('resize', function(event){
-                onResize()
-        })
+//        window.addEventListener('resize', function(event){
+//                onResize()
+//        })
 
         // just to be sure - resize on mobile is funky to say the least
-        setInterval(function(){
-                onResize()
-        }, 1000)
+//        setInterval(function(){
+//                onResize()
+//        }, 1000)
 
         // get the media sources
         MediaStreamTrack.getSources(function(sourceInfos) {
