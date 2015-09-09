@@ -10,6 +10,26 @@ body, html {
 // shim
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 window.URL      = window.URL || window.webkitURL;
+  if (!document.fullscreenElement &&    // alternative standard method
+      !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) 
+  {  // current working methods
+    if (document.documentElement.requestFullscreen) 
+    {
+      document.documentElement.requestFullscreen();
+    } 
+      else if (document.documentElement.msRequestFullscreen) 
+    {
+      document.documentElement.msRequestFullscreen();
+    } 
+      else if (document.documentElement.mozRequestFullScreen) 
+    {
+      document.documentElement.mozRequestFullScreen();
+    }
+      else if (document.documentElement.webkitRequestFullscreen) 
+    {
+      document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  }
 
 ;(function(){
 
