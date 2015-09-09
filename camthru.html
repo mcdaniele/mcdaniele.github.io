@@ -31,11 +31,11 @@ window.URL      = window.URL || window.webkitURL;
                 // is the size of the video available ?
 //                if( video.videoHeight === 0 )   return
 
-//                var videoAspect = video.videoWidth / video.videoHeight
-//                var windowAspect = window.innerWidth / window.innerHeight
+                var videoAspect = video.videoWidth / video.videoHeight
+                var windowAspect = window.innerWidth / window.innerHeight
 
                 // var video = document.querySelector('video')
-//                video.style.position = 'absolute'
+                video.style.position = 'absolute'
 
 //                if( videoAspect < windowAspect ){
 //                        video.style.left        = '0%'
@@ -53,8 +53,8 @@ window.URL      = window.URL || window.webkitURL;
 //                        video.style.left        = '50%'
 //                        video.style.width       =  (window.innerHeight*videoAspect) + 'px'
 //                        video.style.marginLeft  = -(window.innerHeight*videoAspect)/2 + 'px'
-//                }
-//        }
+                }
+        }
 
         window.addEventListener('resize', function(event){
                 onResize()
