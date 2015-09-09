@@ -3,21 +3,21 @@
 <style>
 body, html {
         height : 100%;
-} 
+}
 </style>
 <body style='margin: 0px;; overflow: hidden;'><script>
 
 // shim
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-window.URL = window.URL || window.webkitURL;
-        
+window.URL      = window.URL || window.webkitURL;
+
 
 ;(function(){
 
         'use strict;'
 
         // create video element
-        var video = document.createElement('video')
+        var video        = document.createElement('video')
         video.setAttribute('autoplay', true)
         document.body.appendChild(video)
 
@@ -27,7 +27,7 @@ window.URL = window.URL || window.webkitURL;
          * - it is frequent when the mobile is changing orientation
          * - after a search on the internet, it seems hard/impossible to prevent browser from changing orientation :(
          */
-/*        function onResize(){
+        function onResize(){
                 // is the size of the video available ?
                 if( video.videoHeight === 0 )   return
 
@@ -44,7 +44,7 @@ window.URL = window.URL || window.webkitURL;
 
                         video.style.top         = '50%'
                         video.style.height      =  (window.innerWidth/videoAspect) + 'px'
-                        video.style.marginTop   = -(window.innerWidth/videoAspect) /2 + 'px'                        
+                        video.style.marginTop   = -(window.innerWidth/videoAspect) /2 + 'px'
                 }else{
                         video.style.top         = '0%'
                         video.style.height      = window.innerHeight+'px'
@@ -57,26 +57,20 @@ window.URL = window.URL || window.webkitURL;
         }
 
         window.addEventListener('resize', function(event){
-                onResize()				
+                onResize()
         })
-        
+
         // just to be sure - resize on mobile is funky to say the least
         setInterval(function(){
                 onResize()
         }, 1000)
-*/        
+
         // get the media sources
-screen.lockOrientationUniversal = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
-if (screen.lockOrientationUniversal("portrait-primary")) {
-  // orientation was locked
-} else {
-  // orientation lock failed
-}
-		MediaStreamTrack.getSources(function(sourceInfos) {
+        MediaStreamTrack.getSources(function(sourceInfos) {
                 // define getUserMedia() constraints
                 var constraints = {
                         video: true,
-                        audio: false,                        
+                        audio: false,
                 }
                 // to mirror the video element when it isnt 'environment'
                 // video.style.transform   = 'scaleX(-1)'
@@ -93,7 +87,7 @@ if (screen.lockOrientationUniversal("portrait-primary")) {
                                 // video.style.transform   = ''
                         }
                 }
-              
+
                 // try to get user media
                 navigator.getUserMedia( constraints, function(stream){
                         // set the video.src with the userMedia stream
