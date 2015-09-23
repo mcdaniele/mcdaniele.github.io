@@ -1,14 +1,29 @@
 <html>
-<script>
-screen.lockOrientationUniversal = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
 
-if (screen.lockOrientationUniversal("landscape-primary")) {
-  // orientation was locked
-} else {
-  // orientation lock failed
-}
-</script>
 <body>
-the screen is locked, or unlocked!
+<input id="lock-button" type="submit" value="Lock!" />
+<input id="unlock-button" type="reset" value="Unlock!" />
+
+<script>
+screen.lockO = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
+
+//if (screen.lockOrientationUniversal("landscape-primary")) {
+  // orientation was locked
+//} else {
+  // orientation lock failed
+//}
+               document.getElementById('lock-button').addEventListener('click', function (event) {
+                  event.preventDefault();
+                  Fullscreen.launch(document.documentElement);
+                  screen.lockO("landscape-primary");
+               });
+
+               document.getElementById('unlock-button').addEventListener('click', function (event) {
+                  event.preventDefault();
+                  Fullscreen.exit();
+                  screen.orientation.unlock();
+               });
+</script>
+
 </body>
 </html>
