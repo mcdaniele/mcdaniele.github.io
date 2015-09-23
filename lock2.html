@@ -1,0 +1,14 @@
+<html>
+<script>
+screen.lockOrientationUniversal = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
+
+if (screen.lockOrientationUniversal("landscape-primary")) {
+  // orientation was locked
+} else {
+  // orientation lock failed
+}
+</script>
+<body>
+the screen is locked, or unlocked!
+</body>
+</html>
