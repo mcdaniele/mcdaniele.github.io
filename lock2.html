@@ -40,7 +40,7 @@ screen.lockO = screen.lockOrientation || screen.mozLockOrientation || screen.msL
                document.getElementById('lock-button').addEventListener('click', function (event) {
                   event.preventDefault();
                   Fullscreen.launch(document.documentElement);
-                  screen.lockO("landscape-primary");
+                  screen.orientation.lock("landscape-primary");
                });
 
                document.getElementById('unlock-button').addEventListener('click', function (event) {
