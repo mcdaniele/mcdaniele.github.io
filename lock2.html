@@ -12,6 +12,31 @@ screen.lockO = screen.lockOrientation || screen.mozLockOrientation || screen.msL
 //} else {
   // orientation lock failed
 //}
+            var Fullscreen = {
+               launch: function(element) {
+                  if(element.requestFullscreen) {
+                     element.requestFullscreen();
+                  } else if(element.mozRequestFullScreen) {
+                     element.mozRequestFullScreen();
+                  } else if(element.webkitRequestFullscreen) {
+                     element.webkitRequestFullscreen();
+                  } else if(element.msRequestFullscreen) {
+                     element.msRequestFullscreen();
+                  }
+               },
+               exit: function() {
+                  if(document.exitFullscreen) {
+                     document.exitFullscreen();
+                  } else if(document.mozCancelFullScreen) {
+                     document.mozCancelFullScreen();
+                  } else if(document.webkitExitFullscreen) {
+                     document.webkitExitFullscreen();
+                  } else if (document.msExitFullscreen) {
+                     document.msExitFullscreen();
+                  }
+               }
+            };
+
                document.getElementById('lock-button').addEventListener('click', function (event) {
                   event.preventDefault();
                   Fullscreen.launch(document.documentElement);
