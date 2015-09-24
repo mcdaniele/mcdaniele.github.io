@@ -87,7 +87,7 @@ Game.Menu.prototype = {
 	},
 
 	gofull: function(element) {
-		if((!(document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement)&&(document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled || document.msFullscreenEnabled)) {
+//		if((!(document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement)&&(document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled || document.msFullscreenEnabled)) {
 			if(element.requestFullscreen) {
 				element.requestFullscreen();
 			} else if(element.mozRequestFullScreen) {
@@ -97,6 +97,6 @@ Game.Menu.prototype = {
 			} else if(element.msRequestFullscreen) {
 				element.msRequestFullscreen();
 			}
-		}
+{		}
 	},
 };
