@@ -54,13 +54,13 @@ Game.Menu.prototype = {
 	update: function() {
 		if (this.cursor.up.isDown) {
 		    	game.stage.scale.setScreenSize(true);
-		    	gofull(document.documentElement);
+//		    	gofull(document.documentElement);
 			this.game.state.start('Play');	
 		}
 	},
 
 	startPlay: function() {
-		gofull(document.documentElement);
+//		gofull(document.documentElement);
 		this.game.state.start('Play');
 	},
 	
