@@ -1,0 +1,344 @@
+<html>
+<head>
+<title>Math Flash</title>
+<style>
+    #modal {
+        position: fixed;
+        font-family: Arial, Helvetica, sans-serif;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 10;
+        height: 100%;
+        width: 100%;
+    }
+    .modalconent {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        width: 320px;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    #modal button {
+        background:none!important;
+        border:none; 
+        padding:0!important;
+        font-family:arial,sans-serif;
+        color:#000;
+        cursor:pointer;
+        border-bottom: solid 1px #ccc;
+        width:100%;
+        vertical-align:middle;
+        display:inline-block;
+    }
+    #modal h1 {
+        width: 100%;
+        border-bottom: solid 2px #999;
+        vertical-align:middle;
+    }
+    .myButton {
+        border: 2px solid rgb(0, 30, 40);
+        border-radius: 9px;
+        font-size: 27px;
+        padding: 10px;
+        cursor: pointer;
+        color: white;
+        text-shadow: 2px 2px 2px rgb(5, 70, 0);
+        background: rgb(0, 100, 135);
+    }
+    .scores {
+        margin-left: 0;
+        background-color: inherit;
+        border: 0;
+    }
+    .currentScore, .highScore {
+        margin: 0 92px;
+        font-weight: bold;
+        font-size: 25px;
+    }
+    .highScore {
+        text-align: right;
+    }
+    .scores {
+        margin-left: 0;
+        background-color: inherit;
+        border: 0;
+        vertical-align: top;
+        padding: 13px;
+    }
+    .problemArea {
+        border: 2px solid rgb(0, 30, 40);
+        border-radius: 9px;
+        padding: 10px;
+        width: 580px;
+    }
+    #problem {
+        vertical-align: top;
+        display: table-cell;
+        font-weight: bold;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 130px;
+        text-align: center;
+        margin: 10px 10px;
+    }
+</style>
+</head>
+
+<body>
+<div id='modal'>
+    <div class='modalconent'>
+        <h1><center>Categories:</center></h1><br>
+        <button id='selection1'><h2>(+) Addition (+)</h2></button><br>
+        <button id='selection2'><h2>(−) Subtraction (−)</h2></button><br>
+        <button id='selection3'><h2>(×) Multiplication (×)</h2></button><br>
+        <button id='selection4'><h2>(÷) Division (÷)</h2></button><br>
+    </div>
+</div>
+
+<center>
+    <div class='scores'>
+        <span class='currentScore'>
+            Score: <span id='currentScoreValue'></span>
+        </span>
+        <span class='highScore'>
+            High Score: <span id='highScoreValue'></span>
+        </span>
+    </div>
+    <h1><div id='countDown'>&nbsp;</div></h1>
+    <h1><div class='problemArea'><span id='problem'>&nbsp;</span></div></h1>
+    <button id='startButton' class='myButton'>Start</button><br><br>
+    <button id='changeButton' class='myButton'>Change Category</button><br>
+    <br>
+    <div>I heard: <span id='iHeardText'></span></div>
+</center>
+
+<script language="JavaScript">
+var SpeechRecognition = window.mozSpeechRecognition ||
+	window.msSpeechRecognition ||
+	window.oSpeechRecognition ||
+	window.webkitSpeechRecognition ||
+	window.SpeechRecognition;
+var currentProblem = " ";
+var currentScore = 0;
+var highScore = 0;
+var errorOccurred = false;
+var selectedCategory = 'Addition';
+var problemsForSelectedCategory;
+var firstNumber;
+var secondNumber;
+var value;
+var timer;
+var speech;
+window.onload=function() {
+/* start and change category buttons */
+    document.getElementById('startButton').onclick=function() {
+        startSpeechRecognition()
+    }
+    document.getElementById('changeButton').onclick=function() {
+		speech.onend();
+        document.getElementById('modal').style.visibility="visible";
+    }
+/* change categories selections*/
+    document.getElementById('selection1').onclick=function() {
+        selectedCategory='Addition';
+        currentScore=0;
+        document.getElementById('currentScoreValue').textContent='0';
+        if(localStorage.getItem(selectedCategory)==null){
+            document.getElementById('highScoreValue').textContent='0';
+            localStorage.setItem(selectedCategory, 0);
+        }
+        else{
+            document.getElementById('highScoreValue').textContent=localStorage.getItem(selectedCategory);
+        }
+        document.getElementById('startButton').textContent ='Start ' + selectedCategory;
+        document.getElementById('modal').style.visibility="hidden";
+    }
+    document.getElementById('selection2').onclick=function() {
+        selectedCategory='Subtraction';
+        currentScore=0;
+        document.getElementById('currentScoreValue').textContent='0';
+        if(localStorage.getItem(selectedCategory)==null){
+            document.getElementById('highScoreValue').textContent='0';
+            localStorage.setItem(selectedCategory, 0);
+        }
+        else{
+            document.getElementById('highScoreValue').textContent=localStorage.getItem(selectedCategory);
+        }
+        document.getElementById('startButton').textContent ='Start ' + selectedCategory;
+        document.getElementById('modal').style.visibility="hidden";
+    }
+    document.getElementById('selection3').onclick=function() {
+        selectedCategory='Multiplication';
+        currentScore=0;
+        document.getElementById('currentScoreValue').textContent='0';
+        if(localStorage.getItem(selectedCategory)==null){
+            document.getElementById('highScoreValue').textContent='0';
+            localStorage.setItem(selectedCategory, 0);
+        }
+        else{
+            document.getElementById('highScoreValue').textContent=localStorage.getItem(selectedCategory);
+        }
+        document.getElementById('startButton').textContent ='Start ' + selectedCategory;
+        document.getElementById('modal').style.visibility="hidden";
+    }
+    document.getElementById('selection4').onclick=function() {
+        selectedCategory='Division';
+        currentScore=0;
+        document.getElementById('currentScoreValue').textContent='0';
+        if(localStorage.getItem(selectedCategory)==null){
+            document.getElementById('highScoreValue').textContent='0';
+            localStorage.setItem(selectedCategory, 0);
+        }
+        else{
+            document.getElementById('highScoreValue').textContent=localStorage.getItem(selectedCategory);
+        }
+        document.getElementById('startButton').textContent ='Start ' + selectedCategory;
+        document.getElementById('modal').style.visibility="hidden";
+    }
+}
+function generateProblem() {
+	var first = getRandomInteger(10);
+	var second = getRandomInteger(10);
+    switch(selectedCategory) {
+        case 'Addition':
+            firstNumber = first;
+            secondNumber = second;
+            value = first + second;
+            break;
+        case 'Subtraction':
+            firstNumber = first + second;
+            secondNumber = first;
+            value = second;
+            break;
+        case 'Multiplication':
+            firstNumber = first;
+            secondNumber = second;
+            value = first * second;
+            break;
+        case 'Division':
+            firstNumber = first * second;
+            secondNumber = first;
+            value = second;
+            break;
+    }
+}
+function getRandomInteger(ceiling) {
+	return Math.floor(Math.random() * ceiling + 1);
+}
+function startSpeechRecognition() {
+	var currentTime = 60;
+	var timer;
+	speech = new SpeechRecognition();
+	speech.continuous = true;
+	speech.interimResults = true;
+	speech.lang = "en-US";
+	speech.onstart = function() {
+		// Run for 60 seconds and stop
+		setTimeout(function() {
+			speech.stop();
+		}, 60000);
+		errorOccurred = false;
+		currentScore = 0;
+		document.getElementById('currentScoreValue').textContent = currentScore;
+		beginTime = new Date().getTime();
+		var timeRemaining = document.getElementById('countDown');
+		timeRemaining.textContent = '60';
+		timer = setInterval(function() {
+			currentTime--;
+			timeRemaining.textContent = currentTime;
+		}, 1000);
+		// Show the first question
+		showNextProblem();
+	};
+	speech.onend = function() {
+		currentTime = 60;
+		clearInterval(timer);
+//		doneSound.play();
+		errorOccurred = true;
+		startButton.textContent = 'Restart ' + selectedCategory;
+		var previousHigh = localStorage.getItem(selectedCategory);
+		if (previousHigh < currentScore) {
+			localStorage.setItem(selectedCategory, currentScore);
+			document.getElementById('highScoreValue').innerHTML = currentScore;
+//            window.alert("High Score!");
+        }
+        document.getElementById('countDown').textContent = '0';
+        document.getElementById('problem').textContent = 'Done!'
+	};
+	speech.onerror = speech.onend;
+	speech.onresult = function(event) {
+		var iHeard = '';
+		for (var i = event.resultIndex; i < event.results.length; i++) {
+			if (!event.results[i].isFinal) {
+				iHeard += event.results[i][0].transcript;
+			}
+		}
+        if ((iHeard.indexOf('one') >= 0) || (iHeard.indexOf('won') >= 0)){
+            iHeard = ' 1';
+        }
+        else if ((iHeard.indexOf('to') >= 0) || (iHeard.indexOf('two') >= 0)) {
+            iHeard = ' 2';
+        }
+        else if (iHeard.indexOf('three') >= 0) {
+            iHeard = ' 3';
+        }
+        else if ((iHeard.indexOf('for') >= 0) || (iHeard.indexOf('four') >= 0)) {
+            iHeard = ' 4';
+        }
+        else if ((iHeard.indexOf('sex') >= 0) || (iHeard.indexOf('six') >= 0)) {
+            iHeard = ' 6';
+        }
+        else if ((iHeard.indexOf('hate') >= 0) || (iHeard.indexOf('ate') >= 0) || (iHeard.indexOf('eight') >= 0)) {
+            iHeard = ' 8';
+        }
+		setIHeardText(iHeard);
+		checkAnswer(iHeard);
+	};
+	speech.start();
+}
+function showNextProblem() {
+	var previousProblem = currentProblem;
+	while (previousProblem === currentProblem) {
+        generateProblem();
+        switch (selectedCategory) {
+			case 'Addition':
+				currentProblem = firstNumber + ' + ' + secondNumber;
+				break;
+			case 'Subtraction':
+				currentProblem = firstNumber + ' − ' + secondNumber;
+				break;
+			case 'Multiplication':
+				currentProblem = firstNumber + ' × ' + secondNumber;
+				break;
+			case 'Division':
+				currentProblem = firstNumber + ' ÷ ' + secondNumber;
+				break;
+		}
+	}
+	document.getElementById('problem').textContent = currentProblem;
+}
+function checkAnswer(guess) {
+	var trimmedGuess = guess.trim().toLowerCase();
+	var answer = value;
+	if (typeof answer === 'string') {
+		answer = answer.toLowerCase();
+	}
+	if (trimmedGuess.indexOf('skip') >= 0 || trimmedGuess.indexOf(answer) >= 0) {
+		showNextProblem();
+	}
+	if (trimmedGuess.indexOf(answer) >= 0) {
+		currentScore++;
+		var scoreElement = document.getElementById('currentScoreValue');
+		scoreElement.textContent = currentScore;
+	}
+}
+function setIHeardText(textToDisplay) {
+	document.getElementById('iHeardText').textContent = textToDisplay;
+}
+
+</script>
+</body>
+</html>
