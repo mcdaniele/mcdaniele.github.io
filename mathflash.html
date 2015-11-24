@@ -1,0 +1,670 @@
+<html>
+<head>
+<title>Math Flash</title>
+<meta charset="UTF-8">
+<style>
+/* Microphone */
+    div.icon div.mic {
+        width: 20px;
+        background: #333;
+        height: 38px;
+        border-radius: 50px 50px 50px 50px;
+        -moz-border-radius: 50px 50px 50px 50px;
+        -webkit-border-radius: 50px 50px 50px 50px;
+        position: relative;/**/
+        top: 8px;
+        left: 22px;
+    }
+    div.icon div.holder {
+        position: relative;/**/
+        height: 14px;
+        width: 24px;
+        left: 16px;
+        top: -4px;
+        border: 4px solid #333;
+        border-radius: 0 0 50px 50px;
+        -webkit-border-radius: 0 0 50px 50px;
+        -moz-border-radius: 0 0 50px 50px;
+        border-top: none;/**/
+    }
+    div.icon div.holder:after {
+        content: '';
+        position: absolute;/**/
+        width: 8px;
+        height: 8px;
+        background: #333;
+        top: 14px;
+        left: 8px;/**/
+    }
+    div.icon div.holder:before {
+        content: '';
+        position: absolute;/**/
+        width: 16px;
+        height: 4px;
+        background: #333;
+        bottom: -12px;
+        left: 4px;/**/
+    }
+/* Growing Red Ring */
+    .redring { 
+        position: relative;/**/
+        display: block; 
+        height: 38px; 
+        width: 38px; 
+        top: -48px;
+        left: 8px;
+        background-color: transparent;
+        border: 5px solid red; 
+        -webkit-border-radius: 50%; 
+        -moz-border-radius: 50%; 
+        border-radius: 50%; 
+        -webkit-animation: growUp 0.75s infinite linear;
+        -moz-animation: growUp 0.75s infinite linear; 
+        -ms-animation: growUp 0.75s infinite linear; 
+        -o-animation: growUp 0.75s infinite linear; 
+        animation: growUp 0.75s infinite linear; 
+    }
+    @-webkit-keyframes growUp {   
+        0%  { -webkit-transform: scale(0,0); }
+        100% { -webkit-transform: scale(1,1); }
+    }
+    @-moz-keyframes growUp {
+        0%  { -moz-transform: scale(0,0); }
+        100% { -moz-transform: scale(1,1); }
+    }
+    @-o-keyframes growUp {
+        0%  { -o-transform: scale(0,0); }
+    100% { -o-transform: scale(1,1); }
+    }
+    @-ms-keyframes growUp {
+        0%  { -ms-transform: scale(0,0); }
+        100% { -ms-transform: scale(1,1); }
+    }
+    @keyframes growUp {
+        0%  { transform: scale(0,0); }
+        100% { transform: scale(1,1); }
+    }
+/* End Red Ring */    
+    .animateIt {
+        -webkit-animation:name2 1s;
+        animation:name2 1s;   
+    }
+    @-webkit-keyframes name2
+    {
+        0% {background-color:red;}
+        100% {background-color:white;}
+    }
+    @keyframes name2 {
+        0% {background-color:red;}
+        100% {background-color:white;}
+    }
+    
+    body {
+    	font-family: Arial, Helvetica, sans-serif;
+        background: white;
+    }
+/* Reset Menu */
+    #resetModal {
+        position: fixed;
+        font-family: Arial, Helvetica, sans-serif;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 10;
+        height: 100%;
+        width: 100%;
+        visibility: "hidden";
+    }
+    .resetContent {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        width: 320px;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    #resetQuestion {
+        font-size: 20px;
+        font-weight: 300;
+    }
+/* Change Categories Menu */
+    #modal {
+        position: fixed;
+        font-family: Arial, Helvetica, sans-serif;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 10;
+        height: 100%;
+        width: 100%;
+    }
+    .modalconent {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        width: 320px;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    #modal button {
+        background:none!important;
+        border:none; 
+        padding:0!important;
+        font-family:arial,sans-serif;
+        color:#000;
+        cursor:pointer;
+        border-bottom: solid 1px #ccc;
+        width:100%;
+        vertical-align:middle;
+        display:inline-block;
+    }
+    #modal h1 {
+        width: 100%;
+        border-bottom: solid 2px #999;
+        vertical-align:middle;
+    }
+/* Buttons */    
+    .myButton {
+        border: 2px solid rgb(0, 30, 40);
+        border-radius: 9px;
+        font-size: 27px;
+        padding: 10px;
+        cursor: pointer;
+        color: white;
+        text-shadow: 2px 2px 2px rgb(5, 70, 0);
+        background: rgb(0, 100, 135);
+    }
+    .myButton2 {
+        border: 2px solid rgb(0, 30, 40);
+        border-radius: 5px;
+        font-size: 14px;
+        padding: 5px;
+        cursor: pointer;
+        color: white;
+        text-shadow: 2px 2px 2px rgb(5, 70, 0);
+        background: rgb(0, 100, 135);
+    }
+    .scores {
+        margin-left: 0;
+        background-color: inherit;
+        border: 0;
+    }
+    .currentScore, .highScore {
+        margin: 0 92px;
+        font-weight: bold;
+        font-size: 25px;
+    }
+    .highScore {
+        text-align: right;
+    }
+    .scores {
+        margin-left: 0;
+        background-color: inherit;
+        border: 0;
+        vertical-align: top;
+        padding: 13px;
+    }
+    .problemArea {
+        border: 2px solid rgb(0, 30, 40);
+        border-radius: 9px;
+        padding: 10px;
+        width: 580px;
+    }
+    #problem {
+        vertical-align: top;
+        display: table-cell;
+        font-weight: bold;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 130px;
+        height: 60px;
+        text-align: center;
+        margin: 10px 10px;
+    }
+    #two {
+        diplay: inline-block;
+        vertical-align: middle;
+        width:120px;
+        height: 60px;
+        float: left;
+        overflow: hidden;
+        visibility: hidden;
+    }
+    #iHeardText {
+        diplay: inline-block;
+        vertical-align:middle;
+        width:620px;
+        overflow: auto;
+        font-size: 60;
+    }
+    #wrapper {
+        width: 100%;
+        overflow: auto;
+    }
+    #resetbutton {
+    }
+    #showHighModal {
+        position: fixed;
+        font-family: Arial, Helvetica, sans-serif;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 10;
+        height: 100%;
+        width: 100%;
+        visibility: hidden;
+    }
+    #showHighModal h1 {
+        text-decoration:underline;
+    }
+    #showHighModal h2 {
+        text-align: center;
+        border-bottom: solid 1px #ccc;
+    }
+    .closeHighModal {
+    }
+    .showHighContent {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        width: 320px;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    #buttonWrapper {
+        width: 100%;
+        text-align: center;
+    }
+    #showHighButton {
+        position: fixed;
+        bottom: 6px;
+        left: 6px;
+    }
+</style>
+</head>
+
+<body>
+<div id='showHighModal'>
+    <div class='showHighContent'>
+        <h1><center>High Scores:</center></h1><br>
+        <h2>Addition: <span id='addHigh'></span></h2>
+        <h2>Subtraction: <span id='subHigh'></span></h2>
+        <h2>Multiplication: <span id='mulHigh'></span></h2>
+        <h2>Division: <span id='divHigh'></span></h2>
+        <h2>Random: <span id='ranHigh'></span></h2><br><br>
+        <div id="buttonWrapper">
+        <button id='closeHighButton' class='myButton'>Cancel</button><br><br>
+        <button id='resetButton' class='myButton2'>Reset High Scores</button>
+        </div>
+    </div>
+</div>
+<div id='resetModal'>
+    <div class='resetContent'>
+        <p id='resetQuestion'>Are you sure you want to reset <strong>ALL</strong> of the High Scores?</p><br><br>
+        <center>
+            <button id='selectionYes' class='myButton'>&nbsp;&nbsp;Yes&nbsp;&nbsp;</button>&nbsp;&nbsp;
+            <button id='selectionNo' class='myButton'>&nbsp;&nbsp;No&nbsp;&nbsp;</button><br>
+        </center>
+    </div>
+</div>
+<div id='modal'>
+    <div class='modalconent'>
+        <h1><center>Categories:</center></h1><br>
+        <button id='selection1'><h2>(+) Addition (+)</h2></button><br>
+        <button id='selection2'><h2>(−) Subtraction (−)</h2></button><br>
+        <button id='selection3'><h2>(×) Multiplication (×)</h2></button><br>
+        <button id='selection4'><h2>(÷) Division (÷)</h2></button><br>
+        <button id='selection5'><h2>(?) Random (?)</h2></button><br>
+    </div>
+</div>
+
+<center>
+    <div class='scores'>
+        <span class='currentScore'>
+            Score: <span id='currentScoreValue'></span>
+        </span>
+        <span class='highScore'>
+            High Score: <span id='highScoreValue'></span>
+        </span>
+    </div>
+    <h1><div id='countDown'>&nbsp;</div></h1>
+    <h1><div class='problemArea'><span id='problem'>&nbsp;</span></div></h1>
+    <button id='startButton' class='myButton'>Start</button><br><br>
+    <button id='changeButton' class='myButton'>Change Category</button><br>
+    <br>
+</center>
+<div id="wrapper"><div id="two" class="icon"><div class="mic"></div><div class="holder"></div><div class="redring"></div></div><span id='iHeardText'></span></div>
+<button id='showHighButton' class='myButton2'>Show High Scores</button>
+
+<script language="JavaScript">
+var SpeechRecognition = window.mozSpeechRecognition ||
+	window.msSpeechRecognition ||
+	window.oSpeechRecognition ||
+	window.webkitSpeechRecognition ||
+	window.SpeechRecognition;
+var currentProblem = " ";
+var currentScore = 0;
+var highScore = 0;
+var errorOccurred = false;
+var selectedCategory = 'Addition';
+var problemsForSelectedCategory;
+var firstNumber;
+var secondNumber;
+var value;
+var timer;
+var speech;
+var myTimer;
+var tempCat;
+window.onload=function() {
+/* start and change category buttons */
+    document.getElementById('startButton').onclick=function() {
+        startSpeechRecognition()
+    }
+    document.getElementById('changeButton').onclick=function() {
+        document.getElementById('modal').style.visibility="visible";
+        clearTimeout(myTimer);
+		speech.onend();
+    }
+/* change categories selections*/
+    document.getElementById('selection1').onclick=function() {
+        selectedCategory='Addition';
+        currentScore=0;
+        document.getElementById('currentScoreValue').textContent='0';
+        if(localStorage.getItem(selectedCategory)==null){
+            document.getElementById('highScoreValue').textContent='0';
+            localStorage.setItem(selectedCategory, 0);
+        }
+        else{
+            document.getElementById('highScoreValue').textContent=localStorage.getItem(selectedCategory);
+        }
+        document.getElementById('startButton').textContent ='Start ' + selectedCategory;
+        document.getElementById('modal').style.visibility="hidden";
+    }
+    document.getElementById('selection2').onclick=function() {
+        selectedCategory='Subtraction';
+        currentScore=0;
+        document.getElementById('currentScoreValue').textContent='0';
+        if(localStorage.getItem(selectedCategory)==null){
+            document.getElementById('highScoreValue').textContent='0';
+            localStorage.setItem(selectedCategory, 0);
+        }
+        else{
+            document.getElementById('highScoreValue').textContent=localStorage.getItem(selectedCategory);
+        }
+        document.getElementById('startButton').textContent ='Start ' + selectedCategory;
+        document.getElementById('modal').style.visibility="hidden";
+    }
+    document.getElementById('selection3').onclick=function() {
+        selectedCategory='Multiplication';
+        currentScore=0;
+        document.getElementById('currentScoreValue').textContent='0';
+        if(localStorage.getItem(selectedCategory)==null){
+            document.getElementById('highScoreValue').textContent='0';
+            localStorage.setItem(selectedCategory, 0);
+        }
+        else{
+            document.getElementById('highScoreValue').textContent=localStorage.getItem(selectedCategory);
+        }
+        document.getElementById('startButton').textContent ='Start ' + selectedCategory;
+        document.getElementById('modal').style.visibility="hidden";
+    }
+    document.getElementById('selection4').onclick=function() {
+        selectedCategory='Division';
+        currentScore=0;
+        document.getElementById('currentScoreValue').textContent='0';
+        if(localStorage.getItem(selectedCategory)==null){
+            document.getElementById('highScoreValue').textContent='0';
+            localStorage.setItem(selectedCategory, 0);
+        }
+        else{
+            document.getElementById('highScoreValue').textContent=localStorage.getItem(selectedCategory);
+        }
+        document.getElementById('startButton').textContent ='Start ' + selectedCategory;
+        document.getElementById('modal').style.visibility="hidden";
+    }
+    document.getElementById('selection5').onclick=function() {
+        selectedCategory='Random';
+        currentScore=0;
+        document.getElementById('currentScoreValue').textContent='0';
+        if(localStorage.getItem(selectedCategory)==null){
+            document.getElementById('highScoreValue').textContent='0';
+            localStorage.setItem(selectedCategory, 0);
+        }
+        else{
+            document.getElementById('highScoreValue').textContent=localStorage.getItem(selectedCategory);
+        }
+        document.getElementById('startButton').textContent ='Start ' + selectedCategory;
+        document.getElementById('modal').style.visibility="hidden";
+    }
+/* reset high scores button*/
+    document.getElementById('resetButton').onclick=function() {
+        document.getElementById('showHighModal').style.visibility="hidden";
+        document.getElementById('resetModal').style.visibility="visible";
+    }
+    document.getElementById('showHighButton').onclick=function() {
+        if (localStorage.getItem('Addition')==null) {
+            document.getElementById('addHigh').textContent='0';
+        }
+        else {
+            document.getElementById('addHigh').textContent=localStorage.getItem('Addition');
+        }
+        if (localStorage.getItem('Subtraction')==null) {
+            document.getElementById('subHigh').textContent='0';
+        }
+        else {
+            document.getElementById('subHigh').textContent=localStorage.getItem('Subtraction');
+        }
+        if (localStorage.getItem('Multiplication')==null) {
+            document.getElementById('mulHigh').textContent='0';
+        }
+        else {
+            document.getElementById('mulHigh').textContent=localStorage.getItem('Multiplication');
+        }
+        if (localStorage.getItem('Division')==null) {
+            document.getElementById('divHigh').textContent='0';
+        }
+        else {
+            document.getElementById('divHigh').textContent=localStorage.getItem('Division');
+        }
+        if (localStorage.getItem('Random')==null) {
+            document.getElementById('ranHigh').textContent='0';
+        }
+        else {
+            document.getElementById('ranHigh').textContent=localStorage.getItem('Random');
+        }
+        document.getElementById('showHighModal').style.visibility="visible";
+    }
+    document.getElementById('closeHighButton').onclick=function() {
+        document.getElementById('showHighModal').style.visibility="hidden";
+    }
+/* reset options*/
+    document.getElementById('selectionYes').onclick=function() {
+        currentScore=0;
+        document.getElementById('currentScoreValue').textContent='0';
+        document.getElementById('highScoreValue').textContent='0';
+        localStorage.setItem('Addition', 0);
+        localStorage.setItem('Subtraction', 0);
+        localStorage.setItem('Multiplication', 0);
+        localStorage.setItem('Division', 0);
+        localStorage.setItem('Random', 0);
+        document.getElementById('resetModal').style.visibility="hidden";        
+    }
+    document.getElementById('selectionNo').onclick=function() {
+        document.getElementById('resetModal').style.visibility="hidden";        
+    }
+        document.getElementById('resetModal').style.visibility="hidden";
+}
+function generateProblem() {
+	var first = getRandomInteger(10);
+	var second = getRandomInteger(10);
+    var tempI;
+    tempCat = selectedCategory;
+    if (tempCat == 'Random') {
+        tempI = getRandomInteger(4);
+        switch(tempI) {
+            case 1:
+                tempCat = 'Addition';
+                break;
+            case 2:
+                tempCat = 'Subtraction';
+                break;
+            case 3:
+                tempCat = 'Multiplication';
+                break;
+            case 4:
+                tempCat = 'Division';
+                break;
+        }
+    }
+    switch(tempCat) {
+        case 'Addition':
+            firstNumber = first;
+            secondNumber = second;
+            value = first + second;
+            break;
+        case 'Subtraction':
+            firstNumber = first + second;
+            secondNumber = first;
+            value = second;
+            break;
+        case 'Multiplication':
+            firstNumber = first;
+            secondNumber = second;
+            value = first * second;
+            break;
+        case 'Division':
+            firstNumber = first * second;
+            secondNumber = first;
+            value = second;
+            break;
+    }
+}
+function getRandomInteger(ceiling) {
+	return Math.floor(Math.random() * ceiling + 1);
+}
+function startSpeechRecognition() {
+	var currentTime = 60;
+	var timer;
+	speech = new SpeechRecognition();
+	speech.continuous = true;
+	speech.interimResults = true;
+	speech.lang = "en-US";
+	speech.onstart = function() {
+		// Run for 60 seconds and stop
+		myTimer = setTimeout(function() {
+            document.body.classList.add("animateIt");
+            window.setTimeout(function () {
+                document.body.classList.remove("animateIt");
+            }, 1000);
+			speech.stop();
+		}, 60000);
+		errorOccurred = false;
+		currentScore = 0;
+		document.getElementById('currentScoreValue').textContent = currentScore;
+		beginTime = new Date().getTime();
+		var timeRemaining = document.getElementById('countDown');
+		timeRemaining.textContent = '60';
+		timer = setInterval(function() {
+			currentTime--;
+			timeRemaining.textContent = currentTime;
+		}, 1000);
+		// Show the first question
+		showNextProblem();
+        document.getElementById("two").style.visibility = "visible";
+	};
+	speech.onend = function() {
+		currentTime = 60;
+		clearInterval(timer);
+//		doneSound.play();
+		errorOccurred = true;
+		startButton.textContent = 'Restart ' + selectedCategory;
+		var previousHigh = localStorage.getItem(selectedCategory);
+		if (previousHigh < currentScore) {
+			localStorage.setItem(selectedCategory, currentScore);
+			document.getElementById('highScoreValue').innerHTML = currentScore;
+//            window.alert("High Score!");
+        }
+        document.getElementById('countDown').textContent = '0';
+        document.getElementById('problem').textContent = 'Done!'
+        document.getElementById("two").style.visibility = "hidden";
+        document.getElementById('iHeardText').textContent = " ";
+	};
+	speech.onerror = speech.onend;
+	speech.onresult = function(event) {
+		var iHeard = '';
+		for (var i = event.resultIndex; i < event.results.length; i++) {
+			if (!event.results[i].isFinal) {
+				iHeard += event.results[i][0].transcript;
+			}
+		}
+        if ((iHeard.indexOf('one') >= 0) || (iHeard.indexOf('won') >= 0)){
+            iHeard = ' 1';
+        }
+        else if ((iHeard.indexOf('to') >= 0) || (iHeard.indexOf('two') >= 0)) {
+            iHeard = ' 2';
+        }
+        else if (iHeard.indexOf('three') >= 0) {
+            iHeard = ' 3';
+        }
+        else if ((iHeard.indexOf('for') >= 0) || (iHeard.indexOf('four') >= 0)) {
+            iHeard = ' 4';
+        }
+        else if ((iHeard.indexOf('sex') >= 0) || (iHeard.indexOf('six') >= 0)) {
+            iHeard = ' 6';
+        }
+        else if ((iHeard.indexOf('hate') >= 0) || (iHeard.indexOf('ate') >= 0) || (iHeard.indexOf('eight') >= 0)) {
+            iHeard = ' 8';
+        }
+		setIHeardText(iHeard);
+		checkAnswer(iHeard);
+	};
+	speech.start();
+}
+function showNextProblem() {
+	var previousProblem = currentProblem;
+	while (previousProblem === currentProblem) {
+        generateProblem();
+        switch (tempCat) {
+			case 'Addition':
+				currentProblem = firstNumber + ' + ' + secondNumber;
+				break;
+			case 'Subtraction':
+				currentProblem = firstNumber + ' − ' + secondNumber;
+				break;
+			case 'Multiplication':
+				currentProblem = firstNumber + ' × ' + secondNumber;
+				break;
+			case 'Division':
+				currentProblem = firstNumber + ' ÷ ' + secondNumber;
+				break;
+		}
+	}
+	document.getElementById('problem').textContent = currentProblem;
+}
+function checkAnswer(guess) {
+	var trimmedGuess = guess.trim().toLowerCase();
+	var answer = value;
+	if (typeof answer === 'string') {
+		answer = answer.toLowerCase();
+	}
+	if (trimmedGuess.indexOf('skip') >= 0 || trimmedGuess.indexOf(answer) >= 0) {
+		showNextProblem();
+	}
+	if (trimmedGuess.indexOf(answer) >= 0) {
+		currentScore++;
+		var scoreElement = document.getElementById('currentScoreValue');
+		scoreElement.textContent = currentScore;
+	}
+}
+function setIHeardText(textToDisplay) {
+	document.getElementById('iHeardText').textContent = ": " + textToDisplay;
+}
+
+</script>
+</body>
+</html>
