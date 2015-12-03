@@ -63,9 +63,9 @@
 		container	: document.body,
 		strokeStyle	: 'cyan',
 		limitStickTravel: true,
-		stickRadius	: 120,	
+		stickRadius	: 60,	
 		stationaryBase	: true,
-		baseX		: 200,
+		baseX		: 100,
 		baseY		: 200,
 	        mouseSupport: true,
     });
