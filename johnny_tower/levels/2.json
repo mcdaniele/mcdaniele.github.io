@@ -1,0 +1,26 @@
+{
+  "name":  "level 2",
+  "coincnt":  "20",
+  "color": {
+    "wall":     "#898785",
+    "platform": "#919092",
+    "stroke":   "#060606"
+  },
+  "map": [
+    "XXXXXXXXXXXXXXXXXXXXXXHXXXXXXX",
+    "                      H       ",
+    "                      H       ",
+    "                      H  X    ",
+    "                      H   X   ",
+    "                      H    X  ",
+    "                      H     X ",
+    "                             X",
+    "     o  o  o  o  o  o         ",
+	"  oooXooXooXooXooXooXo        ",
+	"XXHXXXXXXXXXXXXXXXXXXXXXXX   X",
+    "  H                           ",
+    "  H                           ",
+    "                              ",
+    "                              "
+  ]
+}
