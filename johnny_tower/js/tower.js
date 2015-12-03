@@ -64,7 +64,10 @@
 		strokeStyle	: 'cyan',
 		limitStickTravel: true,
 		stickRadius	: 120,	
-        mouseSupport: true,
+		stationaryBase	: true,
+		baseX		: 200,
+		baseY		: 200,
+	        mouseSupport: true,
     });
 	joystick.addEventListener('touchStartValidation', function(event){
 		var touch	= event.changedTouches[0];
