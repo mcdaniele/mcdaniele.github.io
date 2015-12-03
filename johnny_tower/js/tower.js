@@ -366,9 +366,8 @@
       if (joystick.down()) {this.input.down = true;}else this.input.down = false;
       if (joystick.right()) {this.input.right = true;}else this.input.right = false;
       if (joystick.left()) {this.input.left = true;}else this.input.left = false;
-      if (jumpbutton2) {
-        player.input.jump = true && player.input.jumpAvailable;
-        player.input.jumpAvailable = false;
+      if (player.input.jumpAvailable) {
+        player.input.jump = jumpbutton2;
       }
     },
 
