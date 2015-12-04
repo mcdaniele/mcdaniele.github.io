@@ -49,11 +49,11 @@ var Game = {
         last     = Game.Math.timestamp(),
         step     = 1/options.fps,
         update   = options.update,
-        render   = options.render,
-        fpsmeter = new FPSMeter(options.fpsmeter || { decimals: 0, graph: true, theme: 'dark', left: '5px' });
+        render   = options.render;
+//        fpsmeter = new FPSMeter(options.fpsmeter || { decimals: 0, graph: true, theme: 'dark', left: '5px' });
 
     function frame() {
-      fpsmeter.tickStart();
+//      fpsmeter.tickStart();
       now = Game.Math.timestamp();
       dt = dt + Math.min(1, (now - last) / 1000);
       while(dt > step) {
@@ -62,7 +62,7 @@ var Game = {
       }
       render(dt);
       last = now;
-      fpsmeter.tick();
+//      fpsmeter.tick();
       requestAnimationFrame(frame, options.canvas);
     }
 
