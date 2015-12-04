@@ -72,7 +72,7 @@
     });
 	joystick.addEventListener('touchStartValidation', function(event){
 		var touch	= event.changedTouches[0];
-		if( touch.pageX > window.innerWidth/2+5em )	return false;
+		if( touch.pageX > window.innerWidth/2+5 )	return false;
 		return true
 	});
 	var joystick2	= new VirtualJoystick({
@@ -83,7 +83,7 @@
 	});
 	joystick2.addEventListener('touchStartValidation', function(event){
 		var touch	= event.changedTouches[0];
-		if( touch.pageX < window.innerWidth/2-5em )	return false;
+		if( touch.pageX < window.innerWidth/2-5 )	return false;
 		return true
 	});
 	joystick2.addEventListener('touchStart', function(){
