@@ -64,6 +64,10 @@
     Fullscreen.launch(document.documentElement);
     screen.orientation.lock("landscape-primary");
     document.getElementById('modal').style.visibility="hidden";
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "js/tower.js"; 
+    document.getElementsByTagName("head")[0].appendChild(script);
   });
 </script>
 </head>
@@ -98,7 +102,6 @@
   <script src="js/virtualjoystick.js"></script>
   <script src="js/fpsmeter.min.js"></script>
   <script src="js/common.js"></script>
-  <script src="js/tower.js"></script>
   <script>if(VirtualJoystick.touchScreenAvailable())document.getElementById('instructions').innerHTML = "<b>Virtual Joystick: Blue Ring on Left / Jump Button: Push anywhere on Right half of screen</b>"</script>
 
 </body>
