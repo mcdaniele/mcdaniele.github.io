@@ -58,6 +58,8 @@
       renderer;
     var cimg=document.createElement('img');
 	cimg.src='images/cloud.png';
+    var joyavail = VirtualJoystick.touchScreenAvailable();
+    if (joyavail){
     var jumpbutton2;
     var joystick = new VirtualJoystick({
 		container	: document.body,
@@ -66,8 +68,7 @@
 		stickRadius	: 60,	
 		stationaryBase	: true,
 		baseX		: 100,
-		baseY		: 200,
-	        mouseSupport: true,
+		baseY		: 200
     });
 	joystick.addEventListener('touchStartValidation', function(event){
 		var touch	= event.changedTouches[0];
@@ -91,6 +92,7 @@
 	joystick2.addEventListener('touchEnd', function(){
         jumpbutton2 = false;
 	})
+    }
 
     
   //===========================================================================
@@ -365,12 +367,12 @@
         Game.animate(FPS, this, PLAYER.RIGHT);
       else
         Game.animate(FPS, this, PLAYER.STAND);
-      if (joystick.up()) {this.input.up = true;}else this.input.up = false;
-      if (joystick.down()) {this.input.down = true;}else this.input.down = false;
-      if (joystick.right()) {this.input.right = true;}else this.input.right = false;
-      if (joystick.left()) {this.input.left = true;}else this.input.left = false;
-      if (player.input.jumpAvailable) {
-        player.input.jump = jumpbutton2;
+      if (joyavail){
+        if (joystick.up()&&(joystick.deltaY() > 5)) {this.input.up = true;} else this.input.up = false;
+        if (joystick.down()&&(joystick.deltaY() < -5)) {this.input.down = true;} else this.input.down = false;
+        if (joystick.right()&&(joystick.deltaX() > 5)) {this.input.right = true;} else this.input.right = false;
+        if (joystick.left()&&(joystick.deltaX() < -5)) {this.input.left = true;} else this.input.left = false;
+        if (player.input.jumpAvailable) {player.input.jump = jumpbutton2;}
       }
     },
 
