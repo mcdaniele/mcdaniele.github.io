@@ -66,6 +66,40 @@
   // UTILITY METHODS
   //===========================================================================
 
+    	joyavail = VirtualJoystick.touchScreenAvailable();
+    	if (joyavail){
+	    	var joystick = new VirtualJoystick({
+		container	: document.body,
+		strokeStyle	: 'cyan',
+		limitStickTravel: true,
+		stickRadius	: 60,	
+		stationaryBase	: true,
+		baseX		: 100,
+		baseY		: 200
+    		});
+		joystick.addEventListener('touchStartValidation', function(event){
+			var touch	= event.changedTouches[0];
+			if( touch.pageX > window.innerWidth/2+5 )	return false;
+			return true
+		});
+		var joystick2	= new VirtualJoystick({
+			container	: document.body,
+			strokeStyle	: 'red',
+			limitStickTravel: true,
+			stickRadius	: 0		
+		});
+		joystick2.addEventListener('touchStartValidation', function(event){
+			var touch	= event.changedTouches[0];
+			if( touch.pageX < window.innerWidth/2-5 )	return false;
+			return true
+		});
+		joystick2.addEventListener('touchStart', function(){
+        		jumpbutton2 = true;
+    		});
+		joystick2.addEventListener('touchEnd', function(){
+        		jumpbutton2 = false;
+		});
+	}
   function normalizex(x)              { return Game.Math.normalize(x,   0, tower.w);                       }  // wrap x-coord around to stay within tower boundary
   function normalizeColumn(col)       { return Game.Math.normalize(col, 0, tower.cols);                    }  // wrap column  around to stay within tower boundary
   function x2col(x)                   { return Math.floor(normalizex(x)/COL_WIDTH);                        }  // convert x-coord to tower column index
