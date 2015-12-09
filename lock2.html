@@ -1,63 +1,47 @@
 <html>
-
 <body>
-<!--
-<input id="lock-button" type="submit" value="Lock!" />
-<br>
-<input id="unlock-button" type="reset" value="Unlock!" />
--->
-<button id="lock-button">Lock! 1</button>
-<br>
-<button id="unlock-button"">Unlock!</button>
+  <button id="lock-button">Lock!</button>
+  <br>
+  <button id="unlock-button"">Unlock!</button>
 <script>
-//screen.lockO = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
-
-//if (screen.lockOrientationUniversal("landscape-primary")) {
-  // orientation was locked
-//} else {
-  // orientation lock failed
-//}
-            var Fullscreen = {
-               launch: function(element) {
-                  if(element.requestFullscreen) {
-                     element.requestFullscreen();
-                  } else if(element.mozRequestFullScreen) {
-                     element.mozRequestFullScreen();
-                  } else if(element.webkitRequestFullscreen) {
-                     element.webkitRequestFullscreen();
-                  } else if(element.msRequestFullscreen) {
-                     element.msRequestFullscreen();
-                  }
-               },
-               exit: function() {
-                  if(document.exitFullscreen) {
-                     document.exitFullscreen();
-                  } else if(document.mozCancelFullScreen) {
-                     document.mozCancelFullScreen();
-                  } else if(document.webkitExitFullscreen) {
-                     document.webkitExitFullscreen();
-                  } else if (document.msExitFullscreen) {
-                     document.msExitFullscreen();
-                  }
-               }
-            };
-
-               document.getElementById('lock-button').addEventListener('click', function (event) {
-                  event.preventDefault();
-                  Fullscreen.launch(document.documentElement);
-                  screen.orientation.lock("landscape-primary");
-                  document.getElementById('lock-button').style.visibility = "hidden";
-                  document.getElementById('unlock-button').style.visibility = "visible";
-               });
-
-               document.getElementById('unlock-button').addEventListener('click', function (event) {
-                  event.preventDefault();
-                  Fullscreen.exit();
-                  screen.orientation.unlock();
-                  document.getElementById('unlock-button').style.visibility = "hidden";
-                  document.getElementById('lock-button').style.visibility = "visible";
-               });
+  var Fullscreen = {
+    launch: function(element) {
+      if(element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if(element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+      } else if(element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if(element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+      }
+    },
+    exit: function() {
+      if(document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if(document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if(document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  };
+  document.getElementById('lock-button').addEventListener('click', function (event) {
+    event.preventDefault();
+    Fullscreen.launch(document.documentElement);
+    screen.orientation.lock("landscape-primary");
+    document.getElementById('lock-button').style.visibility = "hidden";
+    document.getElementById('unlock-button').style.visibility = "visible";
+  });
+  document.getElementById('unlock-button').addEventListener('click', function (event) {
+    event.preventDefault();
+    Fullscreen.exit();
+    screen.orientation.unlock();
+    document.getElementById('unlock-button').style.visibility = "hidden";
+    document.getElementById('lock-button').style.visibility = "visible";
+  });
 </script>
-
 </body>
 </html>
