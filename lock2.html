@@ -6,7 +6,7 @@
 <br>
 <input id="unlock-button" type="reset" value="Unlock!" />
 -->
-<button id="lock-button">Lock! 0</button>
+<button id="lock-button">Lock! 1</button>
 <br>
 <button id="unlock-button"">Unlock!</button>
 <script>
@@ -46,16 +46,16 @@
                   event.preventDefault();
                   Fullscreen.launch(document.documentElement);
                   screen.orientation.lock("landscape-primary");
-                  getElementById('lock-button').style.visibility = hidden;
-                  getElementById('unlock-button').style.visibility = show;
+                  document.getElementById('lock-button').style.visibility = "hidden";
+                  document.getElementById('unlock-button').style.visibility = "visible";
                });
 
                document.getElementById('unlock-button').addEventListener('click', function (event) {
                   event.preventDefault();
                   Fullscreen.exit();
                   screen.orientation.unlock();
-                  getElementById('unlock-button').style.visibility = hidden;
-                  getElementById('lock-button').style.visibility = show;
+                  document.getElementById('unlock-button').style.visibility = "hidden";
+                  document.getElementById('lock-button').style.visibility = "visible";
                });
 </script>
 
