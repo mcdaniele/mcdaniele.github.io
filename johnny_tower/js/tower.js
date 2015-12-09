@@ -100,6 +100,7 @@
         		jumpbutton2 = false;
 		});
 	}
+
   function normalizex(x)              { return Game.Math.normalize(x,   0, tower.w);                       }  // wrap x-coord around to stay within tower boundary
   function normalizeColumn(col)       { return Game.Math.normalize(col, 0, tower.cols);                    }  // wrap column  around to stay within tower boundary
   function x2col(x)                   { return Math.floor(normalizex(x)/COL_WIDTH);                        }  // convert x-coord to tower column index
@@ -125,8 +126,10 @@
           update: update,
           render: render
         });
-        Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
-        Dom.on(document, 'keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
+        if (!joyavail){
+            Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
+            Dom.on(document, 'keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
+        }
       });
     });
   }
