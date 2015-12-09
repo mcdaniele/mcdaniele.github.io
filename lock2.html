@@ -6,9 +6,9 @@
 <br>
 <input id="unlock-button" type="reset" value="Unlock!" />
 -->
-<button id="lock-button">Lock!</button>
+<button id="lock-button" onclick="lockit()">Lock!</button>
 <br>
-<button id="unlock-button">Unlock!</button>
+<button id="unlock-button" onclick="unlockit()">Unlock!</button>
 <script>
 //screen.lockO = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
 
@@ -42,13 +42,15 @@
                }
             };
 
-               document.getElementById('lock-button').addEventListener('click', function (event) {
+//               document.getElementById('lock-button').addEventListener('click', function (event) {
+function lockit(){
                   event.preventDefault();
                   Fullscreen.launch(document.documentElement);
                   screen.orientation.lock("landscape-primary");
                });
 
-               document.getElementById('unlock-button').addEventListener('click', function (event) {
+//               document.getElementById('unlock-button').addEventListener('click', function (event) {
+function unlockit(){
                   event.preventDefault();
                   Fullscreen.exit();
                   screen.orientation.unlock();
