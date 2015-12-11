@@ -65,8 +65,9 @@
   //===========================================================================
   // UTILITY METHODS
   //===========================================================================
-function joyinit(){
     	joyavail = VirtualJoystick.touchScreenAvailable();
+
+function joyinit(){
     	if (joyavail){
 	    	var joystick = new VirtualJoystick({
 		container	: document.body,
