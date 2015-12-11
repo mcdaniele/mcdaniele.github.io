@@ -22,14 +22,19 @@
     @media screen and (min-width:  1096px) and (min-height:  722px) { #tower { width:  896px; height: 672px; font-size: 13pt; } } /* block = 28 */
     @media screen and (min-width:  1224px) and (min-height:  818px) { #tower { width: 1024px; height: 768px; font-size: 15pt; } } /* block = 32 */
     .main-container {
-      float: left;
+/*      float: left;
       position: relative;
-      left: 50%;
+      left: 50%;*/
     }
     .fixer-container {
-      float: left;
+/*      float: left;
       position: relative;
-      left: -50%;
+      left: -50%;*/
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
     }
 #round{
 width:100px; /*same as the height*/
