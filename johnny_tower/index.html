@@ -103,12 +103,12 @@ box-shadow: 0px 0px 5px rgba(0,0,0, .75);
       }
     }
   };
-  document.getElementById('round').addEventListener('click', function (event) {
+  document.getElementById("round").addEventListener('click', function (event) {
     event.preventDefault();
+    joyinit();
     Fullscreen.launch(document.documentElement);
     screen.orientation.lock("landscape-primary");
-    document.getElementById('round').style.visibility = "hidden";
-    joyinit();
+    document.getElementById("round").style.visibility = "hidden";
     run();
   });
 </script>
