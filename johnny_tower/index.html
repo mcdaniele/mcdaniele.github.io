@@ -37,6 +37,10 @@
 
     }
 #round{
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
 width:100px; /*same as the height*/
 height:100px; /*same as the width*/
 background-color:#0000ff;
@@ -122,7 +126,7 @@ box-shadow: 0px 0px 5px rgba(0,0,0, .75);
   };
   document.getElementById("round").addEventListener('click', function (event) {
     event.preventDefault();
-    document.getElementByClass("fixer-container").style.visibility = "hidden";
+    document.getElementById("round").style.visibility = "hidden";
     Fullscreen.launch(document.documentElement);
     joyinit();
     screen.orientation.lock("landscape-primary");
