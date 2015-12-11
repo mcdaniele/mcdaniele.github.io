@@ -65,7 +65,7 @@
   //===========================================================================
   // UTILITY METHODS
   //===========================================================================
-
+function joyinit(){
     	joyavail = VirtualJoystick.touchScreenAvailable();
     	if (joyavail){
 	    	var joystick = new VirtualJoystick({
@@ -100,7 +100,7 @@
         		jumpbutton2 = false;
 		});
 	}
-
+}
   function normalizex(x)              { return Game.Math.normalize(x,   0, tower.w);                       }  // wrap x-coord around to stay within tower boundary
   function normalizeColumn(col)       { return Game.Math.normalize(col, 0, tower.cols);                    }  // wrap column  around to stay within tower boundary
   function x2col(x)                   { return Math.floor(normalizex(x)/COL_WIDTH);                        }  // convert x-coord to tower column index
