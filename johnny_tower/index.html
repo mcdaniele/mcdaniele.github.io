@@ -37,8 +37,8 @@
 
     }
 #round{
-width:100px; /*same as the height*/
-height:100px; /*same as the width*/
+width:50em; /*same as the height*/
+height:50em; /*same as the width*/
 background-color:#0000ff;
 border:1px solid #0000ff; /*same colour as the background*/
 color:#fff;
@@ -66,11 +66,9 @@ box-shadow: 0px 0px 5px rgba(0,0,0, .75);
 </head>
 
 <body>
-<div class="main-container">
   <div class="fixer-container">
     <button id="round">Start!</button>
   </div>
-</div>
   <div id="tower">
 
     <div id="hud">
@@ -124,7 +122,7 @@ box-shadow: 0px 0px 5px rgba(0,0,0, .75);
   };
   document.getElementById("round").addEventListener('click', function (event) {
     event.preventDefault();
-    document.getElementByClass("main-container").style.visibility = "hidden";
+    document.getElementByClass("fixer-container").style.visibility = "hidden";
     Fullscreen.launch(document.documentElement);
     joyinit();
     screen.orientation.lock("landscape-primary");
