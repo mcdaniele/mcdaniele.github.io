@@ -21,21 +21,6 @@
     @media screen and (min-width:   968px) and (min-height:  626px) { #tower { width:  768px; height: 576px; font-size: 11pt; } } /* block = 24 */
     @media screen and (min-width:  1096px) and (min-height:  722px) { #tower { width:  896px; height: 672px; font-size: 13pt; } } /* block = 28 */
     @media screen and (min-width:  1224px) and (min-height:  818px) { #tower { width: 1024px; height: 768px; font-size: 15pt; } } /* block = 32 */
-    .main-container {
-/*      float: left;
-      position: relative;
-      left: 50%;*/
-    }
-    .fixer-container {
-/*      float: left;
-      position: relative;
-      left: -50%;*/
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-
-    }
 #round{
 position: absolute;
 top: 50%;
@@ -70,9 +55,7 @@ box-shadow: 0px 0px 5px rgba(0,0,0, .75);
 </head>
 
 <body>
-<!--  <div class="fixer-container">-->
-    <button id="round">Start!</button>
-<!--  </div>-->
+  <button id="round">Start!</button>
   <div id="tower">
 
     <div id="hud">
