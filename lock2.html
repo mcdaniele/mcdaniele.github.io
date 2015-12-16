@@ -51,7 +51,7 @@
   	}
   	else document.getElementById('body1').style.backgroundColor="#FF0000";
   }
-  screen.lockOrientationUniversal = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
+  screen.lockOrientationUniversal = screen.orientation.lock || screen.mozLockOrientation.lock || screen.msLockOrientation.lock;
   document.getElementById('lock-button').addEventListener('click', function (event) {
     event.preventDefault();
     Fullscreen.launch(document.documentElement);
