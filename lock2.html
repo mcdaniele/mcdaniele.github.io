@@ -51,18 +51,17 @@
   	}
   	else document.getElementById('body1').style.backgroundColor="#FF0000";
   }
-  function fslocker(orient) {
-  	if (screen.orientation.lock(orient)) {
+  function fslocker(orient1) {
+  	if (screen.orientation.lock(orient1)) {
   		return true;
   	}
-  	else if (screen.mozLockOrientation.lock(orient)) {
+  	else if (screen.mozLockOrientation.lock(orient1)) {
   		return true;
   	}
-  	else if (screen.msLockOrientation.lock(orient)) {
+  	else if (screen.msLockOrientation.lock(orient1)) {
   		return true;
   	}
   	else return false;
-  }
   }
   screen.lockOrientationUniversal = screen.orientation.lock || screen.mozLockOrientation.lock || screen.msLockOrientation.lock;
   document.getElementById('lock-button').addEventListener('click', function (event) {
