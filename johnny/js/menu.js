@@ -64,6 +64,7 @@ this.angle = 0;
 	},
 
 	startPlay: function() {
+		screen.orientation.lock("landscape-primary");
 		this.game.state.start('Play');
 	},
 	
