@@ -1,10 +1,10 @@
 <html>
 <body id='body1'>
-  <button id="lock-button">Lock 1</button>
+  <button id="lock-button">Lock</button>
   <br><br>
-  <button id="unlock-button">Unlock 2</button>
+  <button id="unlock-button">Unlock</button>
   <br><br>
-  <button id="check-button" onclick="fs_check()">Check 3</button>
+  <button id="check-button" onclick="fs_check()">Check</button>
 <script>
   var Fullscreen = {
     launch: function(element) {
@@ -68,7 +68,8 @@
     event.preventDefault();
     Fullscreen.launch(document.documentElement);
     fslocker("landscape-primary");
-   // screen.lockOrientationUniversal("landscape-primary");//    screen.orientation.lock("landscape-primary");
+   // screen.lockOrientationUniversal("landscape-primary");
+   //screen.orientation.lock("landscape-primary");
     document.getElementById('lock-button').style.visibility = "hidden";
     document.getElementById('unlock-button').style.visibility = "visible";
   });
