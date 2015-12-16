@@ -1,8 +1,10 @@
 <html>
 <body>
   <button id="lock-button">Lock!</button>
-  <br>
+  <br><br>
   <button id="unlock-button">Unlock!</button>
+  <br><br>
+  <button id="check-button" onclick="fs_check()">Check</button>
 <script>
   var Fullscreen = {
     launch: function(element) {
@@ -28,6 +30,27 @@
       }
     }
   };
+  function fs_status() {
+  	if(document.fullscreenElement) {
+	  	return true;
+  	}
+	  else if(document.webkitFullscreenElement ) {
+  		return true;
+	  }
+  	else if (document.mozFullScreenElement) {
+	  	return true;
+  	}
+	  else if (document.msFullscreenElement !== undefined) {
+	  	return true;
+	  }
+	  else return false;
+  }
+  function fs_check() {
+	  if (fs_status()) {
+		  body.style.backgroundColor="#00FF00";
+    }
+     else body.style.backgroundColor="#FF0000";
+  }
   document.getElementById('lock-button').addEventListener('click', function (event) {
     event.preventDefault();
     Fullscreen.launch(document.documentElement);
