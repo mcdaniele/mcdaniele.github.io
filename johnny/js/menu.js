@@ -1,45 +1,6 @@
 Game.Menu = function (game) { };
 
 Game.Menu.prototype = {
-  var Fullscreen = {
-    launch: function(element) {
-      if(element.requestFullscreen) {
-        element.requestFullscreen();
-      } else if(element.mozRequestFullScreen) {
-        element.mozRequestFullScreen();
-      } else if(element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen();
-      } else if(element.msRequestFullscreen) {
-        element.msRequestFullscreen();
-      }
-    },
-    exit: function() {
-      if(document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if(document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else if(document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
-    }
-  };
-  function fs_status() {
-  	if(document.fullscreenElement) {
-	  	return true;
-  	}
-	  else if(document.webkitFullscreenElement ) {
-  		return true;
-	  }
-  	else if (document.mozFullScreenElement) {
-	  	return true;
-  	}
-	  else if (document.msFullscreenElement !== undefined) {
-	  	return true;
-	  }
-	  else return false;
-  }
 
 	create: function() {
 		this.cursor = this.game.input.keyboard.createCursorKeys();
@@ -103,10 +64,6 @@ this.angle = 0;
 	},
 
 	startPlay: function() {
-		if(!(fs_status())) {
-			Fullscreen.launch(document.documentElement);
-		}
-		screen.orientation.lock("landscape-primary");
 		this.game.state.start('Play');
 	},
 	
