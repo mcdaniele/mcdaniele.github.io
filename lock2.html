@@ -1,5 +1,5 @@
 <html>
-<body>
+<body id='body1'>
   <button id="lock-button">Lock!</button>
   <br><br>
   <button id="unlock-button">Unlock!</button>
@@ -46,10 +46,10 @@
 	  else return false;
   }
   function fs_check() {
-	  if (fs_status()) {
-		  body.style.backgroundColor="#00FF00";
-    }
-     else body.style.backgroundColor="#FF0000";
+  	if (fs_status()) {
+		document.getElementById('body1').style.backgroundColor="#00FF00";
+  	}
+  	else document.getElementById('body1').style.backgroundColor="#FF0000";
   }
   document.getElementById('lock-button').addEventListener('click', function (event) {
     event.preventDefault();
