@@ -106,7 +106,7 @@ Game.Play.prototype = {
 //			game.stage.scale.setShowAll();
 //			game.stage.scale.refresh();		
 		}
-		game.stage.scale.startFullScreen();
+//		game.stage.scale.startFullScreen();
 
         // SOUND
         this.coin_s = game.add.sound('scoin');
