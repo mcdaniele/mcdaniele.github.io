@@ -90,6 +90,7 @@ this.angle = 0;
   };
     Fullscreen.launch(document.documentElement);
 		screen.orientation.lock("landscape-primary");
+	    	game.stage.scale.setScreenSize(true);
 		setContent();
 		this.game.state.start('Play');
 	},
