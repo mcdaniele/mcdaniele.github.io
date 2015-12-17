@@ -64,7 +64,7 @@ this.angle = 0;
 	},
 
 	startPlay: function() {
-  var Fullscreen = {
+/*  var Fullscreen = {
     launch: function(element) {
       if(element.requestFullscreen) {
         element.requestFullscreen();
@@ -91,7 +91,7 @@ this.angle = 0;
     Fullscreen.launch(document.documentElement);
 		screen.orientation.lock("landscape-primary");
 	    	game.stage.scale.setScreenSize(true);
-		setContent();
+		setContent();*/
 		this.game.state.start('Play');
 	},
 	
