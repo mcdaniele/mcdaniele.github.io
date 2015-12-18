@@ -21,41 +21,12 @@
     @media screen and (min-width:   968px) and (min-height:  626px) { #tower { width:  768px; height: 576px; font-size: 11pt; } } /* block = 24 */
     @media screen and (min-width:  1096px) and (min-height:  722px) { #tower { width:  896px; height: 672px; font-size: 13pt; } } /* block = 28 */
     @media screen and (min-width:  1224px) and (min-height:  818px) { #tower { width: 1024px; height: 768px; font-size: 15pt; } } /* block = 32 */
-#round{
-position: absolute;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-width:100px; /*same as the height*/
-height:100px; /*same as the width*/
-background-color:#0000ff;
-border:1px solid #0000ff; /*same colour as the background*/
-color:#fff;
-font-size:1.6em;
-/*set the border-radius at half the size of the width and height*/
--webkit-border-radius: 50px;
--moz-border-radius: 50px;
-border-radius: 50px;
-/*give the button a small drop shadow*/
--webkit-box-shadow: 0 0 10px rgba(0,0,0, .75);
--moz-box-shadow: 0 0 10px rgba(0,0,0, .75);
-box-shadow: 2px 2px 15px rgba(0,0,0, .75);
-}
-/***NOW STYLE THE BUTTON'S HOVER STATE***/
-input#round:hover{
-background:#c20b0b;
-border:1px solid #c20b0b;
-/*reduce the size of the shadow to give a pushed effect*/
--webkit-box-shadow: 0px 0px 5px rgba(0,0,0, .75);
--moz-box-shadow: 0px 0px 5px rgba(0,0,0, .75);
-box-shadow: 0px 0px 5px rgba(0,0,0, .75);
-}
   </style>
 
 </head>
 
 <body>
-  <button id="round">Start!</button>
+
   <div id="tower">
 
     <div id="hud">
@@ -82,41 +53,6 @@ box-shadow: 0px 0px 5px rgba(0,0,0, .75);
   <script src="js/common.js"></script>
   <script src="js/tower.js"></script>
   <script>if(VirtualJoystick.touchScreenAvailable())document.getElementById('instructions').innerHTML = "<b>Joystick: Blue Ring on Left/Jump Button: Push anywhere on Right</b>"</script>
-<script>
-  var Fullscreen = {
-    launch: function(element) {
-      if(element.requestFullscreen) {
-        element.requestFullscreen();
-      } else if(element.mozRequestFullScreen) {
-        element.mozRequestFullScreen();
-      } else if(element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen();
-      } else if(element.msRequestFullscreen) {
-        element.msRequestFullscreen();
-      }
-    },
-    exit: function() {
-      if(document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if(document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else if(document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
-    }
-  };
-  document.getElementById("round").addEventListener('click', function (event) {
-    event.preventDefault();
-    console.log("Start!")
-    document.getElementById("round").style.visibility = "hidden";
-  //  Fullscreen.launch(document.documentElement);
-    joyinit();
-  //  screen.orientation.lock("landscape-primary");
-    run();
-  });
-</script>
 
 </body>
 </html>
