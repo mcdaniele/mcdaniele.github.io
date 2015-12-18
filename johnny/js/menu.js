@@ -92,6 +92,7 @@ this.angle = 0;
 		screen.orientation.lock("landscape-primary");
 	    	game.stage.scale.setScreenSize(true);
 		setContent();*/
+		Phaser.StageScaleMode#startFullScreen;
 		this.game.state.start('Play');
 	},
 	
