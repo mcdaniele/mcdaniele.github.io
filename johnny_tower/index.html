@@ -13,7 +13,7 @@
 /*    #hud            { position: absolute; bottom: 0em; width: 8em; background-color: red; opacity: 0.8; border: 4px solid black; }*/
     #hud            { position: absolute; top: 0em; width: 12em; background-color: #555; opacity: 0.8; border: 4px solid orange; }
     #score          { color: yellow; font-size: 2em; font-family: 'Cherry Swash', cursive }
-    #canvas         { display: inline-block; width: 100%; height: 100%; }
+    #canvas         { display: inline-block; width: 100%; height: 100%; visibility: "hidden"; }
     #instructions   { font-style: italic; color: #999; font-size: 9pt; margin-left: 1em; margin-top: 0.5em; }
     #instructions b { color: #DDD; }
     @media screen and (min-width:     0px) and (min-height:    0px) { #tower { width:  512px; height: 384px; font-size:  7pt; } } /* block = 16 */
@@ -132,6 +132,7 @@
 
 //		run();
 		document.getElementById("button").style.visibility="hidden";
+		document.getElementById("canvas").style.visibility="show";
 	});
 </script>
 
