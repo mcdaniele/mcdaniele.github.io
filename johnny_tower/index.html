@@ -55,8 +55,47 @@
   <script src="js/tower.js"></script>
   <script>if(VirtualJoystick.touchScreenAvailable())document.getElementById('instructions').innerHTML = "<b>Joystick: Blue Ring on Left/Jump Button: Push anywhere on Right</b>"</script>
 <script>
+  var Fullscreen = {
+    launch: function(element) {
+      if(element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if(element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+      } else if(element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if(element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+      }
+    },
+    exit: function() {
+      if(document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if(document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if(document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  };
+  function fslocker(orient1) {
+  	if (screen.orientation.lock(orient1)) {
+  		return true;
+  	}
+  	else if (screen.mozLockOrientation.lock(orient1)) {
+  		return true;
+  	}
+  	else if (screen.msLockOrientation.lock(orient1)) {
+  		return true;
+  	}
+  	else return false;
+  }
 	document.getElementById("button").addEventListener('click', function (event)
 	{
+    event.preventDefault();
+    Fullscreen.launch(document.getElementById("canvas"));
+    fslocker("landscape-primary");
 	joyinit();
 	run();
 	document.getElementById("button").style.visibility="hidden";
