@@ -26,6 +26,7 @@
 </head>
 
 <body>
+<button id="button">Start</button>
 
   <div id="tower">
 
@@ -53,6 +54,14 @@
   <script src="js/common.js"></script>
   <script src="js/tower.js"></script>
   <script>if(VirtualJoystick.touchScreenAvailable())document.getElementById('instructions').innerHTML = "<b>Joystick: Blue Ring on Left/Jump Button: Push anywhere on Right</b>"</script>
+<script>
+	document.getElementById("button").addEventListener('click', function (event)
+	{
+	joyinit();
+	run();
+	document.getElementById("button").style.visibility="hidden";
+	});
+</script>
 
 </body>
 </html>
