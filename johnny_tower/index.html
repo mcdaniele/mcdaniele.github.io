@@ -28,6 +28,7 @@
 <body>
 <button id="button">Start</button>
 <!-- -->
+<div id="D9">
   <div id="tower">
 
     <div id="hud">
@@ -48,6 +49,7 @@
     </div>
 
   </div>
+</div>
 
   <script src="js/virtualjoystick.js"></script>
   <script src="js/fpsmeter.min.js"></script>
@@ -93,7 +95,7 @@
   }
 	document.getElementById("button").addEventListener('click', function (event){
     		event.preventDefault();
-    		Fullscreen.launch(document.getElementById("canvas"));
+    		Fullscreen.launch(document.getElementById("D9"));
     		fslocker("landscape-primary");/* */
 //		joyinit();
     	if (VirtualJoystick.touchScreenAvailable()){
