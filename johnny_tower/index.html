@@ -26,8 +26,8 @@
 </head>
 
 <body>
-<button id="button">Start</button>
-
+<!--<button id="button">Start</button>
+<!-- -->
   <div id="tower">
 
     <div id="hud">
@@ -55,7 +55,7 @@
   <script src="js/tower.js"></script>
   <script>if(VirtualJoystick.touchScreenAvailable())document.getElementById('instructions').innerHTML = "<b>Joystick: Blue Ring on Left/Jump Button: Push anywhere on Right</b>"</script>
 <script>
-  var Fullscreen = {
+/*  var Fullscreen = {
     launch: function(element) {
       if(element.requestFullscreen) {
         element.requestFullscreen();
@@ -94,11 +94,11 @@
 	document.getElementById("button").addEventListener('click', function (event){
     		event.preventDefault();
     		Fullscreen.launch(document.getElementById("canvas"));
-    		fslocker("landscape-primary");
+    		fslocker("landscape-primary");/* */
 		joyinit();
 //		run();
 		document.getElementById("button").style.visibility="hidden";
-	});
+//	});
 </script>
 
 </body>
