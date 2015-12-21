@@ -91,14 +91,13 @@
   	}
   	else return false;
   }
-	document.getElementById("button").addEventListener('click', function (event)
-	{
-    event.preventDefault();
-    Fullscreen.launch(document.getElementById("canvas"));
-    fslocker("landscape-primary");
-	joyinit();
-	run();
-	document.getElementById("button").style.visibility="hidden";
+	document.getElementById("button").addEventListener('click', function (event){
+    		event.preventDefault();
+    		Fullscreen.launch(document.getElementById("canvas"));
+    		fslocker("landscape-primary");
+		joyinit();
+//		run();
+		document.getElementById("button").style.visibility="hidden";
 	});
 </script>
 
