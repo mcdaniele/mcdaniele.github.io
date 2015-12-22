@@ -132,6 +132,7 @@
             Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
             Dom.on(document, 'keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
         }
+        if (player.x > tower.h) return;
       });
     });
   }
@@ -146,7 +147,7 @@
 
   function update(dt) {
     player.update(dt);
-console.log(tower.map);
+//console.log(tower.map);
     monsters.update(dt);
     camera.update(dt);
   }
