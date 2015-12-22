@@ -133,8 +133,8 @@
             Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
             Dom.on(document, 'keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
         }
-        if (player.x > tower.h) return;
-        console.log(player.x,tower.h);
+        if (player.y > tower.h) return;
+        console.log(player.y,tower.h);
       });
     });
   }
