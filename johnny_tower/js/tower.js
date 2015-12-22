@@ -1030,7 +1030,7 @@
 
     renderScore: function(ctx) {
       if (player.score > this.vscore) {
-        this.vscore = this.vscore + 2;
+        this.vscore = this.vscore + 1;
         Dom.set(score, this.vscore);
       }
     },
