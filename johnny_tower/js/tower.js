@@ -131,7 +131,7 @@
             Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
             Dom.on(document, 'keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
         }
-        console.log(vscore);
+        console.log(this.vscore);
       });
     });
   }
