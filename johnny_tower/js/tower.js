@@ -146,7 +146,7 @@
 
   function update(dt) {
     player.update(dt);
-console.log(level.map);
+console.log(tower.map);
     monsters.update(dt);
     camera.update(dt);
   }
