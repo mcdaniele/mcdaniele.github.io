@@ -146,6 +146,7 @@
 
   function update(dt) {
     player.update(dt);
+console.log(player.x,player.y);
     monsters.update(dt);
     camera.update(dt);
   }
