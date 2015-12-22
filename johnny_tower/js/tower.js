@@ -61,6 +61,7 @@
     var joyavail = false;
     var jumpbutton2 = false;
     var cc = 0;
+    var changem = true;
 
 
   //===========================================================================
@@ -219,7 +220,7 @@ cc = level.score;
         for(col = 0 ; col < this.cols ; col++) {
           cell = source[row][col];
           map[row][col] = {
-            platform: ((cell == 'X')||(cell == 'M')),
+            platform: ((cell == 'X')),//||(cell == 'M')),
             ladder:   (cell == 'H'),
             coin:     (cell == 'o')
           };
