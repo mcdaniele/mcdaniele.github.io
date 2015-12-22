@@ -251,7 +251,7 @@
       this.input     = { left: false, right: false, up: false, down: false, jump: false, jumpAvailable: true };
       this.collision = this.createCollisionPoints();
       this.animation = PLAYER.STAND;
-      this.score     = 0;
+      this.score     = 140;
 
     },
 
