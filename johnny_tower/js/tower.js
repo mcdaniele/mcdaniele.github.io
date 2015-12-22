@@ -131,7 +131,6 @@
             Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
             Dom.on(document, 'keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
         }
-        console.log(this.vscore);
       });
     });
   }
@@ -1034,6 +1033,7 @@
       if (player.score < this.vscore) {
         this.vscore = this.vscore - 1;
         Dom.set(score, this.vscore);
+        console.log(this.vscore);
       }
     },
 
