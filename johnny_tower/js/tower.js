@@ -128,7 +128,6 @@
           fps:    FPS,
           update: update,
           render: render
-          if (player.y > tower.h) return;
         });
         if (!joyavail){
             Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
