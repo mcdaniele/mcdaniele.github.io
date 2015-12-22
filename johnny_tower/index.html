@@ -9,7 +9,7 @@
 
   <style>
     body            { background: #111; }
-    #tower          { position: relative; margin: 1em auto; width: 512px; height: 384px; border: 4px solid #80C0C0; }
+    #tower          { position: relative; margin: 1em auto; width: 512px; height: 384px; border: 4px solid #80C0C0; visibility: 'hidden';}
 /*    #hud            { position: absolute; bottom: 0em; width: 8em; background-color: red; opacity: 0.8; border: 4px solid black; }*/
     #hud            { position: absolute; top: 0em; width: 8em; background-color: #AA3030; opacity: 0.8; border: 4px solid #440044; }
     #score          { color: deepskyblue; font-size: 2em; font-family: 'Lemon', cursive }
@@ -132,7 +132,7 @@
 
 //		run();
 		document.getElementById("button").style.visibility="hidden";
-		document.getElementById("canvas").style.visibility="show";
+		document.getElementById("tower").style.visibility="show";
 	});
 </script>
 
