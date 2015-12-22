@@ -770,8 +770,8 @@
       this.gradient      = this.createGradient();
       this.ground        = this.createGround();
       this.debug         = Dom.get('debug');
-      this.score         = Dom.get('score');
-      this.vscore        = level.score;
+      this.score         = 0;//Dom.get('score');
+      this.vscore        = this.score;
       this.platformWidth = 2 * tower.or * Math.tan((360/tower.cols) * Math.PI / 360);
     },
 
