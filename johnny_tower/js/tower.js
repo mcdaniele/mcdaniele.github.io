@@ -251,7 +251,7 @@
       this.input     = { left: false, right: false, up: false, down: false, jump: false, jumpAvailable: true };
       this.collision = this.createCollisionPoints();
       this.animation = PLAYER.STAND;
-      this.score     = 140;
+      this.score     = 0;
 
     },
 
@@ -770,7 +770,7 @@
       this.gradient      = this.createGradient();
       this.ground        = this.createGround();
       this.debug         = Dom.get('debug');
-      this.score         = 0;//Dom.get('score');
+      this.score         = 140;//Dom.get('score');
       this.vscore        = this.score;
       this.platformWidth = 2 * tower.or * Math.tan((360/tower.cols) * Math.PI / 360);
     },
