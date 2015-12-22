@@ -1,5 +1,5 @@
 {
-  "name":  "0 level",
+  "name":  "level 0",
   "color": {
     "wall":     "#3C503C",
     "wall2":     "#70482C",
@@ -8,7 +8,7 @@
   },
   "score":   "140",
   "map": [
-    "XXHXXXXXXXXXXXXXXXXX",
+    "XXMXXXXXXXXXXXXXXXXX",
     "  H                 ",
     "  H                 ",
     "  H                 ",
