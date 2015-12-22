@@ -186,7 +186,6 @@
       this.rows     = level.map.length;
       this.cols     = level.map[0].length;
       this.score    = level.score;
-      this.vscore   = level.score;
       this.ir       = WIDTH/4;                 // inner radius (walls)
       this.or       = this.ir * 1.2;           // outer radius (walls plus platforms)
       this.w        = this.cols * COL_WIDTH;
@@ -772,7 +771,7 @@
       this.ground        = this.createGround();
       this.debug         = Dom.get('debug');
       this.score         = Dom.get('score');
-      this.vscore        = this.score;
+      this.vscore        = level.score;
       this.platformWidth = 2 * tower.or * Math.tan((360/tower.cols) * Math.PI / 360);
     },
 
