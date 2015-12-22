@@ -185,8 +185,6 @@
       this.color    = level.color;
       this.rows     = level.map.length;
       this.cols     = level.map[0].length;
-//      this.vscore   = level.score;
-      console.log(this)
       this.ir       = WIDTH/4;                 // inner radius (walls)
       this.or       = this.ir * 1.2;           // outer radius (walls plus platforms)
       this.w        = this.cols * COL_WIDTH;
@@ -511,7 +509,7 @@
 
     collectCoin: function(point) {
       point.cell.coin = false;
-      this.score = this.score - 1;
+      this.score = this.score + 50;
     },
 
     startFalling: function(allowFallingJump) {
@@ -771,8 +769,8 @@
       this.gradient      = this.createGradient();
       this.ground        = this.createGround();
       this.debug         = Dom.get('debug');
-      this.score         = 140;//Dom.get('score');
-      this.vscore        = this.score;
+      this.score         = Dom.get('score');
+      this.vscore        = 0;
       this.platformWidth = 2 * tower.or * Math.tan((360/tower.cols) * Math.PI / 360);
     },
 
@@ -1031,10 +1029,9 @@
     //-------------------------------------------------------------------------
 
     renderScore: function(ctx) {
-      if (player.score < this.vscore) {
-        this.vscore = this.vscore - 1;
+      if (player.score > this.vscore) {
+        this.vscore = this.vscore + 2;
         Dom.set(score, this.vscore);
-        console.log(this.vscore," ",player.score);
       }
     },
 
