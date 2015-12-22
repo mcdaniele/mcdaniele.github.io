@@ -60,6 +60,7 @@
 	cimg.src='images/cloud.png';
     var joyavail = false;
     var jumpbutton2 = false;
+    var cc = 0;
 
 
   //===========================================================================
@@ -185,6 +186,7 @@
       this.color    = level.color;
       this.rows     = level.map.length;
       this.cols     = level.map[0].length;
+cc = level.score;
       this.ir       = WIDTH/4;                 // inner radius (walls)
       this.or       = this.ir * 1.2;           // outer radius (walls plus platforms)
       this.w        = this.cols * COL_WIDTH;
@@ -509,7 +511,7 @@
 
     collectCoin: function(point) {
       point.cell.coin = false;
-      this.score = this.score + 50;
+      this.score = this.score + 1;
     },
 
     startFalling: function(allowFallingJump) {
@@ -1031,7 +1033,7 @@
     renderScore: function(ctx) {
       if (player.score > this.vscore) {
         this.vscore = this.vscore + 2;
-        Dom.set(score, this.vscore);
+        Dom.set(score, cc - this.vscore);
       }
     },
 
