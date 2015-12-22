@@ -186,6 +186,7 @@
       this.rows     = level.map.length;
       this.cols     = level.map[0].length;
       this.vscore   = level.score;
+      console.log(this.vscore)
       this.ir       = WIDTH/4;                 // inner radius (walls)
       this.or       = this.ir * 1.2;           // outer radius (walls plus platforms)
       this.w        = this.cols * COL_WIDTH;
@@ -1033,7 +1034,7 @@
 //      if (player.score < this.vscore) {
 //        this.vscore = this.vscore - 1;
         Dom.set(score, this.vscore);
-        console.log(this.vscore);
+        console.log(this.vscore," ",player.score);
 //      }
     },
 
