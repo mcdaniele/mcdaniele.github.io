@@ -221,7 +221,8 @@ cc = level.score;
           map[row][col] = {
             platform: (cell == 'X'),
             ladder:   (cell == 'H'),
-            coin:     (cell == 'o')
+            coin:     (cell == 'o'),
+            platform: (cell == 'M')
           };
         }
       }
