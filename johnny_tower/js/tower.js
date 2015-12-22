@@ -131,7 +131,7 @@
             Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
             Dom.on(document, 'keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
         }
-        console.log(score);
+        console.log(vscore);
       });
     });
   }
@@ -186,7 +186,7 @@
       this.color    = level.color;
       this.rows     = level.map.length;
       this.cols     = level.map[0].length;
-      this.score    = level.score;
+      this.vscore   = level.score;
       this.ir       = WIDTH/4;                 // inner radius (walls)
       this.or       = this.ir * 1.2;           // outer radius (walls plus platforms)
       this.w        = this.cols * COL_WIDTH;
@@ -511,7 +511,7 @@
 
     collectCoin: function(point) {
       point.cell.coin = false;
-      this.score = this.score + 50;
+      this.score = this.score - 1;
     },
 
     startFalling: function(allowFallingJump) {
