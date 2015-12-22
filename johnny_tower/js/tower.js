@@ -772,7 +772,7 @@
       this.ground        = this.createGround();
       this.debug         = Dom.get('debug');
       this.score         = Dom.get('score');
-      this.vscore        = 0;
+      this.vscore        = this.score;
       this.platformWidth = 2 * tower.or * Math.tan((360/tower.cols) * Math.PI / 360);
     },
 
