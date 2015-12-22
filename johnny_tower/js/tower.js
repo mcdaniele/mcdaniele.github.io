@@ -1029,8 +1029,8 @@
     //-------------------------------------------------------------------------
 
     renderScore: function(ctx) {
-      if (player.score > this.vscore) {
-        this.vscore = this.vscore + 1;
+      if (player.score < this.vscore) {
+        this.vscore = this.vscore - 1;
         Dom.set(score, this.vscore);
       }
     },
