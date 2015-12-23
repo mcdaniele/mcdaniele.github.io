@@ -219,7 +219,7 @@ cc = level.score;
         for(col = 0 ; col < this.cols ; col++) {
           cell = source[row][col];
           map[row][col] = {
-            platform: ((cell == 'X')),//||(cell == 'M')),
+            platform: ((cell == 'X')||(cell == 'M')),
             ladder:   (cell == 'H'),
             coin:     (cell == 'o')
           };
