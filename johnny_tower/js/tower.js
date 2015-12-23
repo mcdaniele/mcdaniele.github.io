@@ -61,7 +61,7 @@
     var joyavail = false;
     var jumpbutton2 = false;
     var cc = 0;
-    var changem = true;
+//    var changem = true;
 
 
   //===========================================================================
@@ -514,6 +514,11 @@ cc = level.score;
     collectCoin: function(point) {
       point.cell.coin = false;
       this.score = this.score + 1;
+      if (cc == this.score) {
+      	for (i=0;i<tower.map.length;i++)
+      	  for (j=0;j<tower.map[i].length;j++)
+      	    if(tower.map[i][j]==('A'||'M'))tower.map[i][j]='ladder';
+      }
     },
 
     startFalling: function(allowFallingJump) {
