@@ -61,7 +61,7 @@
     var joyavail = false;
     var jumpbutton2 = false;
     var cc = 0;
-    var mapz[][];
+    var mapz;
 //    var changem = true;
 
 
