@@ -61,6 +61,7 @@
     var joyavail = false;
     var jumpbutton2 = false;
     var cc = 0;
+    var mapz[][];
 //    var changem = true;
 
 
@@ -189,6 +190,7 @@
       this.rows     = level.map.length;
       this.cols     = level.map[0].length;
 cc = level.score;
+mapz=level.map;
       this.ir       = WIDTH/4;                 // inner radius (walls)
       this.or       = this.ir * 1.2;           // outer radius (walls plus platforms)
       this.w        = this.cols * COL_WIDTH;
@@ -518,8 +520,8 @@ cc = level.score;
       if (cc == this.score) {
       	for (i=0;i<tower.map.length;i++)
       	  for (j=0;j<tower.map[i].length;j++)
-      	    if(level.map[i][j]==('A'||'M'))tower.map[i][j]='ladder';
-	tower.map.replace(/A|M/g, "ladder");
+      	    if(mapz[i][j]==('A'||'M'))tower.map[i][j]='ladder';
+//	tower.map.replace(/A|M/g, "ladder");
       }
     },
 
