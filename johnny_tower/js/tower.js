@@ -512,12 +512,14 @@ cc = level.score;
     },
 
     collectCoin: function(point) {
+      var i, j;	
       point.cell.coin = false;
       this.score = this.score + 1;
       if (cc == this.score) {
       	for (i=0;i<tower.map.length;i++)
       	  for (j=0;j<tower.map[i].length;j++)
-      	    if(tower.map[i][j]==('A'||'M'))tower.map[i][j]='ladder';
+      	    if(level.map[i][j]==('A'||'M'))tower.map[i][j]='ladder';
+	tower.map.replace(/A|M/g, "ladder");
       }
     },
 
