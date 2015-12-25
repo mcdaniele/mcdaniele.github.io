@@ -147,10 +147,10 @@
   }
 
   function update(dt) {
-var i;
+//var i;
     player.update(dt);
-for(i=0;i<tower.map[0].length;i++)
-console.log(tower.map[0][i]);
+//for(i=0;i<tower.map[0].length;i++)
+//console.log(tower.map[0][i]);
     monsters.update(dt);
     camera.update(dt);
   }
@@ -522,7 +522,7 @@ mapz=level.map;
       if (cc == this.score) {
       	for (i=0;i<tower.map.length;i++)
       	  for (j=0;j<tower.map[i].length;j++)
-      	    if(mapz[i][j]==('A'||'M'))tower.map[i][j]=ladder;
+      	    if(mapz[i][j]==('A'||'M'))tower.map[i][j]={platform: false, ladder: true, coin: false};
 //	tower.map.replace(/A|M/g, "ladder");
       }
     },
