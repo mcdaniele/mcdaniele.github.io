@@ -192,7 +192,6 @@
       this.rows     = level.map.length;
       this.cols     = level.map[0].length;
 cc = level.score;
-player.score = cc;
 mapz=level.map;
       this.ir       = WIDTH/4;                 // inner radius (walls)
       this.or       = this.ir * 1.2;           // outer radius (walls plus platforms)
@@ -259,7 +258,7 @@ mapz=level.map;
       this.input     = { left: false, right: false, up: false, down: false, jump: false, jumpAvailable: true };
       this.collision = this.createCollisionPoints();
       this.animation = PLAYER.STAND;
-      this.score     = 0;
+      this.score     = cc;
 
     },
 
