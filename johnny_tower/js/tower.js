@@ -811,7 +811,7 @@ mapz=level.map;
       this.renderScore(this.ctx);
       this.ctx.restore();
 
-      // Dom.set(debug, player.debug);
+       Dom.set(debug, player.debug);
 
     },
 
