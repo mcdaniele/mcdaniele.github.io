@@ -258,7 +258,7 @@ mapz=level.map;
       this.input     = { left: false, right: false, up: false, down: false, jump: false, jumpAvailable: true };
       this.collision = this.createCollisionPoints();
       this.animation = PLAYER.STAND;
-      this.score     = cc;
+      this.score     = 0;
 
     },
 
@@ -1044,10 +1044,10 @@ mapz=level.map;
     //-------------------------------------------------------------------------
 
     renderScore: function(ctx) {
-      if (player.score > this.vscore) {
+//      if (player.score > this.vscore) {
         this.vscore = this.vscore + 1;
         Dom.set(score, cc - this.vscore);
-      }
+//      }
     },
 
     //-------------------------------------------------------------------------
