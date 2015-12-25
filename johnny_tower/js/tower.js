@@ -147,8 +147,10 @@
   }
 
   function update(dt) {
+var i;
     player.update(dt);
-//console.log(tower.map);
+for(i=0;i<tower.map[0].length;i++)
+console.log(tower.map[0][i]);
     monsters.update(dt);
     camera.update(dt);
   }
@@ -811,7 +813,7 @@ mapz=level.map;
       this.renderScore(this.ctx);
       this.ctx.restore();
 
-       Dom.set(debug, player.debug);
+//       Dom.set(debug, player.debug);
 
     },
 
