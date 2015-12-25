@@ -192,6 +192,7 @@
       this.rows     = level.map.length;
       this.cols     = level.map[0].length;
 cc = level.score;
+player.score = cc;
 mapz=level.map;
       this.ir       = WIDTH/4;                 // inner radius (walls)
       this.or       = this.ir * 1.2;           // outer radius (walls plus platforms)
