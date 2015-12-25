@@ -520,7 +520,7 @@ mapz=level.map;
       if (cc == this.score) {
       	for (i=0;i<tower.map.length;i++)
       	  for (j=0;j<tower.map[i].length;j++)
-      	    if(mapz[i][j]==('A'||'M'))tower.map[i][j]='ladder';
+      	    if(mapz[i][j]==('A'||'M'))tower.map[i][j]=ladder;
 //	tower.map.replace(/A|M/g, "ladder");
       }
     },
