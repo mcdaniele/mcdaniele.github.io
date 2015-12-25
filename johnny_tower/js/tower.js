@@ -123,7 +123,7 @@
 
   function run() {
     Game.Load.images(IMAGES, function(images) {
-      Game.Load.json("levels/0", function(level) {
+      Game.Load.json("levels/1", function(level) {
         setup(images, level);
         Game.run({
           fps:    FPS,
