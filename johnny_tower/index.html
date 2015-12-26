@@ -69,11 +69,11 @@
 <div id='modal'>
   <div class='modalcontent'>
         <h1><center>Select Level:</center></h1><br>
-        <button id='selection1'><h2>Level 1</h2></button><br>
-        <button id='selection2'><h2>Level 2</h2></button><br>
-        <button id='selection3'><h2>Level 3</h2></button><br>
-        <button id='selection4'><h2>Level 4</h2></button><br>
-        <button id='selection5'><h2>Level 5</h2></button><br>
+        <button id='level1'><h2>Level 1 | <span id="time1"></span></h2></button><br>
+        <button id='level2'><h2>Level 2 | <span id="time2"></span></h2></button><br>
+        <button id='level3'><h2>Level 3 | <span id="time3"></span></h2></button><br>
+        <button id='level4'><h2>Level 4 | <span id="time4"></span></h2></button><br>
+        <button id='level5'><h2>Level 5 | <span id="time5"></span></h2></button><br>
   </div>
 </div>
   <div id="tower">
@@ -103,7 +103,7 @@
   <script src="js/tower.js"></script>
   <script>if(VirtualJoystick.touchScreenAvailable())document.getElementById('instructions').innerHTML = "<b>Joystick: Blue Ring on Left/Jump Button: Push anywhere on Right</b>"</script>
 <script>
-document.getElementById('modal').style.visibility="hidden";
+//document.getElementById('modal').style.visibility="hidden";
   var Fullscreen = {
     launch: function(element) {
       if(element.requestFullscreen) {
