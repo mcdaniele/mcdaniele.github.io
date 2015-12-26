@@ -21,13 +21,61 @@
     @media screen and (min-width:   968px) and (min-height:  626px) { #tower { width:  768px; height: 576px; font-size: 11pt; } } /* block = 24 */
     @media screen and (min-width:  1096px) and (min-height:  722px) { #tower { width:  896px; height: 672px; font-size: 13pt; } } /* block = 28 */
     @media screen and (min-width:  1224px) and (min-height:  818px) { #tower { width: 1024px; height: 768px; font-size: 15pt; } } /* block = 32 */
+    #modal {
+        position: fixed;
+        font-family: Arial, Helvetica, sans-serif;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 1.0);
+        z-index: 10;
+        height: 100%;
+        width: 100%;
+    }
+    .modalcontent {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        width: 100%;
+        height: 100%;
+        padding: 10%;
+        border-radius: 10%;
+    }
+    #modal button {
+        background:none!important;
+        border:none; 
+        padding:0!important;
+        font-family:arial,sans-serif;
+        color:#000;
+        cursor:pointer;
+        border-bottom: solid 1px #ccc;
+        width:100%;
+        vertical-align:middle;
+        display:inline-block;
+    }
+    #modal h1 {
+        width: 100%;
+        border-bottom: solid 2px #999;
+        vertical-align:middle;
+    }
   </style>
 
 </head>
 
 <body>
-<button id="button">Start</button>
+<!--<button id="button">Start</button>
 <!-- -->
+<div id='modal'>
+  <div class='modalcontent'>
+        <h1><center>Select Level:</center></h1><br>
+        <button id='selection1'><h2>Level 1</h2></button><br>
+        <button id='selection2'><h2>Level 2</h2></button><br>
+        <button id='selection3'><h2>Level 3</h2></button><br>
+        <button id='selection4'><h2>Level 4</h2></button><br>
+        <button id='selection5'><h2>Level 5</h2></button><br>
+  </div>
+</div>
   <div id="tower">
 
     <div id="hud">
