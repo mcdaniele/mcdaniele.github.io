@@ -70,7 +70,7 @@
   //===========================================================================
     	joyavail = VirtualJoystick.touchScreenAvailable();
 
-/*function joyinit(){
+/*function joyinit(){*/
     	if (joyavail){
 	    	var joystick = new VirtualJoystick({
 		container	: document.body,
@@ -104,7 +104,7 @@
         		jumpbutton2 = false;
 		});
 	}
-}/**/
+/*}/**/
   function normalizex(x)              { return Game.Math.normalize(x,   0, tower.w);                       }  // wrap x-coord around to stay within tower boundary
   function normalizeColumn(col)       { return Game.Math.normalize(col, 0, tower.cols);                    }  // wrap column  around to stay within tower boundary
   function x2col(x)                   { return Math.floor(normalizex(x)/COL_WIDTH);                        }  // convert x-coord to tower column index
@@ -523,7 +523,6 @@ mapz=level.map;
       	for (i=0;i<tower.map.length;i++)
       	  for (j=0;j<tower.map[i].length;j++)
       	    if((mapz[i][j]=='A')||(mapz[i][j]=='M'))tower.map[i][j]={platform: false, ladder: true, coin: false};
-//	tower.map.replace(/A|M/g, "ladder");
       }
     },
 
