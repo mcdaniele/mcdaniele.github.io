@@ -786,7 +786,7 @@ mapz=level.map;
       this.debug         = Dom.get('debug');
       this.score         = Dom.get('score');
       this.vscore        = 0;
-      this.renderScore(this.ctx);
+      dom.set(this.score, cc);
       this.platformWidth = 2 * tower.or * Math.tan((360/tower.cols) * Math.PI / 360);
     },
 
