@@ -121,7 +121,7 @@
   // GAME - SETUP/UPDATE/RENDER
   //===========================================================================
 
-  function run(lvl) {
+  function grun(lvl) {
     Game.Load.images(IMAGES, function(images) {
       var lvl0 = "levels/";
       lvl0 = lvl0.concat(lvl);
