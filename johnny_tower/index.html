@@ -9,7 +9,7 @@
 
   <style>
     body            { background: #111; }
-    #tower          { position: relative; margin: 1em auto; width: 512px; height: 384px; border: 4px solid #80C0C0; visibility: 'hidden';}
+    #tower          { position: relative; margin: 1em auto; width: 512px; height: 384px; border: 4px solid #80C0C0;}
 /*    #hud            { position: absolute; bottom: 0em; width: 8em; background-color: red; opacity: 0.8; border: 4px solid black; }*/
     #hud            { position: absolute; top: 0em; width: 10em; background-color: #AA3030; opacity: 0.8; border: 4px solid #440044; }
     #score          { color: deepskyblue; font-size: 2em; font-family: 'Lemon', cursive }
@@ -160,12 +160,12 @@ document.getElementById('level5').onclick=function() {
   	}
   	else return false;
   }
-	document.getElementById("button").addEventListener('click', function (event){
+/*	document.getElementById("button").addEventListener('click', function (event){
     		event.preventDefault();
     		Fullscreen.launch(document.getElementById("tower"));
     		fslocker("landscape-primary");/* */
 //		joyinit();
-    	if (VirtualJoystick.touchScreenAvailable()){
+/*    	if (VirtualJoystick.touchScreenAvailable()){
 	    	var joystick = new VirtualJoystick({
 		container	: document.body,
 		strokeStyle	: 'cyan',
@@ -198,10 +198,10 @@ document.getElementById('level5').onclick=function() {
         		jumpbutton2 = false;
 		});
 	}
-
+/**/
 //		run();
-		document.getElementById("button").style.visibility="hidden";
-		document.getElementById("tower").style.visibility="show";
+//		document.getElementById("button").style.visibility="hidden";
+//		document.getElementById("tower").style.visibility="show";
 	});
 </script>
 
