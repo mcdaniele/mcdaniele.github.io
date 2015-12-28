@@ -1125,6 +1125,26 @@ mapz=level.map;
   //===========================================================================
 
 //  run(0);
+document.getElementById('level1').onclick=function() {
+  grun(0);
+  document.getElementById('modal').style.visibility="hidden";
+}
+document.getElementById('level2').onclick=function() {
+  grun(1);
+  document.getElementById('modal').style.visibility="hidden";
+}
+document.getElementById('level3').onclick=function() {
+  grun(2);
+  document.getElementById('modal').style.visibility="hidden";
+}
+document.getElementById('level4').onclick=function() {
+  grun(3);
+  document.getElementById('modal').style.visibility="hidden";
+}
+document.getElementById('level5').onclick=function() {
+  grun(4);
+  document.getElementById('modal').style.visibility="hidden";
+}
 
   //---------------------------------------------------------------------------
 
