@@ -121,9 +121,11 @@
   // GAME - SETUP/UPDATE/RENDER
   //===========================================================================
 
-  function run() {
+  function run(lvl) {
     Game.Load.images(IMAGES, function(images) {
-      Game.Load.json("levels/0", function(level) {
+      var lvl0 = "levels/";
+      lvl0 = lvl0.concat(lvl);
+      Game.Load.json(lvl0, function(level) {
         setup(images, level);
         Game.run({
           fps:    FPS,
@@ -1122,7 +1124,7 @@ mapz=level.map;
   // LETS PLAY!
   //===========================================================================
 
-  run();
+  run(0);
 
   //---------------------------------------------------------------------------
 
