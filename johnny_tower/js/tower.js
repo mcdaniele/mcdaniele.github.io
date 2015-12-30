@@ -68,7 +68,7 @@
   //===========================================================================
   // UTILITY METHODS
   //===========================================================================
-//    	joyavail = VirtualJoystick.touchScreenAvailable();
+    	joyavail = VirtualJoystick.touchScreenAvailable();
 
 /*function joyinit(){*/
 /*}/**/
@@ -89,6 +89,7 @@
   //===========================================================================
 
   function grun(lvl) {
+    	joyavail = VirtualJoystick.touchScreenAvailable();
     Game.Load.images(IMAGES, function(images) {
       var lvl0 = "levels/";
       lvl0 = lvl0.concat(lvl);
