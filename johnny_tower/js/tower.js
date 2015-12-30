@@ -100,11 +100,9 @@
           update: update,
           render: render
         });
-        if (!joyavail){
             Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
             Dom.on(document, 'keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
-        }
-        else {
+        if (joyavail){
 	    	var joystick = new VirtualJoystick({
 		container	: document.body,
 		strokeStyle	: 'cyan',
