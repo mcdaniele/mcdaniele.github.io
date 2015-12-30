@@ -89,7 +89,21 @@
   //===========================================================================
 
   function grun(lvl) {
-    	if (joyavail){
+    Game.Load.images(IMAGES, function(images) {
+      var lvl0 = "levels/";
+      lvl0 = lvl0.concat(lvl);
+      Game.Load.json(lvl0, function(level) {
+        setup(images, level);
+        Game.run({
+          fps:    FPS,
+          update: update,
+          render: render
+        });
+        if (!joyavail){
+            Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
+            Dom.on(document, 'keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
+        }
+        else {
 	    	var joystick = new VirtualJoystick({
 		container	: document.body,
 		strokeStyle	: 'cyan',
@@ -122,20 +136,6 @@
         		jumpbutton2 = false;
 		});
 	}
-    Game.Load.images(IMAGES, function(images) {
-      var lvl0 = "levels/";
-      lvl0 = lvl0.concat(lvl);
-      Game.Load.json(lvl0, function(level) {
-        setup(images, level);
-        Game.run({
-          fps:    FPS,
-          update: update,
-          render: render
-        });
-        if (!joyavail){
-            Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
-            Dom.on(document, 'keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
-        }
       });
     });
   }
