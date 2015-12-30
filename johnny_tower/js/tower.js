@@ -68,7 +68,7 @@
   //===========================================================================
   // UTILITY METHODS
   //===========================================================================
-    	joyavail = VirtualJoystick.touchScreenAvailable();
+//    	joyavail = VirtualJoystick.touchScreenAvailable();
 
 /*function joyinit(){*/
 /*}/**/
