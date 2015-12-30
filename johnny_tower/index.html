@@ -103,27 +103,6 @@
   <script src="js/tower.js"></script>
   <script>if(VirtualJoystick.touchScreenAvailable())document.getElementById('instructions').innerHTML = "<b>Joystick: Blue Ring on Left/Jump Button: Push anywhere on Right</b>"</script>
 <script>
-//document.getElementById('modal').style.visibility="hidden";
-/*document.getElementById('level1').onclick=function() {
-  grun(0);
-  document.getElementById('modal').style.visibility="hidden";
-}
-document.getElementById('level2').onclick=function() {
-  grun(1);
-  document.getElementById('modal').style.visibility="hidden";
-}
-document.getElementById('level3').onclick=function() {
-  grun(2);
-  document.getElementById('modal').style.visibility="hidden";
-}
-document.getElementById('level4').onclick=function() {
-  grun(3);
-  document.getElementById('modal').style.visibility="hidden";
-}
-document.getElementById('level5').onclick=function() {
-  grun(4);
-  document.getElementById('modal').style.visibility="hidden";
-}*/
   var Fullscreen = {
     launch: function(element) {
       if(element.requestFullscreen) {
@@ -160,49 +139,6 @@ document.getElementById('level5').onclick=function() {
   	}
   	else return false;
   }
-/*	document.getElementById("button").addEventListener('click', function (event){
-    		event.preventDefault();
-    		Fullscreen.launch(document.getElementById("tower"));
-    		fslocker("landscape-primary");/* */
-//		joyinit();
-/*    	if (VirtualJoystick.touchScreenAvailable()){
-	    	var joystick = new VirtualJoystick({
-		container	: document.body,
-		strokeStyle	: 'cyan',
-		limitStickTravel: true,
-		stickRadius	: 60,	
-		stationaryBase	: true,
-		baseX		: 100,
-		baseY		: 200
-    		});
-		joystick.addEventListener('touchStartValidation', function(event){
-			var touch	= event.changedTouches[0];
-			if( touch.pageX > window.innerWidth/2+5 )	return false;
-			return true
-		});
-		var joystick2	= new VirtualJoystick({
-			container	: document.body,
-			strokeStyle	: 'red',
-			limitStickTravel: true,
-			stickRadius	: 0		
-		});
-		joystick2.addEventListener('touchStartValidation', function(event){
-			var touch	= event.changedTouches[0];
-			if( touch.pageX < window.innerWidth/2-5 )	return false;
-			return true
-		});
-		joystick2.addEventListener('touchStart', function(){
-        		jumpbutton2 = true;
-    		});
-		joystick2.addEventListener('touchEnd', function(){
-        		jumpbutton2 = false;
-		});
-	}
-/**/
-//		run();
-//		document.getElementById("button").style.visibility="hidden";
-//		document.getElementById("tower").style.visibility="show";
-//	});
 </script>
 
 </body>
