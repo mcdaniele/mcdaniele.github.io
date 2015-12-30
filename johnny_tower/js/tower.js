@@ -104,7 +104,7 @@
         Dom.on(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
         if (joyavail){
 		var joystick = new VirtualJoystick({
-			container : document,
+			container : document.body,
 			strokeStyle : 'cyan',
 			limitStickTravel: true,
 			stickRadius : 60,	
@@ -113,7 +113,7 @@
 			baseY : 200
 		});
 		var joystick2 = new VirtualJoystick({
-			container : document,
+			container : document.body,
 			strokeStyle : 'red',
 			limitStickTravel : true,
 			stickRadius : 0
