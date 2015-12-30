@@ -62,21 +62,6 @@
     var jumpbutton2 = false;
     var cc = 0;
     var mapz;
-    var joystick = new VirtualJoystick({
-    container : document.body,
-    strokeStyle	: 'cyan',
-    limitStickTravel: true,
-    stickRadius	: 60,	
-    stationaryBase : true,
-    baseX : 100,
-    baseY : 200
-    });
-    var joystick2 = new VirtualJoystick({
-    container : document.body,
-    strokeStyle	: 'red',
-    limitStickTravel : true,
-    stickRadius	: 0
-    });
 //    var changem = true;
 
 
@@ -111,21 +96,36 @@
       Game.Load.json(lvl0, function(level) {
         setup(images, level);
         Game.run({
-          fps:    FPS,
+          fps: FPS,
           update: update,
           render: render
         });
-            Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
-            Dom.on(document, 'keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
+        Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
+        Dom.on(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
         if (joyavail){
+		var joystick = new VirtualJoystick({
+			container : document,
+			strokeStyle : 'cyan',
+			limitStickTravel: true,
+			stickRadius : 60,	
+			stationaryBase : true,
+			baseX : 100,
+			baseY : 200
+		});
+		var joystick2 = new VirtualJoystick({
+			container : document,
+			strokeStyle : 'red',
+			limitStickTravel : true,
+			stickRadius : 0
+		});
 		joystick.addEventListener('touchStartValidation', function(event){
-			var touch	= event.changedTouches[0];
-			if( touch.pageX > window.innerWidth/2+5 )	return false;
+			var touch = event.changedTouches[0];
+			if( touch.pageX > window.innerWidth/2+5 ) return false;
 			return true
 		});
 		joystick2.addEventListener('touchStartValidation', function(event){
-			var touch	= event.changedTouches[0];
-			if( touch.pageX < window.innerWidth/2-5 )	return false;
+			var touch = event.changedTouches[0];
+			if( touch.pageX < window.innerWidth/2-5 ) return false;
 			return true
 		});
 		joystick2.addEventListener('touchStart', function(){
