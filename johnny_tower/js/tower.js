@@ -113,7 +113,7 @@
         		jumpbutton2 = false;
 		});
   	}
-  	setTimeout(document.getElementById('modal').style.visibility="show",1500);
+  	setTimeout(document.getElementById('modal').style.visibility="visible",1500);
   }
   //===========================================================================
   // GAME - SETUP/UPDATE/RENDER
