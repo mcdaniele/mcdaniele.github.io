@@ -114,6 +114,11 @@
 		});
   	}
   	setTimeout(document.getElementById('modal').style.visibility="visible",1500);
+tower = undefined;
+monsters = undefined;
+camera = undefined;
+player = undefined;
+renderer = undefined;
   }
   //===========================================================================
   // GAME - SETUP/UPDATE/RENDER
