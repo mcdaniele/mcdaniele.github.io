@@ -91,7 +91,30 @@
     if (isec<9999) {isec++}
     else {clearInterval(myVar)};
   }
-
+  function stopTimer() {
+  	clearInterval(myVar);
+        Dom.un(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
+        Dom.un(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
+  	if (joyavail) {
+		joystick.removeEventListener('touchStartValidation', function(event){
+			var touch = event.changedTouches[0];
+			if( touch.pageX > window.innerWidth/2+5 ) return false;
+			return true
+		});
+		joystick2.removeEventListener('touchStartValidation', function(event){
+			var touch = event.changedTouches[0];
+			if( touch.pageX < window.innerWidth/2-5 ) return false;
+			return true
+		});
+		joystick2.removeEventListener('touchStart', function(){
+        		jumpbutton2 = true;
+    		});
+		joystick2.removeEventListener('touchEnd', function(){
+        		jumpbutton2 = false;
+		});
+  	}
+  	document.getElementById('modal').style.visibility="show";
+  }
   //===========================================================================
   // GAME - SETUP/UPDATE/RENDER
   //===========================================================================
