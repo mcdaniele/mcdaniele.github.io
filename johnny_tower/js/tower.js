@@ -127,7 +127,8 @@
       Game.Load.json(lvl0, function(level) {
         setup(images, level);
         Game.run({
-        	if(player.y >= tower.h) stopTimer();
+//        	if(player.y >= tower.h) stopTimer();
+console.log(player.y, tower.h);
           fps: FPS,
           update: update,
           render: render
