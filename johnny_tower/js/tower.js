@@ -185,8 +185,8 @@
 //console.log(tower.map[0][i]);
     monsters.update(dt);
     camera.update(dt);
-//        	if(player.y >= tower.h) stopTimer();
-console.log(player.y, tower.h);
+        	if(player.y >= tower.h) stopTimer();
+//console.log(player.y, tower.h);
   }
 
   function render(dt) {
