@@ -113,7 +113,7 @@
         		jumpbutton2 = false;
 		});
   	}
-  	document.getElementById('modal').style.visibility="show";
+  	setTimeout(document.getElementById('modal').style.visibility="show",1500);
   }
   //===========================================================================
   // GAME - SETUP/UPDATE/RENDER
@@ -127,6 +127,7 @@
       Game.Load.json(lvl0, function(level) {
         setup(images, level);
         Game.run({
+        	if(player.y >= tower.h) stopTimer();
           fps: FPS,
           update: update,
           render: render
