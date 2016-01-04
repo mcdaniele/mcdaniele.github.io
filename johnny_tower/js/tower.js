@@ -127,8 +127,6 @@
       Game.Load.json(lvl0, function(level) {
         setup(images, level);
         Game.run({
-//        	if(player.y >= tower.h) stopTimer();
-console.log(player.y);
           fps: FPS,
           update: update,
           render: render
@@ -187,6 +185,8 @@ console.log(player.y);
 //console.log(tower.map[0][i]);
     monsters.update(dt);
     camera.update(dt);
+//        	if(player.y >= tower.h) stopTimer();
+console.log(player.y, tower.h);
   }
 
   function render(dt) {
