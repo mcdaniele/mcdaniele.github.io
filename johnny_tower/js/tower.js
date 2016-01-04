@@ -62,6 +62,7 @@
     var jumpbutton2 = false;
     var cc = 0;
     var mapz;
+    var isec = 0;
 //    var changem = true;
 
 
@@ -83,6 +84,11 @@
   function ty(y)                      { return HEIGHT - HORIZON - (y - camera.ry);                         }  // transform y-coord for rendering
   function nearColCenter(x,col,limit) { return limit > Math.abs(x - col2x(col + 0.5))/(COL_WIDTH/2);       }  // is x-coord "near" the center  of a tower column
   function nearRowSurface(y,row)      { return y > (row2y(row+1) - ROW_SURFACE);                           }  // is y-coord "near" the surface of a tower row
+
+  function myTimer() {
+    document.getElementById("hud2").innerHTML = (isec/10).toFixed(1);
+    i++;
+  }
 
   //===========================================================================
   // GAME - SETUP/UPDATE/RENDER
@@ -1119,6 +1125,10 @@ mapz=level.map;
 
   });
 
+function startTimer(){
+	isec=0;
+	myVar=setInterval(myTimer, 100);
+}
   //===========================================================================
   // LETS PLAY!
   //===========================================================================
@@ -1127,22 +1137,27 @@ mapz=level.map;
 document.getElementById('level1').onclick=function() {
   grun(0);
   document.getElementById('modal').style.visibility="hidden";
+  startTimer();
 }
 document.getElementById('level2').onclick=function() {
   grun(1);
   document.getElementById('modal').style.visibility="hidden";
+  startTimer();
 }
 document.getElementById('level3').onclick=function() {
   grun(2);
   document.getElementById('modal').style.visibility="hidden";
+  startTimer();
 }
 document.getElementById('level4').onclick=function() {
   grun(3);
   document.getElementById('modal').style.visibility="hidden";
+  startTimer();
 }
 document.getElementById('level5').onclick=function() {
   grun(4);
   document.getElementById('modal').style.visibility="hidden";
+  startTimer();
 }
 
   //---------------------------------------------------------------------------
