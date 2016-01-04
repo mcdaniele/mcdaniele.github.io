@@ -87,7 +87,7 @@
 
   function myTimer() {
     document.getElementById("timer").innerHTML = (isec/10).toFixed(1);
-    i++;
+    isec++;
   }
 
   //===========================================================================
