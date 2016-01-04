@@ -128,7 +128,7 @@
         setup(images, level);
         Game.run({
 //        	if(player.y >= tower.h) stopTimer();
-console.log(tower.h);
+console.log(player.y);
           fps: FPS,
           update: update,
           render: render
