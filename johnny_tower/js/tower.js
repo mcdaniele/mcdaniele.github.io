@@ -95,7 +95,7 @@
   	clearInterval(myVar);
 //        Dom.un(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
 //        Dom.un(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
-  	if (joyavail) {
+/*  	if (joyavail) {
 		joystick.removeEventListener('touchStartValidation', function(event){
 			var touch = event.changedTouches[0];
 			if( touch.pageX > window.innerWidth/2+5 ) return false;
@@ -112,7 +112,7 @@
 		joystick2.removeEventListener('touchEnd', function(){
         		jumpbutton2 = false;
 		});
-  	}
+  	}/**/
   	setTimeout(document.getElementById('modal').style.visibility="visible",2000);
 tower = null;
 monsters = null;
@@ -143,7 +143,7 @@ Renderer = null;/**/
         });
         Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
         Dom.on(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
-        if (joyavail){
+/*        if (joyavail){
 		var joystick = new VirtualJoystick({
 			container : document.body,
 			strokeStyle : 'cyan',
@@ -175,7 +175,7 @@ Renderer = null;/**/
 		joystick2.addEventListener('touchEnd', function(){
         		jumpbutton2 = false;
 		});
-	}
+	}/**/
       });
     });
   }
@@ -424,13 +424,13 @@ mapz=level.map;
         Game.animate(FPS, this, PLAYER.RIGHT);
       else
         Game.animate(FPS, this, PLAYER.STAND);
-      if (joyavail){
+/*      if (joyavail){
         if (joystick.up()&&(joystick.deltaY() < -10)) {this.input.up = true;} else this.input.up = false;
         if (joystick.down()&&(joystick.deltaY() > 10)) {this.input.down = true;} else this.input.down = false;
         if (joystick.right()&&(joystick.deltaX() > 10)) {this.input.right = true;} else this.input.right = false;
         if (joystick.left()&&(joystick.deltaX() < -10)) {this.input.left = true;} else this.input.left = false;
         if (player.input.jumpAvailable) {player.input.jump = jumpbutton2;}
-      }
+      }/**/
     },
 
     checkCollision: function() {
