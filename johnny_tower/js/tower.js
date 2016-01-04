@@ -63,6 +63,7 @@
     var cc = 0;
     var mapz;
     var isec = 0;
+    var myVar;
 //    var changem = true;
 
 
@@ -87,7 +88,8 @@
 
   function myTimer() {
     document.getElementById("timer").innerHTML = (isec/10).toFixed(1);
-    if (isec<9999) isec++;
+    if (isec<9999) {isec++}
+    else {clearInterval(myVar)};
   }
 
   //===========================================================================
