@@ -119,6 +119,11 @@ monsters = undefined;
 camera = undefined;
 player = undefined;
 renderer = undefined;
+Tower = undefined;
+Monsters = undefined;
+Player = undefined;
+Camera = undefined;
+Renderer = undefined;
   }
   //===========================================================================
   // GAME - SETUP/UPDATE/RENDER
