@@ -114,16 +114,16 @@
 		});
   	}
   	setTimeout(document.getElementById('modal').style.visibility="visible",1500);
-tower = undefined;
-monsters = undefined;
-camera = undefined;
-player = undefined;
-renderer = undefined;
-Tower = undefined;
-Monsters = undefined;
-Player = undefined;
-Camera = undefined;
-Renderer = undefined;
+tower = null;
+monsters = null;
+camera = null;
+player = null;
+renderer = null;
+Tower = null;
+Monsters = null;
+Player = null;
+Camera = null;
+Renderer = null;/**/
   }
   //===========================================================================
   // GAME - SETUP/UPDATE/RENDER
