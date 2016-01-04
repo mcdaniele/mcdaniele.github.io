@@ -86,7 +86,7 @@
   function nearRowSurface(y,row)      { return y > (row2y(row+1) - ROW_SURFACE);                           }  // is y-coord "near" the surface of a tower row
 
   function myTimer() {
-    document.getElementById("hud2").innerHTML = (isec/10).toFixed(1);
+    document.getElementById("timer").innerHTML = (isec/10).toFixed(1);
     i++;
   }
 
