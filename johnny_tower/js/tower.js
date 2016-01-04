@@ -93,8 +93,8 @@
   }
   function stopTimer() {
   	clearInterval(myVar);
-        Dom.un(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
-        Dom.un(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
+//        Dom.un(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
+//        Dom.un(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
   	if (joyavail) {
 		joystick.removeEventListener('touchStartValidation', function(event){
 			var touch = event.changedTouches[0];
@@ -113,7 +113,7 @@
         		jumpbutton2 = false;
 		});
   	}
-  	setTimeout(document.getElementById('modal').style.visibility="visible",1500);
+  	setTimeout(document.getElementById('modal').style.visibility="visible",2000);
 tower = null;
 monsters = null;
 camera = null;
