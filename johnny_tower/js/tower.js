@@ -64,6 +64,7 @@
     var mapz;
     var isec = 0;
     var myVar;
+    var name = '  ';
 //    var changem = true;
 
 
@@ -113,7 +114,7 @@
         		jumpbutton2 = false;
 		});
   	}/**/
-  	setTimeout(document.getElementById('modal').style.visibility="visible",200000);
+  	setTimeout(vis(),2000);
 tower = null;
 monsters = null;
 camera = null;
@@ -124,6 +125,9 @@ Monsters = null;
 Player = null;
 Camera = null;
 Renderer = null;/**/
+  }
+  function vis(){
+  	document.getElementById('modal').style.visibility="visible";
   }
   //===========================================================================
   // GAME - SETUP/UPDATE/RENDER
