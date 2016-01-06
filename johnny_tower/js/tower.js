@@ -114,7 +114,7 @@
         		jumpbutton2 = false;
 		});
   	}/**/
-  	setTimeout(vis(),2000);
+  	setTimeout(vis,2000);
 tower = null;
 monsters = null;
 camera = null;
