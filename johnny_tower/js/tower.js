@@ -113,7 +113,7 @@
         		jumpbutton2 = false;
 		});
   	}/**/
-  	setTimeout(document.getElementById('modal').style.visibility="visible",20000);
+  	setTimeout(document.getElementById('modal').style.visibility="visible",200000);
 tower = null;
 monsters = null;
 camera = null;
