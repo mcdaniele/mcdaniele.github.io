@@ -115,6 +115,7 @@
 		});
   	}/**/
   	setTimeout(vis,2000);
+  	player.input.jumpAvailable = true;
 tower = null;
 monsters = null;
 camera = null;
