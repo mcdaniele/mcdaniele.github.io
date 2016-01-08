@@ -65,6 +65,7 @@
     var isec = 0;
     var myVar;
     var name = '  ';
+    var firstrun = true;
 //    var changem = true;
 
 
@@ -94,8 +95,8 @@
   }
   function stopTimer() {
   	clearInterval(myVar);
-//        Dom.un(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
-//        Dom.un(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
+        Dom.un(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
+        Dom.un(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
 /*  	if (joyavail) {
 		joystick.removeEventListener('touchStartValidation', function(event){
 			var touch = event.changedTouches[0];
@@ -115,7 +116,6 @@
 		});
   	}/**/
   	setTimeout(vis,2000);
-  	player.input.jumpAvailable = true;
 tower = null;
 monsters = null;
 camera = null;
