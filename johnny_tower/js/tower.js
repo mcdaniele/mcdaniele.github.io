@@ -95,8 +95,8 @@
   }
   function stopTimer() {
   	clearInterval(myVar);
-        Dom.un(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
-        Dom.un(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
+//        Dom.un(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
+//        Dom.un(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
 /*  	if (joyavail) {
 		joystick.removeEventListener('touchStartValidation', function(event){
 			var touch = event.changedTouches[0];
@@ -146,8 +146,11 @@ Renderer = null;/**/
           update: update,
           render: render
         });
+        if (firstrun){
         Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
         Dom.on(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
+        firstrun=false;
+        }
 /*        if (joyavail){
 		var joystick = new VirtualJoystick({
 			container : document.body,
