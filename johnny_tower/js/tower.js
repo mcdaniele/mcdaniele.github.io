@@ -1195,12 +1195,12 @@ document.getElementById('level3').onclick=function() {
   startTimer();
 }
 document.getElementById('level4').onclick=function() {
-  grun(5);
+  grun(3);
   document.getElementById('modal').style.visibility="hidden";
   startTimer();
 }
 document.getElementById('level5').onclick=function() {
-  grun(3);
+  grun(5);
   document.getElementById('modal').style.visibility="hidden";
   startTimer();
 }
