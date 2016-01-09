@@ -1200,7 +1200,7 @@ document.getElementById('level4').onclick=function() {
   startTimer();
 }
 document.getElementById('level5').onclick=function() {
-  grun(4);
+  grun(5);
   document.getElementById('modal').style.visibility="hidden";
   startTimer();
 }
