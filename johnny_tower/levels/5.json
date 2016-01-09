@@ -8,19 +8,19 @@
   },
   "score":   "85",
   "map": [
-"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXMX",
-"                                M ",	  
-"ooooo o  o oooo  oooo o  o ooo  M ",
-"  o   o  o o     o    oo o o  o M ",
-"  o   o  o o     o    oo o o  o M ",
-"  o   oooo oooo  oooo oooo o  o M ",
-"  o   o  o o     o    o oo o  o M ",
-"  o   o  o o     o    o oo o  o M ",
-"  o   o  o oooo  oooo o  o ooo  M ",
-"                                A ",
-"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-"                                  ",
-"                                  ",
-"                                  "
+"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXMX",
+"                               M ",	  
+"oooooHo  oHooooHooooHo  oHooo  H ",
+"  o  Ho  oHo   Ho   Hoo oHo  o H ",
+"  o  Ho  oHo   Ho   Hoo oHo  o H ",
+"  o  HooooHooooHooooHooooHo  o H ",
+"  o  Ho  oHo   Ho   Ho ooHo  o H ",
+"  o  Ho  oHo   Ho   Ho ooHo  o H ",
+"  o  Ho  oHooooHooooHo  oHooo  H ",
+"     H   H     H    H    H     H ",
+"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXxXHX",
+"                               H ",
+"                               H ",
+"                               H "
   ]
 }
