@@ -13,8 +13,8 @@
 /*    #hud            { position: absolute; bottom: 0em; width: 8em; background-color: red; opacity: 0.8; border: 4px solid black; }*/
     #hud            { position: absolute; top: 0em; width: 10em; background-color: #AA3030; opacity: 0.8; border: 4px solid #440044; }
     #hud2           { position: absolute; top: 0em; right: 0em; width: 10em; background-color: #AA3030; opacity: 0.8; border: 4px solid #440044; }
-    #score          { color: deepskyblue; font-size: 2em; font-family: 'Lemon', cursive }
-    #timer          { color: deepskyblue; font-size: 2em; font-family: 'Lemon', cursive }
+    #score          { color: deepskyblue; font-size: 2em; font-family: monospace; font-weight: bold }
+    #timer          { color: deepskyblue; font-size: 2em; font-family: monospace; font-weight: bold }
     #canvas         { display: inline-block; width: 100%; height: 100%; }
     #instructions   { font-style: italic; color: #999999; font-size: 9pt; margin-left: 1em; margin-top: 0.5em; }
     #instructions b { color: #DDDDDD; }
@@ -61,21 +61,202 @@
         border-bottom: solid 2px #999;
         vertical-align:middle;
     }
-  </style>
+    #resetModal {
+        position: fixed;
+        font-family: Arial, Helvetica, sans-serif;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 10;
+        height: 100%;
+        width: 100%;
+        visibility: "hidden";
+    }
+    .resetContent {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        width: 320px;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    #resetQuestion {
+        font-size: 20px;
+        font-weight: 300;
+    }
+    .myButton {
+        border: 2px solid rgb(0, 30, 40);
+        border-radius: 9px;
+        font-size: 27px;
+        padding: 10px;
+        cursor: pointer;
+        color: white;
+        text-shadow: 2px 2px 2px rgb(5, 70, 0);
+        background: rgb(0, 100, 135);
+    }
+    .myButton2 {
+        border: 2px solid rgb(0, 30, 40);
+        border-radius: 5px;
+        font-size: 14px;
+        padding: 5px;
+        cursor: pointer;
+        color: white;
+        text-shadow: 2px 2px 2px rgb(5, 70, 0);
+        background: rgb(0, 100, 135);
+    }
+#parent{
+position: absolute;
+left: 50%;
+top: 50%;
+transform: translate(-50%, -50%);
+}
+#child {
+left: 50%;
+top: 50%;
+transform: translate(-50%, -50%);
+color: red;
+font-family: "Courier New", Courier, monospace;
+font-size: 4em;
+font-weight: bold;
+position: absolute;
+-webkit-text-stroke: 1px black;
+}
+.animate{
+-webkit-animation: mywords 3s linear; 
+animation: mywords 3s linear;
+}
+@-webkit-keyframes mywords {
+0%{top:0px;transform:scale(0) translate(-50%,-50%)}
+2%{top:13px}
+4%{top:25px}
+6%{top:37px}
+8%{top:48px}
+10%{top:59px}
+12%{top:68px}
+14%{top:77px}
+16%{top:84px}
+18%{top:90px}
+20%{top:95px}
+22%{top:98px}
+24%{top:100px}
+26%{top:100px}
+28%{top:98px}
+30%{top:95px}
+32%{top:90px}
+34%{top:84px}
+36%{top:77px}
+38%{top:68px}
+40%{top:59px}
+42%{top:48px}
+44%{top:37px}
+46%{top:25px}
+48%{top:13px}
+50%{top:0px}
+52%{top:-13px}
+54%{top:-25px}
+56%{top:-37px}
+58%{top:-48px}
+60%{top:-59px}
+62%{top:-68px}
+64%{top:-77px}
+66%{top:-84px}
+68%{top:-90px}
+70%{top:-95px}
+72%{top:-98px}
+74%{top:-100px}
+76%{top:-100px}
+78%{top:-98px}
+80%{top:-95px}
+82%{top:-90px}
+84%{top:-84px}
+86%{top:-77px}
+88%{top:-68px}
+90%{top:-59px}
+92%{top:-48px}
+94%{top:-36px}
+96%{top:-25px}
+98%{top:-13px}
+100%{top:0px;transform:scale(1) translate(-50%, -50%)}
+}
+@keyframes mywords {
+0%{top:0px;transform:scale(0) translate(-50%, -50%)}
+2%{top:13px}
+4%{top:25px}
+6%{top:37px}
+8%{top:48px}
+10%{top:59px}
+12%{top:68px}
+14%{top:77px}
+16%{top:84px}
+18%{top:90px}
+20%{top:95px}
+22%{top:98px}
+24%{top:100px}
+26%{top:100px}
+28%{top:98px}
+30%{top:95px}
+32%{top:90px}
+34%{top:84px}
+36%{top:77px}
+38%{top:68px}
+40%{top:59px}
+42%{top:48px}
+44%{top:37px}
+46%{top:25px}
+48%{top:13px}
+50%{top:0px}
+52%{top:-13px}
+54%{top:-25px}
+56%{top:-37px}
+58%{top:-48px}
+60%{top:-59px}
+62%{top:-68px}
+64%{top:-77px}
+66%{top:-84px}
+68%{top:-90px}
+70%{top:-95px}
+72%{top:-98px}
+74%{top:-100px}
+76%{top:-100px}
+78%{top:-98px}
+80%{top:-95px}
+82%{top:-90px}
+84%{top:-84px}
+86%{top:-77px}
+88%{top:-68px}
+90%{top:-59px}
+92%{top:-48px}
+94%{top:-36px}
+96%{top:-25px}
+98%{top:-13px}
+100%{top:0px;transform:scale(1) translate(-50%, -50%)}
+}
+</style>
 
 </head>
 
 <body>
+<div id='resetModal'>
+    <div class='resetContent'>
+        <p id='resetQuestion'>Are you sure?</p><br><br>
+        <center>
+            <button id='selectionYes' class='myButton'>&nbsp;&nbsp;Reset&nbsp;&nbsp;</button>&nbsp;&nbsp;
+            <button id='selectionNo' class='myButton'>&nbsp;&nbsp;Cancel&nbsp;&nbsp;</button><br>
+        </center>
+    </div>
+</div>
 <!--<button id="button">Start</button>
 <!-- -->
 <div id='modal'>
   <div class='modalcontent'>
         <h1><center>Select Level:</center></h1><br>
-        <button id='level1'><span id="play1"></span> <h2>Level 1 | <span id="time1"></span></h2></button><br>
-        <button id='level2'><span id="play2"></span> <h2>Level 2 | <span id="time2"></span></h2></button><br>
-        <button id='level3'><span id="play3"></span> <h2>Level 3 | <span id="time3"></span></h2></button><br>
-        <button id='level4'><span id="play4"></span> <h2>Level 4 | <span id="time4"></span></h2></button><br>
-        <button id='level5'><span id="play5"></span> <h2>Level 5 | <span id="time5"></span></h2></button><br>
+<button id='level0'><table align="center"><tr><td><span id="play0"></span></td><td>&nbsp;&nbsp; <h2>Tower 1 &nbsp;|&nbsp; Best Time: <span id="time0"></span></h2></td></tr></table></button><br>
+<button id='level1'><table align="center"><tr><td><span id="play1"></span></td><td>&nbsp;&nbsp; <h2>Tower 2 &nbsp;|&nbsp; Best Time: <span id="time1"></span></h2></td></tr></table></button><br>
+<button id='level2'><table align="center"><tr><td><span id="play2"></span></td><td>&nbsp;&nbsp; <h2>Tower 3 &nbsp;|&nbsp; Best Time: <span id="time2"></span></h2></td></tr></table></button><br>
+<button id='level3'><table align="center"><tr><td><span id="play3"></span></td><td>&nbsp;&nbsp; <h2>Tower 4 &nbsp;|&nbsp; Best Time: <span id="time3"></span></h2></td></tr></table></button><br>
+<button id='level4'><table align="center"><tr><td><span id="play4"></span></td><td>&nbsp;&nbsp; <h2>Tower 5 &nbsp;|&nbsp; Best Time: <span id="time4"></span></h2></td></tr></table></button><br>
   </div>
 </div>
   <div id="tower">
@@ -88,7 +269,7 @@
 
     <div id="hud2">
       <table>
-        <tr><td><img src="images/stopwatch1.png"></td><td><span id="timer"></span></td></tr>
+        <tr><td><img src="images/stopwatch2.png"></td><td><span id="timer"></span></td></tr>
       </table>
     </div>
 
@@ -104,6 +285,7 @@
     </div>
 
   </div>
+<div id="parent"><div id="child">Tower&nbsp;1<br>Climbed</div></div>
 
   <script src="js/virtualjoystick.js"></script>
   <script src="js/fpsmeter.min.js"></script>
@@ -111,6 +293,8 @@
   <script src="js/tower.js"></script>
   <script>if(VirtualJoystick.touchScreenAvailable())document.getElementById('instructions').innerHTML = "<b>Joystick: Blue Ring on Left/Jump Button: Push anywhere on Right</b>"</script>
 <script>
+  document.getElementById('child').style.visibility='hidden';
+  document.getElementById('resetModal').style.visibility='hidden';
   var Fullscreen = {
     launch: function(element) {
       if(element.requestFullscreen) {
