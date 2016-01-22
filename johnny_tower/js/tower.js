@@ -14,6 +14,7 @@
       COL_WIDTH     = METER * 3,                                            // 2D column width
       ROW_HEIGHT    = METER,                                                // 2D row height
       ROW_SURFACE   = ROW_HEIGHT * 0.3,                                     // amount of row considered 'near' enough to surface to allow jumping onto that row (instead of bouncing off again)
+      MAXLEVEL      = 5,
       PLAYER_WIDTH  = METER * 1.5,                                          // player logical width
       PLAYER_HEIGHT = METER * 2,                                            // player logical height
       GROUND_SPEED  = 2,                                                    // how fast ground scrolls left-right
@@ -66,6 +67,14 @@
     var myVar;
     var name = '  ';
     var firstrun = true;
+    var between = [
+        {"play":true, "time":1000},
+        {"play":false, "time":1000},
+        {"play":false, "time":1000},
+        {"play":false, "time":1000},
+        {"play":false, "time":1000}
+    ];
+    var curlevel = 0;
 //    var changem = true;
 
 
@@ -93,8 +102,25 @@
     if (isec<9999) {isec++}
     else {clearInterval(myVar)};
   }
+/*  function printbetween(){
+for (var i=0;i<MAXLEVEL;i++){
+console.log(between[i].play, between[i].time, i);      
+}
+  }/**/
   function stopTimer() {
   	clearInterval(myVar);
+    var curtime = Number(document.getElementById("timer").innerHTML);
+var elm = document.getElementById('child');
+elm.classList.add("animate");
+elm.innerHTML="Tower&nbsp;"+(curlevel+1)+"<br>Climbed";
+elm.style.visibility="visible";
+    if (curtime < between[curlevel].time) {between[curlevel].time = curtime};
+    if ((curlevel+1)<MAXLEVEL) {
+        between[curlevel+1].play = true;
+    }
+//printbetween();
+    savedata();
+    printdata();
 //        Dom.un(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
 //        Dom.un(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
 /*  	if (joyavail) {
@@ -115,11 +141,11 @@
         		jumpbutton2 = false;
 		});
   	}/**/
-  	setTimeout(vis,2000);
+  	setTimeout(vis,7000);
 tower = null;
-monsters = null;
-camera = null;
-player = null;
+monsters.update = null;
+camera.update = null;
+player.update = null;
 renderer = null;
 /*Tower = null;
 Monsters = null;
@@ -127,29 +153,31 @@ Player = null;
 Camera = null;
 Renderer = null;/**/
   }
-  function vis(){
+function vis() {
+    document.getElementById('child').style.visibility='hidden';
   	document.getElementById('modal').style.visibility="visible";
-  }
+    document.getElementById('child').classList.remove("animate");
+}
   //===========================================================================
   // GAME - SETUP/UPDATE/RENDER
   //===========================================================================
 
   function grun(lvl) {
-    	joyavail = VirtualJoystick.touchScreenAvailable();
-    Game.Load.images(IMAGES, function(images) {
-      var lvl0 = "levels/";
-      lvl0 = lvl0.concat(lvl);
-      Game.Load.json(lvl0, function(level) {
+        joyavail = VirtualJoystick.touchScreenAvailable();
+        Game.Load.images(IMAGES, function(images) {
+        var lvl0 = "levels/";
+        lvl0 = lvl0.concat(lvl);
+        Game.Load.json(lvl0, function(level) {
         setup(images, level);
         Game.run({
-          fps: FPS,
-          update: update,
-          render: render
+            fps: FPS,
+            update: update,
+            render: render
         });
         if (firstrun){
-        Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
-        Dom.on(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
-        firstrun=false;
+            Dom.on(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
+            Dom.on(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
+            firstrun=false;
         }
 /*        if (joyavail){
 		var joystick = new VirtualJoystick({
@@ -197,14 +225,10 @@ Renderer = null;/**/
   }
 
   function update(dt) {
-//var i;
     player.update(dt);
-//for(i=0;i<tower.map[0].length;i++)
-//console.log(tower.map[0][i]);
     monsters.update(dt);
     camera.update(dt);
         	if(player.y >= tower.h) stopTimer();
-//console.log(player.y, tower.h);
   }
 
   function render(dt) {
@@ -1170,6 +1194,47 @@ mapz=level.map;
 
   });
 
+function savedata(){
+    for (var i=0;i<=MAXLEVEL;i++){
+        localStorage.setItem('between'+i.toSring,JSON.stringify(between[i]));
+    }
+}
+    
+function getdata(){
+    for (var i=0;i<MAXLEVEL;i++){
+        between[i]=JSON.parse(localStorage.getItem('between'+i.toSring));
+        if (between[i].play){
+            document.getElementById('play'+i.toString()).innerHTML = "<img src='images/unlock.png' width=32 height=32>";
+        }
+        else{
+            document.getElementById('play'+i.toString()).innerHTML = "<img src='images/locked.png' width=32 height=32>";
+        }
+        if (between[i].time == 1000){
+            document.getElementById('time'+i.toString()).innerHTML = "N/A";
+        }
+        else{
+            document.getElementById('time'+i.toString()).innerHTML = between[i].time.toString();
+        }
+    }
+}
+    
+function printdata(){
+    for (var i=0;i<MAXLEVEL;i++){
+        if (between[i].play){
+            document.getElementById('play'+i.toString()).innerHTML = "<img src='images/unlock.png' width=32 height=32>";
+        }
+        else{
+            document.getElementById('play'+i.toString()).innerHTML = "<img src='images/locked.png' width=32 height=32>";
+        }
+        if (between[i].time == 1000){
+            document.getElementById('time'+i.toString()).innerHTML = "N/A";
+        }
+        else{
+            document.getElementById('time'+i.toString()).innerHTML = between[i].time.toString();
+        }
+    }
+}
+    
 function startTimer(){
 	isec=0;
 	myVar=setInterval(myTimer, 100);
@@ -1179,30 +1244,65 @@ function startTimer(){
   //===========================================================================
 
 //  run(0);
-document.getElementById('level1').onclick=function() {
+if (localStorage.getItem("between0")==null) {
+    for (var i=0;i<MAXLEVEL;i++) {
+        if (between[i].play){
+            document.getElementById("play"+i.toString()).innerHTML = "<img src='images/unlock.png' width=32 height=32>";
+        }
+        else{
+            document.getElementById("play"+i.toString()).innerHTML = "<img src='images/locked.png' width=32 height=32>";
+        }
+        if (between[i].time == 1000){
+            document.getElementById('time'+i.toString()).innerHTML = "N/A";
+        }
+        else{
+            document.getElementById('time'+i.toString()).innerHTML = between[i].time.toString();
+        }
+    }
+}
+else {
+    getdata();
+}
+//printbetween();
+document.getElementById('level0').onclick=function() {
+if (between[0].play){
+  curlevel = 0;
   grun(0);
   document.getElementById('modal').style.visibility="hidden";
   startTimer();
 }
-document.getElementById('level2').onclick=function() {
+}
+document.getElementById('level1').onclick=function() {
+if (between[1].play){
+  curlevel = 1;
   grun(1);
   document.getElementById('modal').style.visibility="hidden";
   startTimer();
 }
-document.getElementById('level3').onclick=function() {
+}
+document.getElementById('level2').onclick=function() {
+if (between[2].play){
+  curlevel = 2;
   grun(2);
   document.getElementById('modal').style.visibility="hidden";
   startTimer();
 }
-document.getElementById('level4').onclick=function() {
+}
+document.getElementById('level3').onclick=function() {
+if (between[3].play){
+  curlevel = 3;
   grun(3);
   document.getElementById('modal').style.visibility="hidden";
   startTimer();
 }
-document.getElementById('level5').onclick=function() {
+}
+document.getElementById('level4').onclick=function() {
+if (between[4].play){
+  curlevel = 4;
   grun(5);
   document.getElementById('modal').style.visibility="hidden";
   startTimer();
+}
 }
 
   //---------------------------------------------------------------------------
