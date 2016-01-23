@@ -442,7 +442,7 @@ mapz=level.map;
         Game.animate(FPS, this, PLAYER.RIGHT);
       else
         Game.animate(FPS, this, PLAYER.STAND);
-/*      if (joyavail){
+      if (joyavail){
         if (joystick.up()&&(joystick.deltaY() < -10)) {this.input.up = true;} else this.input.up = false;
         if (joystick.down()&&(joystick.deltaY() > 10)) {this.input.down = true;} else this.input.down = false;
         if (joystick.right()&&(joystick.deltaX() > 10)) {this.input.right = true;} else this.input.right = false;
