@@ -123,24 +123,10 @@ elm.style.visibility="visible";
     printdata();
 //        Dom.un(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
 //        Dom.un(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
-/*  	if (joyavail) {
-		joystick.removeEventListener('touchStartValidation', function(event){
-			var touch = event.changedTouches[0];
-			if( touch.pageX > window.innerWidth/2+5 ) return false;
-			return true
-		});
-		joystick2.removeEventListener('touchStartValidation', function(event){
-			var touch = event.changedTouches[0];
-			if( touch.pageX < window.innerWidth/2-5 ) return false;
-			return true
-		});
-		joystick2.removeEventListener('touchStart', function(){
-        		jumpbutton2 = true;
-    		});
-		joystick2.removeEventListener('touchEnd', function(){
-        		jumpbutton2 = false;
-		});
-  	}/**/
+  	if (joyavail) {
+		joystick.destroy;
+		joystick2.destroy;
+  	}
   	setTimeout(vis,7000);
 tower = null;
 monsters.update = null;
@@ -179,7 +165,7 @@ function vis() {
             Dom.on(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
             firstrun=false;
         }
-/*        if (joyavail){
+        if (joyavail){
 		var joystick = new VirtualJoystick({
 			container : document.body,
 			strokeStyle : 'cyan',
@@ -211,7 +197,7 @@ function vis() {
 		joystick2.addEventListener('touchEnd', function(){
         		jumpbutton2 = false;
 		});
-	}/**/
+	}
       });
     });
   }
