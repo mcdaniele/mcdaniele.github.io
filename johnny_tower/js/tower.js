@@ -82,7 +82,7 @@
   // UTILITY METHODS
   //===========================================================================
     	joyavail = VirtualJoystick.touchScreenAvailable();
-
+joyavail=true;
 /*function joyinit(){*/
 /*}/**/
   function normalizex(x)              { return Game.Math.normalize(x,   0, tower.w);                       }  // wrap x-coord around to stay within tower boundary
@@ -150,6 +150,7 @@ function vis() {
 
   function grun(lvl) {
         joyavail = VirtualJoystick.touchScreenAvailable();
+joyavail = true;
         Game.Load.images(IMAGES, function(images) {
         var lvl0 = "levels/";
         lvl0 = lvl0.concat(lvl);
