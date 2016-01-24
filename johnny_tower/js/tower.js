@@ -165,7 +165,7 @@ function vis() {
             Dom.on(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
             firstrun=false;
         }
-        if (joyavail){
+        if (true){//joyavail){
 		var joystick = new VirtualJoystick({
 			container : document.body,
 			strokeStyle : 'cyan',
@@ -443,11 +443,11 @@ mapz=level.map;
       else
         Game.animate(FPS, this, PLAYER.STAND);
       if (true){//joyavail){
-//        if (joystick.up()&&(joystick.deltaY() < -10)) {this.input.up = true;} else this.input.up = false;
-//        if (joystick.down()&&(joystick.deltaY() > 10)) {this.input.down = true;} else this.input.down = false;
-//        if (joystick.right()&&(joystick.deltaX() > 10)) {this.input.right = true;} else this.input.right = false;
-//        if (joystick.left()&&(joystick.deltaX() < -10)) {this.input.left = true;} else this.input.left = false;
-        if (player.input.jumpAvailable) {player.input.jump = jumpbutton2;}
+        if (joystick.up()&&(joystick.deltaY() < -10)) {this.input.up = true;} else this.input.up = false;
+        if (joystick.down()&&(joystick.deltaY() > 10)) {this.input.down = true;} else this.input.down = false;
+        if (joystick.right()&&(joystick.deltaX() > 10)) {this.input.right = true;} else this.input.right = false;
+        if (joystick.left()&&(joystick.deltaX() < -10)) {this.input.left = true;} else this.input.left = false;
+//        if (player.input.jumpAvailable) {player.input.jump = jumpbutton2;}
       }/**/
     },
 
