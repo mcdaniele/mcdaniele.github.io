@@ -60,6 +60,8 @@
     var cimg=document.createElement('img');
 	cimg.src='images/cloud.png';
     var joyavail = false;
+    var joystick;
+    var joystick2;
     var jumpbutton2 = false;
     var cc = 0;
     var mapz;
@@ -165,8 +167,8 @@ function vis() {
             Dom.on(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
             firstrun=false;
         }
-        if (true){//joyavail){
-		var joystick = new VirtualJoystick({
+        if (joyavail){
+		joystick = new VirtualJoystick({
 			container : document.body,
 			strokeStyle : 'cyan',
 			limitStickTravel: true,
@@ -175,7 +177,7 @@ function vis() {
 			baseX : 100,
 			baseY : 200
 		});
-		var joystick2 = new VirtualJoystick({
+		joystick2 = new VirtualJoystick({
 			container : document.body,
 			strokeStyle : 'red',
 			limitStickTravel : true,
@@ -442,12 +444,12 @@ mapz=level.map;
         Game.animate(FPS, this, PLAYER.RIGHT);
       else
         Game.animate(FPS, this, PLAYER.STAND);
-      if (true){//joyavail){
+      if (joyavail){
         if (joystick.up()&&(joystick.deltaY() < -10)) {this.input.up = true;} else this.input.up = false;
         if (joystick.down()&&(joystick.deltaY() > 10)) {this.input.down = true;} else this.input.down = false;
         if (joystick.right()&&(joystick.deltaX() > 10)) {this.input.right = true;} else this.input.right = false;
         if (joystick.left()&&(joystick.deltaX() < -10)) {this.input.left = true;} else this.input.left = false;
-//        if (player.input.jumpAvailable) {player.input.jump = jumpbutton2;}
+        if (player.input.jumpAvailable) {player.input.jump = jumpbutton2;}
       }/**/
     },
 
