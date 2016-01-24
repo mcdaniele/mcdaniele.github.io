@@ -165,7 +165,7 @@ function vis() {
             Dom.on(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
             firstrun=false;
         }
-        if (joyavail){
+        if (true){//joyavail){
 		var joystick = new VirtualJoystick({
 			container : document.body,
 			strokeStyle : 'cyan',
