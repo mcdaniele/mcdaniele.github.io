@@ -126,6 +126,10 @@ elm.style.visibility="visible";
 //        Dom.un(document, 'keydown', function(ev) { return onkey(ev, ev.keyCode, true); }, false);
 //        Dom.un(document, 'keyup', function(ev) { return onkey(ev, ev.keyCode, false); }, false);
   	if (joyavail) {
+		joystick.removeEventListener('touchStartValidation', joystart(event));
+		joystick2.removeEventListener('touchStartValidation', joy2start(event));
+		joystick2.removeEventListener('touchStart', joy2ts);
+		joystick2.removeEventListener('touchEnd', joy2te);
 		joystick.destroy;
 		joystick2.destroy;
   	}
@@ -183,27 +187,30 @@ function vis() {
 			limitStickTravel : true,
 			stickRadius : 0
 		});
-		joystick.addEventListener('touchStartValidation', function(event){
-			var touch = event.changedTouches[0];
-			if( touch.pageX > window.innerWidth/2+5 ) return false;
-			return true
-		});
-		joystick2.addEventListener('touchStartValidation', function(event){
-			var touch = event.changedTouches[0];
-			if( touch.pageX < window.innerWidth/2-5 ) return false;
-			return true
-		});
-		joystick2.addEventListener('touchStart', function(){
-        		jumpbutton2 = true;
-    		});
-		joystick2.addEventListener('touchEnd', function(){
-        		jumpbutton2 = false;
-		});
+		joystick.addEventListener('touchStartValidation', joystart(event));
+		joystick2.addEventListener('touchStartValidation', joy2start(event));
+		joystick2.addEventListener('touchStart', joy2ts);
+		joystick2.addEventListener('touchEnd', joy2te);
 	}
       });
     });
   }
-
+function joystart(event){
+	var touch = event.changedTouches[0];
+	if( touch.pageX > window.innerWidth/2+5 ) return false;
+	return true
+}
+function joy2start(event){
+	var touch = event.changedTouches[0];
+	if( touch.pageX < window.innerWidth/2-5 ) return false;
+	return true
+}
+function joy2ts(){
+	jumpbutton2 = true;
+}
+function joy2te(){
+	jumpbutton2 = false;
+}
   function setup(images, level) {
     tower    = new Tower(level);
     monsters = new Monsters(level);
