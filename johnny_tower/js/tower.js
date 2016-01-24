@@ -447,7 +447,7 @@ mapz=level.map;
         if (joystick.down()&&(joystick.deltaY() > 10)) {this.input.down = true;} else this.input.down = false;
         if (joystick.right()&&(joystick.deltaX() > 10)) {this.input.right = true;} else this.input.right = false;
         if (joystick.left()&&(joystick.deltaX() < -10)) {this.input.left = true;} else this.input.left = false;
-        if (player.input.jumpAvailable) {player.input.jump = jumpbutton2;}
+//        if (player.input.jumpAvailable) {player.input.jump = jumpbutton2;}
       }/**/
     },
 
