@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Leaflet Quick Start Guide Example</title>
+	<title>Leaflet & Google Satelite</title>
 	<meta charset="utf-8" />
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,11 +14,12 @@
 	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 	<script>
 
-		var mymap = L.map('mapid').setView([31.159260, -97.491185], 13);
-L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-    maxZoom: 21,
-    subdomains:['mt0','mt1','mt2','mt3']
-}).addTo(mymap);
+		var mymap = L.map('mapid').setView([31.15914, -97.49125], 13);
+		
+		L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+		    maxZoom: 21,
+		    subdomains:['mt0','mt1','mt2','mt3']
+		}).addTo(mymap);
 //		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
 //			maxZoom: 18,
 //			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -28,7 +29,7 @@ L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
 //		}).addTo(mymap);
 
 
-		L.marker([51.5, -0.09]).addTo(mymap)
+/*		L.marker([51.5, -0.09]).addTo(mymap)
 			.bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
 
 		L.circle([51.508, -0.11], 500, {
@@ -43,7 +44,7 @@ L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
 			[51.51, -0.047]
 		]).addTo(mymap).bindPopup("I am a polygon.");
 
-
+*/
 		var popup = L.popup();
 
 		function onMapClick(e) {
