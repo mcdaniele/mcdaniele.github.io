@@ -51,7 +51,7 @@
 		function onMapClick(e) {
 			popup
 				.setLatLng(e.latlng)
-				.setContent("You clicked the map at " + e.latlng.toString() + " zoom: " + z)
+				.setContent("You clicked the map at " + e.latlng.toString() + " zoom: " + z.toString())
 				.openOn(mymap);
 		}
 
