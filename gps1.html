@@ -14,18 +14,18 @@
             padding: 0;
             margin: 0;
         }
-        html, body, #mapid {
+        html, body, #map {
             height: 100%;
             width: 100%;
         }
     </style>
 <body>
-	<div id="mapid"></div>
+	<div id="map"></div>
 
 	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 	<script>
 
-		var mymap = L.map('mapid').setView([32.86138, -96.97761], 15);
+		var map = L.map('mapid').setView([32.86138, -96.97761], 15);
 		
 		L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
 		    maxZoom: 24,
@@ -43,8 +43,9 @@
 				.openOn(mymap);
 		}
 
-		mymap.on('click', onMapClick);
-map.locate({watch: true},{setView: true});
+		map.on('click', onMapClick);
+map.locate({watch: true});
+map.locate({setView: true});
 	</script>
 </body>
 </html>
