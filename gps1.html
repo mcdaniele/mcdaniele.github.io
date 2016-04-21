@@ -25,14 +25,14 @@
 	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 	<script>
 
-		var map = L.map('mapid').setView([32.86138, -96.97761], 15);
+		var map = L.map('map').setView([32.86138, -96.97761], 15);
 		
 		L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
 		    maxZoom: 24,
 		    maxNativeZoom: 21,
 		    attribution: 'background tiles by: <a href="http://www.google.com">Google</a>',
 		    subdomains:['mt0','mt1','mt2','mt3']
-		}).addTo(mymap);
+		}).addTo(map);
 
 		var popup = L.popup();
 
@@ -40,7 +40,7 @@
 			popup
 				.setLatLng(e.latlng)
 				.setContent("You clicked the map at " + e.latlng.toString() + mymap.getZoom())
-				.openOn(mymap);
+				.openOn(map);
 		}
 
 		map.on('click', onMapClick);
