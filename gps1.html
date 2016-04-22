@@ -44,6 +44,11 @@
 		}
 
 		map.on('click', onMapClick);
+map.on('locationfound', onLocationFound);
+function onLocationFound(e) {
+    // create a marker at the users "latlng" and add it to the map
+    L.marker(e.latlng).addTo(map);
+}
 map.locate({watch: true, setView: true, maxZoom: 21});
 	</script>
 </body>
