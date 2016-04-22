@@ -24,7 +24,10 @@
 
 	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 	<script>
-var mark1=L.marker(0,0).addTo(map);
+var mark1=L.marker(0,0);
+mark1.addTo(map);
+var mark1 = L.marker(map.getCenter()).addTo(map);
+
 		var map = L.map('map').setView([32.86138, -96.97761], 15);
 		
 		L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
@@ -39,18 +42,17 @@ var mark1=L.marker(0,0).addTo(map);
 		function onMapClick(e) {
 			popup
 				.setLatLng(e.latlng)
-				.setContent("You clicked the map at " + e.latlng.toString() + mymap.getZoom())
+				.setContent("You clicked the map at " + e.latlng.toString() + map.getZoom())
 				.openOn(map);
 		}
 
 		map.on('click', onMapClick);
-map.on('locationfound', onLocationFound);
-function onLocationFound(e) {
-    // create a marker at the users "latlng" and add it to the map
-    //L.marker(e.latlng).addTo(map);
-    mark1.latlng=e.latlng;
-}
-map.locate({watch: true, setView: true, maxZoom: 21});
+	map.on('locationfound', onLocationFound);
+	function onLocationFound(e) {
+		mark1.setLatLng(e.latlng);
+		map.setView(mark1.getLatLng(),map.getZoom()); 
+	}
+map.locate({watch: true});//, setView: true, maxZoom: 21});
 	</script>
 </body>
 </html>
