@@ -40,7 +40,13 @@
 //				.openOn(map);
 //		}
 //		map.on('click', onMapClick);
-	var mark1 = L.marker(map.getCenter()).addTo(map);
+	var johnny = L.icon({
+		iconUrl: 'http://cosmicidea.com/trails/wp-content/uploads/leaflet-maps-marker-icons/icon-hiker.png',
+    		iconSize:     [26, 32], // size of the icon
+    		iconAnchor:   [13, 32], // point of the icon which will correspond to marker's location
+    		popupAnchor:  [13, 0] // point from which the popup should open relative to the iconAnchor
+	});
+	var mark1 = L.marker({map.getCenter(),icon:johnny}).addTo(map);
 	map.on('locationfound', onLocationFound);
 	function onLocationFound(e) {
 		mark1.setLatLng(e.latlng).update();
