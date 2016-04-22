@@ -46,7 +46,7 @@
     		iconAnchor:   [13, 32], // point of the icon which will correspond to marker's location
     		popupAnchor:  [13, 0] // point from which the popup should open relative to the iconAnchor
 	});
-	var mark1 = L.marker({map.getCenter(),icon:johnny}).addTo(map);
+	var mark1 = L.marker(map.getCenter(),{icon:johnny}).addTo(map);
 	map.on('locationfound', onLocationFound);
 	function onLocationFound(e) {
 		mark1.setLatLng(e.latlng).update();
