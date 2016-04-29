@@ -1,0 +1,39 @@
+<html>
+<head>
+    <title>GPS Test</title>
+</head>
+<body>
+    <div id='mylat'></div><br>
+    <div id='mylon'></div><br>
+    <button type="button" onclick="navigator.geolocation.clearWatch(id)">Turn Off GPS</button>
+
+<script>
+var id, target, options;
+
+function success(pos) {
+  var crd = pos.coords;
+  document.getElementById('mylat').innerHTML = 'Lat = '+crd.latitude;
+  document.getElementById('mylon').innerHTML = 'Lon = '+crd.longitude;
+//  if (target.latitude === crd.latitude && target.longitude === crd.longitude) {
+//    navigator.geolocation.clearWatch(id);
+}
+
+function error(err) {
+  alert('ERROR(' + err.code + '): ' + err.message);
+}
+
+target = {
+  latitude : 0,
+  longitude: 0
+};
+
+options = {
+  enableHighAcconacy: true,
+  timeout: 5000,
+  maximumAge: 0
+};
+
+id = navigator.geolocation.watchPosition(success, error, options);
+</script>
+</body>
+</html>
