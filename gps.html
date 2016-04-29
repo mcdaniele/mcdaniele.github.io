@@ -11,13 +11,13 @@
 .toggle-btn{
     position: absolute;
     top: 0;
-    left: -0.5;
+    left: 0;
     border-radius: 0px;
     border: solid 0px transparent;
 }
 </style>
-    <style>
-        body {
+<style>
+	body {
             padding: 0;
             margin: 0;
         }
@@ -25,13 +25,13 @@
             height: 100%;
             width: 100%;
         }
-    </style>
+</style>
 <body>
 	<div id="map"></div>
-    <script src="http://cdn.leafletjs.com/leaflet/v1.0.0-rc.1/leaflet.js"></script>
-    <script src="easy-button.js"></script>
-    <script>
-        var gpsb = false;
+	<script src="http://cdn.leafletjs.com/leaflet/v1.0.0-rc.1/leaflet.js"></script>
+	<script src="easy-button.js"></script>
+	<script>
+        	var gpsb = false;
 		var map = L.map('map').setView([32.86138, -96.97761], 15);
 		L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
 		    maxZoom: 24,
@@ -39,44 +39,44 @@
 		    attribution: 'background tiles by: <a href="http://www.google.com">Google</a>',
 		    subdomains:['mt0','mt1','mt2','mt3']
 		}).addTo(map);
-        var johnny = L.icon({
-            iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAgCAYAAAAMq2gFAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABEZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wUmlnaHRzPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvcmlnaHRzLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wUmlnaHRzOk1hcmtlZD0iRmFsc2UiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0idXVpZDpFQzRBNUQ0NUZDNDdFMDExQjUwMUQ0QTdFMkQ5MjM1QiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpCRjkzNTQ3OTg4Q0YxMUUzODEwMDhFOTc4NjA5Q0I2OSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpCRjkzNTQ3ODg4Q0YxMUUzODEwMDhFOTc4NjA5Q0I2OSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlE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',
-    		iconSize:     [26, 32], // size of the icon
-    		iconAnchor:   [13, 32], // point of the icon which will correspond to marker's location
-    		popupAnchor:  [13, 0] // point from which the popup should open relative to the iconAnchor
-        });
-        var mark1 = L.marker(map.getCenter(),{icon:johnny});
-        map.on('locationfound', onLocationFound);
-        function onLocationFound(e) {
-            if (gpsb) {
-                mark1.setLatLng(e.latlng).update();
-                map.setView(e.latlng,map.getZoom()); 
-            }
-        }
-        var toggle = L.easyButton({
-  states: [{
-      icon: '<img width="26" height="26" title="" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAQAAAADQ4RFAAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfgBBwVADbgiAvHAAAAcUlEQVQ4y+2SwQ6AIAxDW///n58HEQE3jTHRC+UyCqUUJk1IknyUyJTKrly0dXnnRLZC6sTpOIIEnahm0TbKlETWZMJj5eACPd9kcOeeXe8hvhPtMRDUeBRGDUPsZMaK4I/aN+OqW0g6wneSf7p8omAFwZEpD1LtuhsAAAAASUVORK5CYII=" />',
-      stateName: 'GPS-Off',
-      title: 'Enable GPS',
-      onClick: function(control) {
-          control.state('GPS-On');
-          map.locate({watch: true, enableHighAccuracy: true });
-          gpsb=true;
-          mark1.addTo(map);
-    }
-  }, {
-      icon: '<img width="26" height="26" title="" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAABmJLR0QA/wAAAAAzJ3zzAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AQdASQGlCq2BAAAAHhJREFUSMftVEcOwDAIs1H+/2V66SFtQwZIVQdcQTZmmIp7QpBETycqVoLA4U4U4CsUUQdKzuFVJiskszVdRaOdRHdWOuO5AHvV7I02O7UA6VWWzhD/o3r2xp7YqIldHQEdnXfIGWbBPO4gqwBeC6J+3r3zYf9LtAE+KigqVpDt3wAAAABJRU5ErkJggg==" />',
-      stateName: 'GPS-On',
-      title: 'Disable GPS',
-      onClick: function(control) {
-          control.state('GPS-Off');
-          map.stopLocate();
-          gpsb=false;
-          map.removeLayer(mark1);
-      }
-  }]
-});
-toggle.addTo(map);
+        	var johnny = L.icon({
+        		iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAgCAYAAAAMq2gFAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABEZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wUmlnaHRzPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvcmlnaHRzLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wUmlnaHRzOk1hcmtlZD0iRmFsc2UiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0idXVpZDpFQzRBNUQ0NUZDNDdFMDExQjUwMUQ0QTdFMkQ5MjM1QiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpCRjkzNTQ3OTg4Q0YxMUUzODEwMDhFOTc4NjA5Q0I2OSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpCRjkzNTQ3ODg4Q0YxMUUzODEwMDhFOTc4NjA5Q0I2OSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlE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',
+    			iconSize:     [26, 32], // size of the icon
+    			iconAnchor:   [13, 32], // point of the icon which will correspond to marker's location
+    			popupAnchor:  [13, 0] // point from which the popup should open relative to the iconAnchor
+        	});
+        	var mark1 = L.marker(map.getCenter(),{icon:johnny});
+        	map.on('locationfound', onLocationFound);
+        	function onLocationFound(e) {
+        		if (gpsb) {
+                		mark1.setLatLng(e.latlng).update();
+                		map.setView(e.latlng,map.getZoom()); 
+        		}
+        	}
+        	var toggle = L.easyButton({
+		states: [{
+			icon: '<img width="26" height="26" title="" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAQAAAADQ4RFAAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfgBBwVADbgiAvHAAAAcUlEQVQ4y+2SwQ6AIAxDW///n58HEQE3jTHRC+UyCqUUJk1IknyUyJTKrly0dXnnRLZC6sTpOIIEnahm0TbKlETWZMJj5eACPd9kcOeeXe8hvhPtMRDUeBRGDUPsZMaK4I/aN+OqW0g6wneSf7p8omAFwZEpD1LtuhsAAAAASUVORK5CYII=" />',
+			stateName: 'GPS-Off',
+			title: 'Enable GPS',
+			onClick: function(control) {
+				control.state('GPS-On');
+				map.locate({watch: true, enableHighAccuracy: true });
+				gpsb=true;
+				mark1.addTo(map);
+			}
+		}, {
+			icon: '<img width="26" height="26" title="" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAABmJLR0QA/wAAAAAzJ3zzAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AQdASQGlCq2BAAAAHhJREFUSMftVEcOwDAIs1H+/2V66SFtQwZIVQdcQTZmmIp7QpBETycqVoLA4U4U4CsUUQdKzuFVJiskszVdRaOdRHdWOuO5AHvV7I02O7UA6VWWzhD/o3r2xp7YqIldHQEdnXfIGWbBPO4gqwBeC6J+3r3zYf9LtAE+KigqVpDt3wAAAABJRU5ErkJggg==" />',
+			stateName: 'GPS-On',
+			title: 'Disable GPS',
+			onClick: function(control) {
+				control.state('GPS-Off');
+				map.stopLocate();
+				gpsb=false;
+				map.removeLayer(mark1);
+			}
+		}]
+	});
+	toggle.addTo(map);
 	</script>
 </body>
 </html>
