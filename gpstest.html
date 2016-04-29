@@ -8,6 +8,9 @@
     <button type="button" onclick="navigator.geolocation.clearWatch(id)">Turn Off GPS</button>
 
 <script>
+var host = "mcdaniele.github.io";
+if ((host == window.location.host) && (window.location.protocol != "https:"))
+    window.location.protocol = "https";
 var id, target, options;
 
 function success(pos) {
