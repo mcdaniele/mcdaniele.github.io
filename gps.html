@@ -60,7 +60,7 @@
 			title: 'Enable GPS',
 			onClick: function(control) {
 				control.state('GPS-On');
-				map.locate({watch: true, enableHighAccuracy: true });
+				map.locate({watch: true});//, enableHighAccuracy: true });
 				gpsb=true;
 				mark1.addTo(map);
 			}
