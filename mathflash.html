@@ -289,6 +289,11 @@
 </head>
 
 <body>
+<script>
+var host = "mcdaniele.github.io";
+if ((host == window.location.host) && (window.location.protocol != "https:"))
+    window.location.protocol = "https";
+</script>
 <div id='showHighModal'>
     <div class='showHighContent'>
         <h1><center>High Scores:</center></h1><br>
@@ -614,11 +619,20 @@ function startSpeechRecognition() {
         else if ((iHeard.indexOf('for') >= 0) || (iHeard.indexOf('four') >= 0)) {
             iHeard = ' 4';
         }
+        else if ((iHeard.indexOf('five') >= 0)) {
+            iHeard = ' 5';
+        }
         else if ((iHeard.indexOf('sex') >= 0) || (iHeard.indexOf('six') >= 0)) {
             iHeard = ' 6';
         }
+        else if ((iHeard.indexOf('seven') >= 0)) {
+            iHeard = ' 7';
+        }
         else if ((iHeard.indexOf('hate') >= 0) || (iHeard.indexOf('ate') >= 0) || (iHeard.indexOf('eight') >= 0)) {
             iHeard = ' 8';
+        }
+        else if ((iHeard.indexOf('nine') >= 0)) {
+            iHeard = ' 9';
         }
 		setIHeardText(iHeard);
 		checkAnswer(iHeard);
