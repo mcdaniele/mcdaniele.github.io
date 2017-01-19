@@ -1,0 +1,196 @@
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.js"></script>
+</head>
+<style>
+.container {
+    width: 100%;
+    text-align: center;
+    margin: 15px auto;
+}
+#myDiv, #myDiv2 {
+    display: inline-block;    
+    width: 45%;
+}
+</style>
+<body>
+<input type="text" id="symbol" onkeypress="handle(event)"/>
+<div id='result'></div>
+<button type="submit" onClick="getData();">Get Data</button>
+<div class="container">
+    <div id="myDiv">
+        <canvas id="myChart"></canvas>
+    </div>
+    <div id="myDiv2">
+        <canvas id="myChart2"></canvas>
+    </div>
+</div>
+</body>
+<script>
+function handle(e) {
+    var key=e.keyCode || e.which;
+    if (key==13) {
+        getData();
+    }
+}
+function gimmeYesterday(toAdd) {
+    var d = new Date();
+    d.setDate(d.getDate() - parseInt(toAdd));
+    return d;
+}
+function getData() {
+    var addprice = 0;
+    var prices = [];
+    var price = [];
+    var sma7 = [];
+    var sma13 = [];
+    var sma20 = [];
+    var j = 0;
+    var k = 0;
+    var today = (new Date()).toISOString().substring(0, 10);
+    var month3 = gimmeYesterday(92).toISOString().substring(0, 10); 
+    var url = "http://query.yahooapis.com/v1/public/yql";
+    var symbol = $("#symbol").val();
+    var data = encodeURIComponent('select * from yahoo.finance.historicaldata where symbol = "' + symbol + '" and startDate = "' + month3 + '" and endDate = "' + today + '"');
+    $.getJSON(url, 'q=' + data + "&format=json&diagnostics=true&env=store://datatables.org/alltableswithkeys")
+        .done(function (data) {
+        $.each(data.query.results.quote, function(i, quote) {
+            prices.push(Number(quote.Close));
+        });
+        for(j=0;j<20;j++) {
+            addprice = 0;
+            price[19-j] = prices[j];
+            for(k=j;k<j+7;k++) {
+                addprice+=prices[k];
+            }
+            sma7[19-j]=Math.round(addprice/7*100)/100;
+            for(;k<j+13;k++) {
+                addprice+=prices[k];
+            }
+            sma13[19-j]=Math.round(addprice/13*100)/100;
+            for(;k<j+20;k++) {
+                addprice+=prices[k];
+            }
+            sma20[19-j]=Math.round(addprice/20*100)/100;
+        }
+        console.log(price);
+        console.log(sma7);
+        console.log(sma13);
+        console.log(sma20);
+var data2 = {
+    labels: [" "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "],
+    datasets: [
+        {
+            label: "SMA(7)",
+            fill: false,
+            lineTension: 0,
+            backgroundColor: "rgba(255,0,0,1)",
+            borderColor: "rgba(255,0,0,1)",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "rgba(255,0,0,1)",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "rgba(255,0,0,1)",
+            pointHoverBorderColor: "rgba(255,0,0,1)",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: sma7,
+            spanGaps: false,
+        },
+        {
+            label: "SMA(13)",
+            fill: false,
+            lineTension: 0,
+            backgroundColor: "rgba(0,255,0,1)",
+            borderColor: "rgba(0,255,0,1)",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "rgba(0,255,0,1)",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "rgba(0,255,0,1)",
+            pointHoverBorderColor: "rgba(0,255,0,1)",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: sma13,
+            spanGaps: false,
+        }
+    ]
+};
+var data3 = {
+    labels: [" "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "],
+    datasets: [
+        {
+            label: "SMA(20)",
+            fill: false,
+            lineTension: 0,
+            backgroundColor: "rgba(255,165,0,1)",
+            borderColor: "rgba(255,165,0,1)",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "rgba(255,165,0,1)",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "rgba(255,165,0,1)",
+            pointHoverBorderColor: "rgba(255,165,0,1)",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: sma20,
+            spanGaps: false,
+        },
+        {
+            label: "Price",
+            fill: false,
+            lineTension: 0,
+            backgroundColor: "rgba(0,0,255,1)",
+            borderColor: "rgba(0,0,255,1)",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "rgba(0,0,255,1)",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "rgba(0,0,255,1)",
+            pointHoverBorderColor: "rgba(0,0,255,1)",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: price,
+            spanGaps: false,
+        }
+    ]
+};
+var ctx = document.getElementById('myChart').getContext('2d');
+var myChart = new Chart(ctx, {
+  type: 'line',
+  data: data2
+});
+var ctx2 = document.getElementById('myChart2').getContext('2d');
+var myChart2 = new Chart(ctx2, {
+    type: 'line',
+    data: data3
+});
+    })
+        .fail(function (jqxhr, textStatus, error) {
+        var err = textStatus + ", " + error;
+            $("#result").text('Request failed: ' + err);
+    });
+}
+</script>
+</html>
