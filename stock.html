@@ -181,6 +181,10 @@ var data3 = {
         }
     ]
 };
+$('#myChart').remove(); // this is my <canvas> element
+$('#myDiv').append('<canvas id="myChart"><canvas>');
+$('#myChart2').remove(); // this is my <canvas> element
+$('#myDiv2').append('<canvas id="myChart2"><canvas>');
 var ctx = document.getElementById('myChart').getContext('2d');
 var myChart = new Chart(ctx, {
   type: 'line',
