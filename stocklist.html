@@ -51,6 +51,7 @@ function getData() {
     var date2 = [];
     var j = 0;
     var k = 0;
+    var clr;
     var today = (new Date()).toISOString().substring(0, 10);
     var month3 = gimmeYesterday(92).toISOString().substring(0, 10); 
     var url = "http://query.yahooapis.com/v1/public/yql";
@@ -188,6 +189,7 @@ var div = document.createElement('div');
 div.id = 'overlay';
 document.body.appendChild(div);
 */
+if((((sma20[19]>=price[19])&&(sma20[18]<price[18]))||((sma20[19]<=price[19])&&(sma20[18]>price[18])))||(((sma13[19]>=sma7[19])&&(sma13[18]<sma7[18]))||((sma13[19]<=sma7[19])&&(sma13[18]>sma7[18])))) {
 var div3 = document.createElement('div');
 div3.id=div1;
 div3.style.display = 'inline-block';
@@ -250,6 +252,7 @@ var twoChart = new Chart(ctx2, {
      }
    }
 });
+}
     })
         .fail(function (jqxhr, textStatus, error) {
         var err = textStatus + ", " + error;
