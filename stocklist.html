@@ -1,0 +1,262 @@
+
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.js"></script>
+</head>
+<style>
+.container {
+    width: 100%;
+    text-align: center;
+    margin: 15px auto;
+}
+#oneDiv, #twoDiv {
+    display: inline-block;    
+    width: 45%;
+}
+</style>
+<body>
+</body>
+<script>
+var list = ["ON","HOG","COG","MRO","EMN","AKAM","BIBB","FLR","NOV","MHK","AMZN","AZO","PXD","LYB","ADI","HPQ","XLE","BEAV","DVN","DG","SWKS","A","FCX","XLNX","USB","IBM","DFE","HD","GS","GE","DD","DIS","CSCO","DE","AMAT","CVX","CAT","BA","FFIV","TSCO","USG","DRYS","V","GM","GDX","C","MRK","SLB","AMGN","BMY","HON","MA","GILD","BDX","AMD","HPE","SKY","HAL","CSX","MON","EOG","COP","MS","MS","DJIA","DOW","QCOM","INTC","ABT","SLV"];
+var l = 0;
+//for(l=0;l<list.length;l++) {
+    getData();
+//}
+function handle(e) {
+    var key=e.keyCode || e.which;
+    if (key==13) {
+        getData();
+    }
+}
+function gimmeYesterday(toAdd) {
+    var d = new Date();
+    d.setDate(d.getDate() - parseInt(toAdd));
+    return d;
+}
+function getData() {
+    var name = list[l]
+    var numst = l.toString();
+    var div1 = "oneDiv" + numst;
+    var div2 = "twoDiv" + numst;
+    var chart1 = "oneChart" + numst;
+    var chart2 = "twoChart" + numst;
+    var addprice = 0;
+    var prices = [];
+    var price = [];
+    var sma7 = [];
+    var sma13 = [];
+    var sma20 = [];
+    var dates2 = [];
+    var date2 = [];
+    var j = 0;
+    var k = 0;
+    var today = (new Date()).toISOString().substring(0, 10);
+    var month3 = gimmeYesterday(92).toISOString().substring(0, 10); 
+    var url = "http://query.yahooapis.com/v1/public/yql";
+    var symbol = list[l];
+//    var symbol = $("#symbol").val();
+    var data = encodeURIComponent('select * from yahoo.finance.historicaldata where symbol = "' + symbol + '" and startDate = "' + month3 + '" and endDate = "' + today + '"');
+    $.getJSON(url, 'q=' + data + "&format=json&diagnostics=true&env=store://datatables.org/alltableswithkeys")
+        .done(function (data) {
+        $.each(data.query.results.quote, function(i, quote) {
+            prices.push(Number(quote.Close));
+            dates2.push(quote.Date);
+        });
+        for(j=0;j<20;j++) {
+            addprice = 0;
+            date2[19-j] = dates2[j];
+            price[19-j] = prices[j];
+            for(k=j;k<j+7;k++) {
+                addprice+=prices[k];
+            }
+            sma7[19-j]=Math.round(addprice/7*100)/100;
+            for(;k<j+13;k++) {
+                addprice+=prices[k];
+            }
+            sma13[19-j]=Math.round(addprice/13*100)/100;
+            for(;k<j+20;k++) {
+                addprice+=prices[k];
+            }
+            sma20[19-j]=Math.round(addprice/20*100)/100;
+        }
+//        console.log(price);
+//        console.log(sma7);
+//        console.log(sma13);
+//        console.log(sma20);
+//        console.log(dates2);
+var data2 = {
+    labels: date2,
+    datasets: [
+        {
+            label: "SMA(7)",
+            fill: false,
+            lineTension: 0,
+            backgroundColor: "rgba(255,0,0,1)",
+            borderColor: "rgba(255,0,0,1)",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "rgba(255,0,0,1)",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "rgba(255,0,0,1)",
+            pointHoverBorderColor: "rgba(255,0,0,1)",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: sma7,
+            spanGaps: false,
+        },
+        {
+            label: "SMA(13)",
+            fill: false,
+            lineTension: 0,
+            backgroundColor: "rgba(0,255,0,1)",
+            borderColor: "rgba(0,255,0,1)",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "rgba(0,255,0,1)",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "rgba(0,255,0,1)",
+            pointHoverBorderColor: "rgba(0,255,0,1)",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: sma13,
+            spanGaps: false,
+        }
+    ]
+};
+var data3 = {
+    labels: date2,
+    datasets: [
+        {
+            label: "Close",
+            fill: false,
+            lineTension: 0,
+            backgroundColor: "rgba(0,0,255,1)",
+            borderColor: "rgba(0,0,255,1)",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "rgba(0,0,255,1)",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "rgba(0,0,255,1)",
+            pointHoverBorderColor: "rgba(0,0,255,1)",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: price,
+            spanGaps: false,
+        },
+        {
+            label: "SMA(20)",
+            fill: false,
+            lineTension: 0,
+            backgroundColor: "rgba(255,165,0,1)",
+            borderColor: "rgba(255,165,0,1)",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "rgba(255,165,0,1)",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "rgba(255,165,0,1)",
+            pointHoverBorderColor: "rgba(255,165,0,1)",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: sma20,
+            spanGaps: false,
+        }
+    ]
+};
+/*
+var div = document.createElement('div');
+div.id = 'overlay';
+document.body.appendChild(div);
+*/
+var div3 = document.createElement('div');
+div3.id=div1;
+div3.style.display = 'inline-block';
+div3.style.width = '45%';
+document.body.appendChild(div3);
+var div4 = document.createElement('div');
+div4.id=div2;
+div4.style.display = 'inline-block';
+div4.style.width = '45%';
+document.body.appendChild(div4);
+$('#'+div1).append('<H2>'+name+'</H2>');
+var chart3 = document.createElement('canvas');
+chart3.id=chart1;
+document.getElementById(div1).appendChild(chart3);
+$('#'+div2).append('<H2>'+name+'</H2>');
+var chart4 = document.createElement('canvas');
+chart4.id=chart2;
+document.getElementById(div2).appendChild(chart4);
+/*
+//$('#oneChart').remove(); // this is my <canvas> element
+$('#oneDiv').append('<H2>'+list[0]+'</H2>');
+$('#oneDiv').append('<canvas id="oneChart"><canvas>');
+//$('#twoChart').remove(); // this is my <canvas> element
+$('#twoDiv').append('<H2>'+list[0]+'</H2>');
+$('#twoDiv').append('<canvas id="twoChart"><canvas>');
+*/
+var ctx = document.getElementById(chart1).getContext('2d');
+var oneChart = new Chart(ctx, {
+  type: 'line',
+  data: data2,
+  options: {
+      animation: false,
+     scales: {
+       yAxes: [{
+         ticks: {
+           callback: function(value, index, values) {
+             return value.toLocaleString("en-US",{style:"currency", currency:"USD"});
+           }
+         }
+       }]
+     }
+   }
+});
+var ctx2 = document.getElementById(chart2).getContext('2d');
+var twoChart = new Chart(ctx2, {
+    type: 'line',
+    data: data3,
+  options: {
+      animation: false,
+     scales: {
+       yAxes: [{
+         ticks: {
+           callback: function(value, index, values) {
+             return value.toLocaleString("en-US",{style:"currency", currency:"USD"});
+           }
+         }
+       }]
+     }
+   }
+});
+    })
+        .fail(function (jqxhr, textStatus, error) {
+        var err = textStatus + ", " + error;
+            $("#result").text('Request failed: ' + err);
+    });
+    l++;
+    if( l<list.length) {
+        getData();
+    }
+}
+</script>
+</html>
