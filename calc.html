@@ -1,0 +1,39 @@
+<body>
+<form Name="calc">
+<table border=1>
+<tr>
+<td colspan=4><input type=text Name="display"></td>
+</tr>
+<tr>
+<td><center><input type=button value="(" OnClick="calc.display.value+='('"></center></td>
+<td><center><input type=button value=")" OnClick="calc.display.value+=')'"></center></td>
+<td><center><input type=button value="C" OnClick="calc.display.value=''"></center></td>
+<td><center><input type=button value="+" OnClick="calc.display.value+='+'"></center></td>
+</tr>
+<tr>
+<td><center><input type=button value="7" OnClick="calc.display.value+='7'"></center></td>
+<td><center><input type=button value="8" OnClick="calc.display.value+='8'"></center></td>
+<td><center><input type=button value="9" OnClick="calc.display.value+='9'"></center></td>
+<td><center><input type=button value="-" OnClick="calc.display.value+='-'"></center></td>
+</tr>
+<tr>
+<td><center><input type=button value="4" OnClick="calc.display.value+='4'"></center></td>
+<td><center><input type=button value="5" OnClick="calc.display.value+='5'"></center></td>
+<td><center><input type=button value="6" OnClick="calc.display.value+='6'"></center></td>
+<td><center><input type=button value="x" OnClick="calc.display.value+='*'"></center></td>
+</tr>
+<tr>
+<td><center><input type=button value="1" OnClick="calc.display.value+='1'"></center></td>
+<td><center><input type=button value="2" OnClick="calc.display.value+='2'"></center></td>
+<td><center><input type=button value="3" OnClick="calc.display.value+='3'"></center></td>
+<td><center><input type=button value="/" OnClick="calc.display.value+='/'"></center></td>
+</tr>
+<tr>
+<td><center><input type=button value="0" OnClick="calc.display.value+='0'"></center></td>
+<td><center><input type=button value="." OnClick="calc.display.value+='.'"></center></td>
+<td></td>
+<td><center><input type=button value="=" OnClick="calc.display.value=eval(calc.display.value)"></center></td>
+</tr>
+</table>
+</form>
+</body>
