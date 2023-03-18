@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<!-- adapted from: //jonassebastianohlsson.com/sudoku -->
+	<head>
+		<meta charset="utf-8">
+		<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+
+		<!--inline full CSS: too small to extract critical-->
+		<style>.difficulty .header--extra__menu-button__text,.modal__title{font-weight:700}.sudoku-board-cell{display:inline-block;position:relative;border:1px solid #ddd;background:#fff;max-width:11.11111%}[data-board-size="9"].sudoku-board .sudoku-board-cell:nth-of-type(9n+1){border-left-width:2px;border-left-color:grey}[data-board-size="9"].sudoku-board .sudoku-board-cell:nth-of-type(n):nth-of-type(-n+9){border-top-width:2px;border-top-color:grey}[data-board-size="9"].sudoku-board .sudoku-board-cell:nth-of-type(3n){border-right-width:2px;border-right-color:grey}[data-board-size="9"].sudoku-board .sudoku-board-cell:nth-of-type(n+19):nth-of-type(-n+27),[data-board-size="9"].sudoku-board .sudoku-board-cell:nth-of-type(n+46):nth-of-type(-n+54),[data-board-size="9"].sudoku-board .sudoku-board-cell:nth-of-type(n+73):nth-of-type(-n+81){border-bottom-width:2px;border-bottom-color:grey}.sudoku-board-cell input{background:0 0;font-size:19.2px;font-size:1.2rem;text-align:center;width:2em;max-width:100%;height:2em;border:0;position:relative;z-index:1}.sudoku-board-cell .highlight-val{color:#00d}.sudoku-board-cell .board-cell--error{background:#d00;color:#eee}.sudoku-board-cell .candidates{display:none;position:absolute;top:0;bottom:0;left:0;right:0;font-size:.75em;letter-spacing:-.5px;font-family:monospace,sans-serif;line-height:0;text-align:justify}.icon,.main-footer,.touch-controls__item,button{text-align:center}.sudoku-board .candidates:after{content:"";display:inline-block;width:100%}@media(max-width:23em){.sudoku-board .candidates{letter-spacing:-2px}}.showCandidates .candidates{display:block;text-decoration:none;color:#aaa}.sudoku-board .candidates div{display:inline-block;width:20%;line-height:1.13;vertical-align:top}.candidate--highlight{background-color:#ff0}.candidate--to-remove{background-color:red;color:#fff}.sudoku-board{min-height:21.625rem;margin-bottom:.25em}.sudoku-board input{color:#404040;width:3em;height:1.9em;cursor:default}*{margin:0;padding:0;box-sizing:border-box}body{font-size:100%;font-family:Verdana,Arial,sans-serif;background:#efefef}button{border:0;background:0 0;overflow:hidden;text-decoration:none;white-space:nowrap}.button--primary{font-size:1em;color:#404040;border:1px solid #CCC;padding:.25em .5em;border-radius:.25em;transition:all 100ms ease-in-out;margin-right:.5em}.button--primary:hover{border-color:#404040;color:#202020}.icon{display:inline-block;font-size:1em;line-height:1;width:1em;height:1em;vertical-align:middle;position:relative;top:-.2em;color:inherit;fill:currentColor}.icon use{pointer-events:none}.no-localStorage .localStorage-only,.sw--only{display:none}.has-sw .sw--only{display:inline-block}.desktop--only{display:none}@media (min-width:40em){.desktop--only{display:inline-block}}.modal{position:absolute;z-index:-1;top:0;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);opacity:0;transition:opacity 150ms 50ms ease-in}.modal__content{width:100%;padding:2em 3em;background:#fff;margin:auto;transform:translateY(-100%)}.modal__title{font-size:1.5em;margin-bottom:.75em}.active.modal{z-index:12;opacity:1}.active.modal .modal__content{transform:none}.group{margin-bottom:1em}.wrap{padding-left:.5em;padding-right:.5em;width:400px;max-width:100%;margin-left:auto;margin-right:auto}.wrap--only-large{padding-left:0;padding-right:0}@media (min-width:30em){.wrap{width:490px;padding-left:1em;padding-right:1em}.sudoku-board{min-height:28.375rem}.sudoku-board input{font-size:24px;font-size:1.5rem}.sudoku-board .candidates{font-size:.8em}}.header{height:2em;overflow:hidden;padding:0 .5em;background:#fff}.header__logo__title{position:absolute;font-size:1em;line-height:2em}.header__logo__tagline{display:none}.header--extra__menu-button{font-size:1em;line-height:2rem;padding-left:.5em;padding-right:.5em;margin-left:2em}.difficulty,.help{float:right}.difficulty .menu,.help .menu{display:none;position:absolute;z-index:10;left:0;right:0;top:2rem;bottom:0;background:#505050;background:rgba(0,0,0,.25)}.difficulty .active.menu,.difficulty .menu__item-wrap,.help .active.menu,.help .menu__item-wrap{display:block}.difficulty .menu__item,.help .menu__item{display:block;width:100%;text-align:center;font-size:1.2em;line-height:3;border-top:1px solid silver;background:#fff}.help .header--extra__menu-button{font-size:.8125em;opacity:.4}.difficulty .header--extra__menu-button .icon{font-size:.875em;opacity:.6}.difficulty .header--extra__menu-button:hover .icon{opacity:1}@media (min-width:30em){.difficulty .header--extra__menu-button:before{content:'Difficulty: ';font-weight:400;font-size:.8375em;vertical-align:top}}.touch-controls__items{padding-right:16.67%;position:relative;margin-bottom:1em}.touch-controls__item-wrap{display:inline-block;width:16.67%;height:2.5em;margin:0 1.33% .375em}.touch-controls__item{display:inline-block;width:100%;height:100%;font-size:.9375em;color:grey;background:#fff}.active.touch-controls__item{border:2px solid #606060;color:#404040;font-weight:700}.touch-controls__item--reset{background:#ddd}.touch-controls__item--float{position:absolute;right:0;top:0;bottom:0;width:16.67%;font-size:.875em;height:auto}.touch-controls__item--float.touch-controls__item--float{height:auto}.touch-controls__item--candidates{white-space:normal;word-wrap:break-word}.touch-controls__item--candidates .icon{font-size:1.5em}.main-footer{color:#606060;opacity:.6;font-size:.75em}@media (min-height:33.75em){.header,.sudoku-board{margin-bottom:1em}.sudoku-board{min-height:22.75rem}.sudoku-board input{height:2em}.touch-controls__item-wrap{height:3em;margin-bottom:.5em}}@media(min-width:50em){.header{margin-bottom:3em}.touch-controls{display:none}.sudoku-board{margin-bottom:2em}.sudoku-board input{cursor:text}.difficulty .menu,.help .menu{left:auto;width:20em;background:0 0;border-top:1px solid silver}.difficulty .menu__item,.help .menu__item{border-top:0;border-left:1px solid silver;border-bottom:1px solid silver}}</style>
+
+		<meta name="description" content="Sudoku solver implementing all basic sudoku strategies. Should beat any newspaper sudoku" />
+		<title>Sudoku</title>
+		<meta name="keywords" content="Sudoku solver, sudoku, sudoku strategies, sudoku help, newspaper sudoku" />
+
+		<script>var dev = "";var boardSize = "";var bbool = false;</script>
+		<script>
+			function removecan(){
+				if(bbool){
+					const el2 = document.querySelector('#board');
+					el2.classList.remove("showCandidates");
+				}
+				bbool=!bbool;
+			}
+		</script>
+		<script src="sudoku.min.js" async></script>
+	</head>
+
+	<body>
+		<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;">
+  <defs>
+    <symbol id="quill" viewBox="0 0 1024 1024">
+    	<path class="path1" d="M0 1024c128-384 463-1024 1024-1024-263 211-384 704-576 704s-192 0-192 0l-192 320h-64z"></path>
+    </symbol>
+
+    <symbol id="cog" viewBox="0 0 1024 1024">
+    	<path class="path1" d="M933.79 610.25c-53.726-93.054-21.416-212.304 72.152-266.488l-100.626-174.292c-28.75 16.854-62.176 26.518-97.846 26.518-107.536 0-194.708-87.746-194.708-195.99h-201.258c0.266 33.41-8.074 67.282-25.958 98.252-53.724 93.056-173.156 124.702-266.862 70.758l-100.624 174.292c28.97 16.472 54.050 40.588 71.886 71.478 53.638 92.908 21.512 211.92-71.708 266.224l100.626 174.292c28.65-16.696 61.916-26.254 97.4-26.254 107.196 0 194.144 87.192 194.7 194.958h201.254c-0.086-33.074 8.272-66.57 25.966-97.218 53.636-92.906 172.776-124.594 266.414-71.012l100.626-174.29c-28.78-16.466-53.692-40.498-71.434-71.228zM512 719.332c-114.508 0-207.336-92.824-207.336-207.334 0-114.508 92.826-207.334 207.336-207.334 114.508 0 207.332 92.826 207.332 207.334-0.002 114.51-92.824 207.334-207.332 207.334z"></path>
+    </symbol>
+
+    <symbol id="bin" viewBox="0 0 1024 1024">
+    	<path class="path1" d="M128 320v640c0 35.2 28.8 64 64 64h576c35.2 0 64-28.8 64-64v-640h-704zM320 896h-64v-448h64v448zM448 896h-64v-448h64v448zM576 896h-64v-448h64v448zM704 896h-64v-448h64v448z"></path>
+    	<path class="path2" d="M848 128h-208v-80c0-26.4-21.6-48-48-48h-224c-26.4 0-48 21.6-48 48v80h-208c-26.4 0-48 21.6-48 48v80h832v-80c0-26.4-21.6-48-48-48zM576 128h-192v-63.198h192v63.198z"></path>
+    </symbol>
+  </defs>
+</svg>
+		<section class="header">
+			<div class="header__logo">
+				<h1 class="header__logo__title">Sudoku</h1>
+				<small class='header__logo__tagline sw--only'>Works offline!</small>
+			</div>
+
+			<div class='header--extra'>
+				<div class="difficulty">
+					<button class="header--extra__menu-button js-menu-open-btn" type="button">
+						<span class='header--extra__menu-button__text js-difficulty-label'>Medium </span>
+						<svg class="icon icon-cog"><use xlink:href="#cog"></use></svg>
+					</button>
+
+					<ul class='menu'>
+						<li class='menu__item-wrap'>
+							<button type="button" class="menu__item js-generate-board-btn--easy">Easy</button>
+						</li>
+						<li class='menu__item-wrap'>
+							<button type="button" class="menu__item js-generate-board-btn--medium">Medium</button>
+						</li>
+						<li class='menu__item-wrap'>
+							<button type="button" class="menu__item js-generate-board-btn--hard">Hard</button>
+						</li>
+						<li class='menu__item-wrap'>
+							<button type="button" class="menu__item js-generate-board-btn--very-hard">Very Hard</button>
+						</li>
+					</ul>
+				</div>
+
+			</div>
+		</section>
+
+		<div class="wrap wrap--only-large">
+			<div class="sudoku-board js-sudoku-board" id="board">
+			</div>
+		</div>
+
+		<section class="touch-controls">
+			<ul class='touch-controls__items'>
+				<li class='touch-controls__item-wrap'>
+					<button type="button" class='touch-controls__item js-digit-button active' data-digit-button-value='1'>1</button>
+				</li><!--
+				--><li class='touch-controls__item-wrap'>
+					<button type="button" class='touch-controls__item js-digit-button' data-digit-button-value='2'>2</button>
+				</li><!--
+				--><li class='touch-controls__item-wrap'>
+					<button type="button" class='touch-controls__item js-digit-button' data-digit-button-value='3'>3</button>
+				</li><!--
+				--><li class='touch-controls__item-wrap'>
+					<button type="button" class='touch-controls__item js-digit-button' data-digit-button-value='4'>4</button>
+				</li><!--
+				--><li class='touch-controls__item-wrap'>
+					<button type="button" class='touch-controls__item js-digit-button' data-digit-button-value='5'>5</button>
+				</li><!--
+				--><li class='touch-controls__item-wrap'>
+					<button type="button" class='touch-controls__item js-digit-button' data-digit-button-value='6'>6</button>
+				</li><!--
+				--><li class='touch-controls__item-wrap'>
+					<button type="button" class='touch-controls__item js-digit-button' data-digit-button-value='7'>7</button>
+				</li><!--
+				--><li class='touch-controls__item-wrap'>
+					<button type="button" class='touch-controls__item js-digit-button' data-digit-button-value='8'>8</button>
+				</li><!--
+				--><li class='touch-controls__item-wrap'>
+					<button type="button" class='touch-controls__item js-digit-button' data-digit-button-value='9'>9</button>
+				</li><!--
+				--><li class='touch-controls__item-wrap'>
+					<button type="button" class='touch-controls__item touch-controls__item--reset js-digit-button' data-digit-button-value='C'>
+						<svg class="icon icon-bin">
+							<use xlink:href="#bin"></use>
+						</svg>
+					</button>
+				</li><!--
+				--><li class='touch-controls__item-wrap touch-controls__item--float'>
+					<button type="button" id="quill-button" class='touch-controls__item touch-controls__item--candidates js-toggle-candidate-mode-button' onclick="removecan()">
+						<svg class="icon icon-quill">
+							<use xlink:href="#quill"></use>
+						</svg>
+					</button>
+				</li>
+			</ul>
+		</section>
+		<div class='modal js-modal'>
+			<div class='modal__content js-modal-content'></div>
+		</div>
+	</body>
+</html>
