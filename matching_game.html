@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Match Game">
-    
     <link rel="apple-touch-icon" href="icon.png">
-
-    <title>Colorful Match Pro</title>
+    <title>Match Pro: Levels</title>
     <style>
         :root { --bg: #2c3e50; --card: #ffffff; }
         body {
-            font-family: 'system-ui', -apple-system, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             background: var(--bg);
             margin: 0;
             display: flex;
@@ -29,32 +25,34 @@
             overflow: hidden;
         }
         #canvas { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 100; }
-        .header { color: white; text-align: center; margin-bottom: 10px; z-index: 10; }
+        .header { color: white; text-align: center; margin-bottom: 5px; z-index: 10; }
+        #level-indicator { font-size: 1.2rem; opacity: 0.8; margin-bottom: 5px; }
+        
         .game-board {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            width: 90vw;
-            max-width: 500px;
+            gap: 8px;
+            width: 95vw;
+            max-width: 600px;
             padding: 10px;
             transition: opacity 0.5s;
+            justify-content: center;
         }
+
         .card {
             aspect-ratio: 1/1;
             background: var(--card);
-            border: 4px solid transparent;
-            border-radius: 15px;
+            border: 3px solid transparent;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             transition: transform 0.2s, opacity 0.4s;
         }
-        .card.is-selected { border-color: #ecf0f1; transform: scale(1.1); }
+        .card.is-selected { border-color: #ecf0f1; transform: scale(1.08); }
         .card.is-matched { opacity: 0; pointer-events: none; transform: scale(0.5); }
-        .icon { width: 70%; height: 70%; }
-        
-        /* Victory Styles */
+        .icon { width: 75%; height: 75%; }
+
         #victory-overlay {
             position: fixed;
             top: 50%; left: 50%;
@@ -73,68 +71,100 @@
             display: block;
             animation: bounce 0.6s infinite alternate;
         }
-        @keyframes bounce {
-            from { transform: scale(1); }
-            to { transform: scale(1.1); }
-        }
+        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
         .btn {
-            padding: 20px 40px;
-            font-size: 1.4rem;
-            background: #f1c40f;
-            color: #2c3e50;
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            padding: 20px 40px; font-size: 1.4rem;
+            background: #f1c40f; color: #2c3e50;
+            border: none; border-radius: 50px;
+            font-weight: bold; box-shadow: 0 6px 15px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body>
 
     <canvas id="canvas"></canvas>
-    <div class="header"><h2 id="msg">Find the Pairs!</h2></div>
+    <div class="header">
+        <div id="level-indicator">Level 1</div>
+        <h2 id="msg">Find the Pairs!</h2>
+    </div>
+
     <div class="game-board" id="board"></div>
 
     <div id="victory-overlay">
         <span id="victory-text"></span>
-        <button class="btn" onclick="initGame()">Play Again!</button>
+        <button class="btn" onclick="resetGame()">Start Over</button>
     </div>
 
     <script>
-        const icons = [
-            { n: 'star', p: 'M256 38.05l68.73 139.26 153.64 22.33-111.16 108.35 26.24 153.01L256 388.92l-137.45 72.08 26.24-153.01L33.63 199.64l153.64-22.33L256 38.05z', c: '#f1c40f' },
-            { n: 'heart', p: 'M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z', c: '#e74c3c' },
-            { n: 'rocket', p: 'M480 32l-46.6 0-46.1 46.1c-40.1-3.1-80.1 6.3-114.2 28.1l-10.4-10.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l10.4 10.4c-21.8 34.1-31.2 74.1-28.1 114.2l-46.1 46.1c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l46.1-46.1c40.1 3.1 80.1-6.3 114.2-28.1l10.4 10.4c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-10.4-10.4c21.8-34.1 31.2-74.1 28.1-114.2l46.1-46.1z', c: '#3498db' },
-            { n: 'bell', p: 'M256 0c-17.7 0-32 14.3-32 32v19.2C132.6 66 64 145.1 64 240v120c0 11.4-6.1 21.9-16 27.4L16 405.5C1.8 413.4-3.5 431.1 3.5 445.6c7 14.5 24.8 20.6 39.3 13.6L72 445V480c0 17.7 14.3 32 32 32h304c17.7 0 32-14.3 32-32v-35l29.2 14.2c14.5 7.1 32.3.9 39.3-13.6 7-14.5 1.7-32.2-12.5-40.1l-32-18.1c-9.9-5.6-16-16.1-16-27.4V240c0-94.9-68.6-174-160-188.8V32c0-17.7-14.3-32-32-32z', c: '#9b59b6' },
-            { n: 'moon', p: 'M223.5 32C100 32 0 132 0 255.5S100 479 223.5 479c60.6 0 115.5-24.2 155.8-63.4 5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6-96.9 0-175.5-78.6-175.5-175.5 0-65.8 36.2-123.1 89.7-153.3 6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.1-.5-12.6-.8-19.4-.8z', c: '#f39c12' },
-            { n: 'sun', p: 'M256 160c-53 0-96 43-96 96s43 96 96 96 96-43 96-96-43-96-96-96zm0-64c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32s-32 14.3-32 32v32c0 17.7 14.3 32 32 32zm135.8 45.4c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-22.6-22.6c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l22.6 22.6zM480 224h-32c-17.7 0-32 14.3-32 32s14.3 32 32 32h32c17.7 0 32-14.3 32-32s-14.3-32-32-32zM391.8 346.5c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l22.6 22.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-22.6-22.6z', c: '#ff5e13' },
-            { n: 'bolt', p: 'M0 288c0-17.7 14.3-32 32-32h144V32c0-13.1 8-24.8 20.1-29.7s26-.8 34.6 10l192 240c11.3 14.1 11.3 34.4 0 48.4s-32.5 19-50.6 11.4L272 288v224c0 13.1-8 24.8-20.1 29.7s-26 .8-34.6-10l-192-240C10.7 312.4 8 300.5 8 288H0z', c: '#2ecc71' },
-            { n: 'cloud', p: 'M0 336c0 79.5 64.5 144 144 144h224c79.5 0 144-64.5 144-144 0-63.9-41.6-118.2-99.3-137 2.1-10.1 3.3-20.6 3.3-31.4 0-83.9-68.1-152-152-152-60.3 0-112.5 35.1-137.4 86.4-15.1-10.4-33.3-16.4-53-16.4-52.8 0-95.6 42.8-95.6 95.6 0 1.9.1 3.7.2 5.5C31.5 212.5 0 269.8 0 336z', c: '#1abc9c' }
+        // Library of 25 unique icons
+        const iconLibrary = [
+            { n: 'star', p: 'M256 38l68 139 154 22-111 108 26 153-137-72-137 72 26-153-111-108 154-22z', c: '#f1c40f' },
+            { n: 'heart', p: 'M462 62c-55-46-136-38-186 14L256 96l-20-20C186 24 104 16 50 62c-63 54-66 150-10 208l193 200c13 13 33 13 45 0l194-200c56-58 53-154-10-208z', c: '#e74c3c' },
+            { n: 'moon', p: 'M223 32C100 32 0 132 0 255s100 224 223 224c61 0 116-24 156-63 5-5 6-13 3-19s-10-10-17-9c-10 2-20 3-30 3-97 0-175-79-175-175 0-66 36-123 90-153 6-4 9-11 8-17s-7-12-14-13c-6-1-13-1-19-1z', c: '#f39c12' },
+            { n: 'bolt', p: 'M0 288c0-18 14-32 32-32h144V32c0-13 8-25 20-30s26-1 35 10l192 240c11 14 11 34 0 48s-32 19-51 11L272 288v224c0 13-8 25-20 30s-26 1-35-10l-192-240C11 312 8 300 8 288H0z', c: '#2ecc71' },
+            { n: 'cloud', p: 'M0 336c0 80 65 144 144 144h224c80 0 144-65 144-144 0-64-42-118-99-137 2-10 3-21 3-31 0-84-68-152-152-152-60 0-113 35-137 86-15-10-33-16-53-16-53 0-96 43-96 96 0 2 0 4 0 6C31 213 0 270 0 336z', c: '#3498db' },
+            { n: 'sun', p: 'M256 160c-53 0-96 43-96 96s43 96 96 96 96-43 96-96-43-96-96-96zm0-64c18 0 32-14 32-32V32c0-18-14-32-32-32s-32 14-32 32v32c0 18 14 32 32 32zm136 45c12 13 33 13 45 0s13-33 0-45l-23-23c-12-12-33-12-45 0s-13 33 0 45l23 23zM480 224h-32c-18 0-32 14-32 32s14 32 32 32h32c18 0 32-14 32-32s-14-32-32-32z', c: '#ff9f43' },
+            { n: 'bell', p: 'M256 0c-18 0-32 14-32 32v19C133 66 64 145 64 240v120c0 11-6 22-16 27L16 406c-14 8-19 26-12 40 7 15 25 21 39 14l33-15v35c0 18 14 32 32 32h304c18 0 32-14 32-32v-35l29 14c15 7 32 1 39-14 7-15 2-32-12-40l-32-18c-10-6-16-16-16-27V240c0-95-69-174-160-189V32c0-18-14-32-32-32z', c: '#9b59b6' },
+            { n: 'gift', p: 'M32 160c-18 0-32 14-32 32v32c0 18 14 32 32 32h448c18 0 32-14 32-32v-32c0-18-14-32-32-32H32zm208 128H64v192c0 18 14 32 32 32h144V288zm32 0v224h144c18 0 32-14 32-32V288H272zM96 128c0-35 29-64 64-64s64 29 64 64h32c0-35 29-64 64-64s64 29 64 64h48c18 0 32-14 32-32s-14-32-32-32h-11c-6-37-38-64-77-64-32 0-60 18-74 46-14-28-42-46-74-46-39 0-71 27-77 64h-11c-18 0-32 14-32 32s14 32 32 32h48z', c: '#ff4d4d' },
+            { n: 'rocket', p: 'M480 32l-47 0-46 46c-40-3-80 6-114 28l-10-10c-13-13-33-13-45 0s-13 33 0 45l10 10c-22 34-31 74-28 114l-46 46c-13 13-13 33 0 45s33 13 45 0l46-46c40 3 80-6 114-28l10 10c13 13 33 13 45 0s13-33 0-45l-10-10c22-34 31-74 28-114l46-46', c: '#00d2d3' },
+            { n: 'gem', p: 'M160 32L48 224l208 256 208-256L352 32H160zM90 216l84-143h164l84 143H90z', c: '#a29bfe' },
+            { n: 'bug', p: 'M256 64c-44 0-80 36-80 80v32h160v-32c0-44-36-80-80-80zM144 176c-27 0-48 21-48 48v160c0 44 36 80 80 80h160c44 0 80-36 80-80V224c0-27-21-48-48-48H144z', c: '#badc58' },
+            { n: 'car', p: 'M496 304l-40-104c-12-32-42-54-76-54H132c-34 0-64 22-76 54L16 304c-10 26 9 54 37 54h11c-3 8-5 16-5 24 0 40 32 72 72 72s72-32 72-72c0-8-2-16-5-24h128c-3 8-5 16-5 24 0 40 32 72 72 72s72-32 72-72c0-8-2-16-5-24h11c28 0 47-28 37-54z', c: '#ff7675' },
+            { n: 'tree', p: 'M256 32L96 224h64l-96 160h128v96h64v-96h128L320 224h64L256 32z', c: '#27ae60' },
+            { n: 'ghost', p: 'M256 32c-88 0-160 72-160 160v224l32-32 32 32 32-32 32 32 32-32 32 32 32-32 32 32V192c0-88-72-160-160-160z', c: '#dfe6e9' },
+            { n: 'plane', p: 'M464 224h-80l-96-160h-48l48 160h-96l-32-48h-32l16 48-16 48h32l32-48h96l-48 160h48l96-160h80c27 0 48-21 48-48s-21-48-48-48z', c: '#74b9ff' },
+            { n: 'music', p: 'M470 41c-11-5-24-2-29 9l-96 224v162c0 44-36 80-80 80s-80-36-80-80 36-80 80-80c12 0 24 3 34 8l3-192c1-26 19-48 44-53l128-30c12-3 25 4 29 16s-2 25-14 29l-114 27v14l96-22c11-3 22 4 25 15s-4 22-15 25z', c: '#fd79a8' },
+            { n: 'fish', p: 'M512 256c0 60-128 160-256 160S0 316 0 256 128 96 256 96s256 100 256 160z', c: '#fab1a0' },
+            { n: 'bone', p: 'M448 320c-35 0-64 29-64 64 0 5-1 10-2 15L130 257c1-5 2-10 2-15 0-35-29-64-64-64S4 207 4 242s29 64 64 64c5 0 10-1 15-2l253 142c-1 5-2 10-2 15 0 35 29 64 64 64s64-29 64-64-29-64-64-64z', c: '#eee' },
+            { n: 'ice', p: 'M256 32c-88 0-160 72-160 160 0 128 160 288 160 288s160-160 160-288c0-88-72-160-160-160z', c: '#81ecec' },
+            { n: 'crown', p: 'M480 128l-96 96-128-160-128 160-96-96 32 256h384l32-256z', c: '#ffeaa7' },
+            { n: 'pizza', p: 'M256 32L32 448h448L256 32z', c: '#e67e22' },
+            { n: 'apple', p: 'M256 96c-44 0-80 36-80 80s36 80 80 80 80-36 80-80-36-80-80-80z', c: '#ff7675' },
+            { n: 'key', p: 'M160 224c-35 0-64 29-64 64s29 64 64 64 64-29 64-64c0-5-1-10-2-15l162-162V32h80v80h-40v40h-40l-80 80c-5-1-10-2-15-2z', c: '#95a5a6' },
+            { n: 'leaf', p: 'M480 32C320 32 32 320 32 480c160 0 448-288 448-448z', c: '#55efc4' },
+            { n: 'paw', p: 'M256 192c-53 0-96 43-96 96s43 96 96 96 96-43 96-96-43-96-96-96z', c: '#a29bfe' }
         ];
 
-        const victoryPhrases = ["Incredible!", "You're a Star!", "Awesome!", "You Did It!", "Fantastic!", "Boom!", "Perfect!"];
+        const levels = [
+            { r: 4, c: 4 }, // 8 pairs
+            { r: 5, c: 4 }, // 10 pairs
+            { r: 6, c: 4 }, // 12 pairs
+            { r: 6, c: 5 }, // 15 pairs
+            { r: 6, c: 6 }  // 18 pairs
+        ];
+
+        let currentLevelIndex = 0;
         let first = null;
         let matchesFound = 0;
         let fireworksActive = false;
 
-        function initGame() {
+        function initLevel() {
+            const level = levels[currentLevelIndex];
             const b = document.getElementById('board');
             const overlay = document.getElementById('victory-overlay');
+            const indicator = document.getElementById('level-indicator');
+            
             b.style.opacity = "1";
+            b.style.gridTemplateColumns = `repeat(${level.c}, 1fr)`;
             overlay.style.display = "none";
+            indicator.innerText = `Level ${currentLevelIndex + 1} (${level.r}x${level.c})`;
             fireworksActive = false;
             b.innerHTML = '';
             first = null;
             matchesFound = 0;
 
-            let g = [...icons, ...icons].sort(() => Math.random() - 0.5);
-            g.forEach(i => {
-                const c = document.createElement('div');
-                c.className = 'card';
-                c.dataset.i = i.n;
-                c.innerHTML = `<svg class="icon" viewBox="0 0 512 512" style="fill: ${i.c}"><path d="${i.p}"/></svg>`;
-                c.onclick = () => handleTap(c);
-                b.appendChild(c);
+            // Pick random subset of icons for this level
+            const numPairs = (level.r * level.c) / 2;
+            let levelIcons = [...iconLibrary].sort(() => Math.random() - 0.5).slice(0, numPairs);
+            let gameSet = [...levelIcons, ...levelIcons].sort(() => Math.random() - 0.5);
+
+            gameSet.forEach(i => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.i = i.n;
+                card.innerHTML = `<svg class="icon" viewBox="0 0 512 512" style="fill: ${i.c}"><path d="${i.p}"/></svg>`;
+                card.onclick = () => handleTap(card);
+                b.appendChild(card);
             });
         }
 
@@ -148,7 +178,9 @@
                     first.classList.add('is-matched');
                     first = null;
                     matchesFound++;
-                    if (matchesFound === icons.length) triggerVictory();
+                    if (matchesFound === (levels[currentLevelIndex].r * levels[currentLevelIndex].c) / 2) {
+                        nextLevel();
+                    }
                 } else {
                     first.classList.remove('is-selected');
                     first = c;
@@ -157,14 +189,30 @@
             }
         }
 
-        function triggerVictory() {
+        function nextLevel() {
+            if (currentLevelIndex < levels.length - 1) {
+                currentLevelIndex++;
+                setTimeout(initLevel, 600); // Small pause between levels
+            } else {
+                triggerFinalVictory();
+            }
+        }
+
+        function triggerFinalVictory() {
             const b = document.getElementById('board');
             const overlay = document.getElementById('victory-overlay');
             const txt = document.getElementById('victory-text');
+            const phrases = ["MASTER!", "UNSTOPPABLE!", "PERFECT!", "YOU WON!"];
+            
             b.style.opacity = "0";
-            txt.innerText = victoryPhrases[Math.floor(Math.random() * victoryPhrases.length)];
+            txt.innerText = phrases[Math.floor(Math.random() * phrases.length)];
             overlay.style.display = "block";
             fireworksActive = true;
+        }
+
+        function resetGame() {
+            currentLevelIndex = 0;
+            initLevel();
         }
 
         // --- FIREWORKS ---
@@ -179,9 +227,9 @@
             constructor(x, y, color) {
                 this.x = x; this.y = y;
                 this.color = color;
-                this.velocity = { x: (Math.random() - 0.5) * 10, y: (Math.random() - 0.5) * 10 };
+                this.velocity = { x: (Math.random() - 0.5) * 12, y: (Math.random() - 0.5) * 12 };
                 this.alpha = 1;
-                this.friction = 0.96;
+                this.friction = 0.95;
             }
             draw() {
                 ctx.globalAlpha = this.alpha;
@@ -193,30 +241,31 @@
             update() {
                 this.velocity.x *= this.friction;
                 this.velocity.y *= this.friction;
-                this.velocity.y += 0.08;
+                this.velocity.y += 0.1;
                 this.x += this.velocity.x;
                 this.y += this.velocity.y;
-                this.alpha -= 0.012;
+                this.alpha -= 0.01;
             }
         }
 
         function animate() {
             requestAnimationFrame(animate);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (fireworksActive && Math.random() < 0.08) {
+            if (fireworksActive && Math.random() < 0.1) {
                 const x = Math.random() * canvas.width;
-                const y = Math.random() * canvas.height * 0.4;
+                const y = Math.random() * canvas.height * 0.5;
                 const color = `hsl(${Math.random() * 360}, 80%, 60%)`;
-                for (let i = 0; i < 40; i++) particles.push(new Particle(x, y, color));
+                for (let i = 0; i < 50; i++) particles.push(new Particle(x, y, color));
             }
             particles.forEach((p, i) => {
                 if (p.alpha <= 0) particles.splice(i, 1);
                 else { p.update(); p.draw(); }
             });
         }
+
         animate();
         document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
-        initGame();
+        initLevel();
     </script>
 </body>
 </html>
