@@ -32,6 +32,7 @@
             margin-top: 10px;
             margin-bottom: 20px;
             z-index: 5;
+            cursor: pointer;
         }
 
         .btn {
@@ -57,6 +58,7 @@
             text-shadow: 0 0 20px rgba(255,255,255,0.5);
             z-index: 100;
             color: white;
+            pointer-events: none;
             animation: bounce 0.6s infinite alternate;
         }
         @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
@@ -81,7 +83,7 @@
         
         let targetIndex = 0;
         let currentAngle = 0;
-        let rotationSpeed = 0.04; // SLOWER: Half the original speed
+        let rotationSpeed = 0.04; 
         let isSpinning = true;
         let fireworksActive = false;
 
@@ -93,6 +95,13 @@
         const cx = canvas.width / 2;
         const cy = 250;
         const targetBottomEdgeY = cy - spinnerRadius;
+
+        // Interaction Listeners for the Canvas
+        canvas.addEventListener('mousedown', (e) => { handleAction(); });
+        canvas.addEventListener('touchstart', (e) => { 
+            e.preventDefault(); // Prevents ghost clicks and scrolling
+            handleAction(); 
+        }, {passive: false});
 
         function setTarget() {
             targetIndex = Math.floor(Math.random() * colors.length);
@@ -112,11 +121,9 @@
             ctx.moveTo(targetCX - targetWidth / 2, targetTopY);
             ctx.lineTo(targetCX + targetWidth / 2, targetTopY);
             ctx.lineTo(targetCX + targetWidth / 2, targetBottomEdgeY);
-            
-            // Inverse Arc Match
             ctx.arc(cx, cy, spinnerRadius, Math.asin((targetWidth/2)/spinnerRadius) - Math.PI/2, -Math.asin((targetWidth/2)/spinnerRadius) - Math.PI/2, true);
-
             ctx.closePath();
+            
             ctx.shadowColor = 'rgba(0,0,0,0.3)';
             ctx.shadowBlur = 15;
             ctx.shadowOffsetY = 5;
@@ -192,7 +199,7 @@
             victoryText.style.display = 'none';
             btn.innerText = "STOP";
             setTarget();
-            rotationSpeed = 0.04 + (Math.random() * 0.03); // Randomized speed is also slower
+            rotationSpeed = 0.04 + (Math.random() * 0.03);
         }
 
         function win() {
@@ -201,6 +208,7 @@
             btn.innerText = "SPIN AGAIN";
         }
 
+        // --- FIREWORKS ---
         const bgCanvas = document.getElementById('canvas-bg');
         const bgCtx = bgCanvas.getContext('2d');
         let particles = [];
