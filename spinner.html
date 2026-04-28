@@ -29,7 +29,7 @@
         
         #game-canvas {
             background: transparent;
-            margin-top: 10px; /* Space for the Match This label above the canvas */
+            margin-top: 10px;
             margin-bottom: 20px;
             z-index: 5;
         }
@@ -77,11 +77,11 @@
     <script>
         const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#e67e22'];
         const spinnerRadius = 140;
-        const targetWidth = spinnerRadius * 2 * Math.sin((30 * Math.PI) / 180); // Width of one segment
+        const targetWidth = spinnerRadius * 2 * Math.sin((30 * Math.PI) / 180);
         
         let targetIndex = 0;
         let currentAngle = 0;
-        let rotationSpeed = 0.08;
+        let rotationSpeed = 0.04; // SLOWER: Half the original speed
         let isSpinning = true;
         let fireworksActive = false;
 
@@ -90,20 +90,15 @@
         const btn = document.getElementById('action-btn');
         const victoryText = document.getElementById('victory-text');
 
-        // Center coordinates for the main spinner
         const cx = canvas.width / 2;
-        const cy = 250; // Main spinner center
-        // targetY is where the concave curve ends (top edge of the spinner)
+        const cy = 250;
         const targetBottomEdgeY = cy - spinnerRadius;
 
         function setTarget() {
             targetIndex = Math.floor(Math.random() * colors.length);
         }
 
-        // --- DRAWING ---
-        
         function drawTargetZone() {
-            // stationary, sitting on top of the spinner. concave bottom curve.
             const targetHeight = 60;
             const targetTopY = targetBottomEdgeY - targetHeight;
             const targetCX = cx;
@@ -114,31 +109,20 @@
             ctx.lineWidth = 4;
             
             ctx.beginPath();
-            // Start at top left
             ctx.moveTo(targetCX - targetWidth / 2, targetTopY);
-            // Top edge
             ctx.lineTo(targetCX + targetWidth / 2, targetTopY);
-            // Right edge
             ctx.lineTo(targetCX + targetWidth / 2, targetBottomEdgeY);
             
-            // Bottom Concave Curve (Inverse Arc)
-            // ctx.arc(cx, cy, radius, startAngle, endAngle, anticlockwise);
-            // We want an anti-clockwise arc going back to the left point
+            // Inverse Arc Match
             ctx.arc(cx, cy, spinnerRadius, Math.asin((targetWidth/2)/spinnerRadius) - Math.PI/2, -Math.asin((targetWidth/2)/spinnerRadius) - Math.PI/2, true);
 
-            // Left edge
             ctx.closePath();
-            
-            // Shadow
             ctx.shadowColor = 'rgba(0,0,0,0.3)';
             ctx.shadowBlur = 15;
             ctx.shadowOffsetY = 5;
-
             ctx.fill();
-            ctx.shadowBlur = 0; // Disable shadow for stroke
-            ctx.shadowOffsetY = 0;
+            ctx.shadowBlur = 0;
             ctx.stroke();
-            
             ctx.restore();
         }
 
@@ -157,7 +141,6 @@
                 ctx.stroke();
             }
 
-            // Central hub
             ctx.beginPath();
             ctx.arc(cx, cy, 15, 0, Math.PI * 2);
             ctx.fillStyle = 'white';
@@ -169,10 +152,8 @@
         function drawFrame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawSpinner();
-            drawTargetZone(); // Target draws on top of the spinner
+            drawTargetZone();
         }
-
-        // --- GAME LOGIC ---
 
         function update() {
             if (isSpinning) {
@@ -211,7 +192,7 @@
             victoryText.style.display = 'none';
             btn.innerText = "STOP";
             setTarget();
-            rotationSpeed = 0.08 + (Math.random() * 0.06); // randomize speed
+            rotationSpeed = 0.04 + (Math.random() * 0.03); // Randomized speed is also slower
         }
 
         function win() {
@@ -220,7 +201,6 @@
             btn.innerText = "SPIN AGAIN";
         }
 
-        // --- FIREWORKS ---
         const bgCanvas = document.getElementById('canvas-bg');
         const bgCtx = bgCanvas.getContext('2d');
         let particles = [];
