@@ -83,9 +83,10 @@
         
         let targetIndex = 0;
         let currentAngle = 0;
-        let rotationSpeed = 0.04; 
+        let rotationSpeed = 0.02; // Base speed halved
         let isSpinning = true;
         let fireworksActive = false;
+        let lastWin = false; // Flag to check if we need a new color
 
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
@@ -96,10 +97,9 @@
         const cy = 250;
         const targetBottomEdgeY = cy - spinnerRadius;
 
-        // Interaction Listeners for the Canvas
         canvas.addEventListener('mousedown', (e) => { handleAction(); });
         canvas.addEventListener('touchstart', (e) => { 
-            e.preventDefault(); // Prevents ghost clicks and scrolling
+            e.preventDefault(); 
             handleAction(); 
         }, {passive: false});
 
@@ -189,6 +189,7 @@
             if (topIndex === targetIndex) {
                 win();
             } else {
+                lastWin = false; // Player missed, keep the same color
                 btn.innerText = "SPIN AGAIN";
             }
         }
@@ -198,14 +199,20 @@
             fireworksActive = false;
             victoryText.style.display = 'none';
             btn.innerText = "STOP";
-            setTarget();
-            rotationSpeed = 0.04 + (Math.random() * 0.03);
+            
+            // Only change color if the player won the last round
+            if (lastWin) {
+                setTarget();
+            }
+            
+            rotationSpeed = 0.02 + (Math.random() * 0.015); // Offset halved
         }
 
         function win() {
             victoryText.style.display = 'block';
             fireworksActive = true;
             btn.innerText = "SPIN AGAIN";
+            lastWin = true; // Set flag so color changes on next spin
         }
 
         // --- FIREWORKS ---
