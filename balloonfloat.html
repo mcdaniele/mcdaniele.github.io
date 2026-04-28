@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Balloon Float">
+
+    <title>Balloon Float</title>
+    <style>
+        :root {
+            /* High-contrast, easy-on-the-eyes dark background */
+            --bg-color: #1a253a; 
+            --balloon-size: clamp(140px, 20vw, 220px); /* Massive targets */
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Lock the screen to prevent scrolling */
+            touch-action: none; /* Critical for dementia interaction on iPad */
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #game-area {
+            position: relative;
+            flex-grow: 1;
+            width: 100vw;
+            z-index: 5;
+        }
+
+        .balloon {
+            position: absolute;
+            width: var(--balloon-size);
+            height: calc(var(--balloon-size) * 1.3);
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; /* Balloon shape */
+            cursor: pointer;
+            box-shadow: inset -15px -15px 40px rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.2);
+            /* Very slow rise animation: 15 seconds */
+            animation: rise 15s linear forwards; 
+            z-index: 10;
+        }
+
+        /* Balloon tail/string base */
+        .balloon::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 25px;
+            background-color: inherit;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        @keyframes rise {
+            from { top: 100vh; }
+            to { top: -200px; } /* Disappears smoothly off the top */
+        }
+
+        /* Burst effect elements */
+        .confetti {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 20;
+            animation: burst 1.5s ease-out forwards;
+        }
+
+        @keyframes burst {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-area"></div>
+
+    <script>
+        // High-saturation primary colors for aging retinas
+        const balloonColors = ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6'];
+        const gameArea = document.getElementById('game-area');
+        
+        // --- Pleasant, Non-Startling Audio ---
+        // Using low-frequency oscillator for a gentle, calming feedback sound.
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playChime() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            // SINE WAVE (soft sound) instead of standard square wave (jarring)
+            osc.type = 'sine';
+            
+            // Low-frequency (180Hz) provides tactile feedback without being high-pitched
+            osc.frequency.setValueAtTime(180, audioCtx.currentTime); 
+            
+            // Gentle fade-out
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.8);
+        }
+
+        // --- Core Game Logic ---
+
+        function createBalloon() {
+            // Only allow one balloon at a time to reduce cognitive load
+            if (gameArea.childElementCount > 0) return;
+
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            
+            // Set random color
+            const color = balloonColors[Math.floor(Math.random() * balloonColors.length)];
+            balloon.style.backgroundColor = color;
+            
+            // Random horizontal position (padding 10% to keep away from screen edge)
+            const randomX = 10 + Math.random() * 80; // 10% to 90% width
+            balloon.style.left = `${randomX}vw`;
+            
+            // Unified interaction handler (handles iPad taps smoothly)
+            balloon.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Prevents iPad UI interference
+                handlePop(balloon);
+            }, {passive: false});
+
+            balloon.addEventListener('click', () => {
+                handlePop(balloon);
+            });
+
+            gameArea.appendChild(balloon);
+
+            // Set a timer to spawn the next balloon if this one reaches the top (15 seconds)
+            setTimeout(() => {
+                if (balloon.parentNode) {
+                    balloon.remove();
+                    createBalloon(); // Spawn next
+                }
+            }, 15100);
+        }
+
+        function handlePop(balloon) {
+            playChime();
+            createBurst(balloon);
+            balloon.remove(); // Removes instantly for responsive feel
+            
+            // Spawn the next balloon after a gentle pause (1.5 seconds)
+            setTimeout(createBalloon, 1500);
+        }
+
+        // --- Visual Reinforcement ---
+
+        function createBurst(balloon) {
+            const rect = balloon.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const color = balloon.style.backgroundColor;
+
+            for (let i = 0; i < 15; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = color;
+                
+                // Burst direction logic (explode outwards)
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 100;
+                
+                // Set CSS variables for the keyframe animation
+                confetti.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+                confetti.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
+                
+                // Confetti spawn position
+                confetti.style.left = `${centerX}px`;
+                confetti.style.top = `${centerY}px`;
+
+                gameArea.appendChild(confetti);
+
+                // Clean up confetti after animation (1.5 seconds)
+                setTimeout(() => confetti.remove(), 1500);
+            }
+        }
+
+        // --- Initial Load ---
+        
+        // Start the game loop after a slight delay
+        setTimeout(createBalloon, 1000);
+
+    </script>
+</body>
+</html>
