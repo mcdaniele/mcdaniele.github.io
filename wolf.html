@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Retro Raycaster: Desktop Edition</title>
+    <style>
+        body { 
+            background: #050505; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+        }
+        #game-container { position: relative; border: 4px solid #333; box-shadow: 0 0 20px rgba(0,255,0,0.2); }
+        canvas { display: block; image-rendering: pixelated; background: black; }
+        .ui-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border: 1px solid #0f0;
+            pointer-events: none;
+        }
+        .controls-hint { margin-top: 15px; font-size: 0.9rem; color: #888; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div class="ui-overlay">
+            FPS: <span id="fps">60</span><br>
+            POS: <span id="pos">0,0</span>
+        </div>
+        <canvas id="view"></canvas>
+    </div>
+
+    <div class="controls-hint">
+        <b>WASD</b> or <b>ARROWS</b> to Move & Rotate | <b>ESC</b> to Reset
+    </div>
+
+<script>
+/**
+ * TEXT-BASED LEVEL CREATOR
+ * Edit the 1s and 0s below. 
+ * 1 = Wall, 0 = Empty Space
+ */
+const MAP = [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,1,1,1,1,0,1,1,1,1,1,1,0,0,1],
+    [1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,1],
+    [1,0,1,0,1,1,1,1,1,1,0,0,1,0,0,1],
+    [1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1],
+    [1,0,1,0,1,0,1,1,0,1,0,1,1,1,0,1],
+    [1,0,1,0,0,0,1,1,0,0,0,0,0,1,0,1],
+    [1,0,1,1,1,0,0,0,0,1,1,1,0,1,0,1],
+    [1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
+
+const canvas = document.getElementById('view');
+const ctx = canvas.getContext('2d');
+const fpsDisplay = document.getElementById('fps');
+const posDisplay = document.getElementById('pos');
+
+// Resolution (Higher for desktop, but kept low for style)
+canvas.width = 640;
+canvas.height = 480;
+
+const MAP_W = MAP[0].length;
+const MAP_H = MAP.length;
+const FOV = Math.PI / 3;
+
+let player = {
+    x: 2.0,
+    y: 2.0,
+    dir: 0,
+    rotSpeed: 0.04,
+    moveSpeed: 0.07
+};
+
+// Input State
+const keys = {};
+document.addEventListener('keydown', e => keys[e.code] = true);
+document.addEventListener('keyup', e => keys[e.code] = false);
+
+function update() {
+    // Rotation: A/D or Left/Right
+    if (keys['KeyA'] || keys['ArrowLeft']) player.dir -= player.rotSpeed;
+    if (keys['KeyD'] || keys['ArrowRight']) player.dir += player.rotSpeed;
+
+    // Movement: W/S or Up/Down
+    let moveX = 0;
+    let moveY = 0;
+    if (keys['KeyW'] || keys['ArrowUp']) {
+        moveX = Math.cos(player.dir) * player.moveSpeed;
+        moveY = Math.sin(player.dir) * player.moveSpeed;
+    }
+    if (keys['KeyS'] || keys['ArrowDown']) {
+        moveX = -Math.cos(player.dir) * player.moveSpeed;
+        moveY = -Math.sin(player.dir) * player.moveSpeed;
+    }
+
+    // Collision Detection (Wall slide)
+    if (MAP[Math.floor(player.y)][Math.floor(player.x + moveX)] === 0) player.x += moveX;
+    if (MAP[Math.floor(player.y + moveY)][Math.floor(player.x)] === 0) player.y += moveY;
+
+    posDisplay.innerText = `${player.x.toFixed(1)}, ${player.y.toFixed(1)}`;
+}
+
+function draw() {
+    // 1. Draw Ceiling and Floor
+    ctx.fillStyle = "#111"; // Ceiling
+    ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
+    ctx.fillStyle = "#222"; // Floor
+    ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+
+    // 2. Raycasting
+    for (let x = 0; x < canvas.width; x++) {
+        let rayAngle = (player.dir - FOV / 2) + (x / canvas.width) * FOV;
+        
+        let distanceToWall = 0;
+        let hitWall = false;
+        let boundary = false;
+
+        let eyeX = Math.cos(rayAngle);
+        let eyeY = Math.sin(rayAngle);
+
+        while (!hitWall && distanceToWall < 20) {
+            distanceToWall += 0.02;
+            let testX = Math.floor(player.x + eyeX * distanceToWall);
+            let testY = Math.floor(player.y + eyeY * distanceToWall);
+
+            if (testX < 0 || testX >= MAP_W || testY < 0 || testY >= MAP_H) {
+                hitWall = true;
+                distanceToWall = 20;
+            } else if (MAP[testY][testX] === 1) {
+                hitWall = true;
+            }
+        }
+
+        // Correct fisheye and calculate height
+        let correctedDist = distanceToWall * Math.cos(rayAngle - player.dir);
+        let wallHeight = canvas.height / correctedDist;
+
+        // Shading based on distance
+        let shade = Math.min(255, 255 / (correctedDist * 0.2));
+        ctx.strokeStyle = `rgb(0, ${shade}, 0)`;
+        
+        ctx.beginPath();
+        ctx.moveTo(x, (canvas.height / 2) - (wallHeight / 2));
+        ctx.lineTo(x, (canvas.height / 2) + (wallHeight / 2));
+        ctx.stroke();
+    }
+
+    // 3. Mini-Map (The Text Creator visualization)
+    const mapScale = 6;
+    ctx.fillStyle = "rgba(0, 255, 0, 0.2)";
+    for(let y = 0; y < MAP_H; y++) {
+        for(let x = 0; x < MAP_W; x++) {
+            if(MAP[y][x] === 1) ctx.fillRect(x * mapScale + 10, y * mapScale + 80, mapScale-1, mapScale-1);
+        }
+    }
+    // Player on map
+    ctx.fillStyle = "white";
+    ctx.fillRect(player.x * mapScale + 10, player.y * mapScale + 80, 3, 3);
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
