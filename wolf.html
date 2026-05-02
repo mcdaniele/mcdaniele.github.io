@@ -67,7 +67,6 @@ function update() {
         let newX = player.x + Math.cos(player.dir) * move;
         let newY = player.y + Math.sin(player.dir) * move;
         
-        // Sliding Logic preserved
         if (MAP[Math.floor(player.y)][Math.floor(newX)] !== 1) player.x = newX;
         if (MAP[Math.floor(newY)][Math.floor(player.x)] !== 1) player.y = newY;
 
@@ -79,7 +78,6 @@ function update() {
 }
 
 function draw() {
-    // Ceiling (Pitch Black) and Floor (Very Dark Gray)
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height/2);
     ctx.fillStyle = "#080808"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
 
@@ -106,10 +104,8 @@ function draw() {
         if (cell === 3) {
             ctx.fillStyle = "gold";
         } else {
-            // Updated Color Logic: Deep Sky Blue (0, 191, 255)
-            // Multiplier set to 25 as requested
             let b = Math.max(0, 255 - (realDist * 25));
-            let g = Math.max(0, 191 - (realDist * (191/10))); // Scale green relative to blue
+            let g = Math.max(0, 191 - (realDist * (191/10)));
             ctx.fillStyle = `rgb(0, ${g}, ${b})`;
         }
 
