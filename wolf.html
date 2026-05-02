@@ -1,91 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Maze Runner: Smooth Sliding</title>
-    <style>
-        body { background: #000; margin: 0; padding: 0; overflow: hidden; color: #0f0; font-family: 'Courier New', monospace; }
-        canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
-        .hud { position: absolute; bottom: 20px; width: 100%; text-align: center; pointer-events: none; text-shadow: 2px 2px #000; font-size: 1.2rem; }
-    </style>
-</head>
-<body>
-    <canvas id="view"></canvas>
-    <div class="hud">LVL: <span id="lvl-num">1</span> | SMOOTH SLIDING ENABLED</div>
-
-<script>
-const canvas = document.getElementById('view');
-const ctx = canvas.getContext('2d');
-
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resize);
-resize();
-
-const FOV = Math.PI / 3;
-let currentLevel = 1;
-let MAP = [];
-let player = { x: 1.5, y: 1.5, dir: 0, rotSpeed: 0.05, moveSpeed: 0.1 };
-
-function generateMaze(size) {
-    let maze = Array.from({ length: size }, () => Array(size).fill(1));
-    function walk(x, y) {
-        maze[y][x] = 0;
-        let dirs = [[0,-2],[0,2],[-2,0],[2,0]].sort(()=>Math.random()-0.5);
-        for(let [dx,dy] of dirs){
-            let nx=x+dx, ny=y+dy;
-            if(nx>0 && nx<size-1 && ny>0 && ny<size-1 && maze[ny][nx]===1){
-                maze[y+dy/2][x+dx/2]=0; walk(nx,ny);
-            }
-        }
-    }
-    walk(1,1);
-    maze[1][1]=0; maze[size-2][size-2]=3;
-    return maze;
-}
-
-function initLevel() {
-    const size = 11 + (currentLevel * 2);
-    MAP = generateMaze(size);
-    player.x = 1.5; player.y = 1.5; player.dir = 0;
-    document.getElementById('lvl-num').innerText = currentLevel;
-}
-
-const keys = {};
-document.addEventListener('keydown', e => keys[e.code] = true);
-document.addEventListener('keyup', e => keys[e.code] = false);
-
-function update() {
-    // Rotation
-    if (keys['KeyA'] || keys['ArrowLeft']) player.dir -= player.rotSpeed;
-    if (keys['KeyD'] || keys['ArrowRight']) player.dir += player.rotSpeed;
-    
-    // Movement Calculation
-    let move = (keys['KeyW'] || keys['ArrowUp'] ? 1 : keys['KeyS'] || keys['ArrowDown'] ? -1 : 0) * player.moveSpeed;
-    
-    if (move !== 0) {
-        let newX = player.x + Math.cos(player.dir) * move;
-        let newY = player.y + Math.sin(player.dir) * move;
-        
-        // SLIDING LOGIC: Check X and Y independently
-        // This allows the player to move along the X-axis even if the Y-axis is blocked (and vice versa)
-        if (MAP[Math.floor(player.y)][Math.floor(newX)] !== 1) {
-            player.x = newX;
-        }
-        if (MAP[Math.floor(newY)][Math.floor(player.x)] !== 1) {
-            player.y = newY;
-        }
-
-        // Check for Exit
-        if (MAP[Math.floor(player.y)][Math.floor(player.x)] === 3) {
-            currentLevel++;
-            initLevel();
-        }
-    }
-}
-
 function draw() {
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height/2);
     ctx.fillStyle = "#111"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
@@ -113,22 +25,13 @@ function draw() {
         if (cell === 3) {
             ctx.fillStyle = "gold";
         } else {
-            let brightness = Math.max(0, 255 - (realDist * 12));
+            // --- UPDATED DISTANCE SHADER ---
+            // Increased the multiplier (from 12 to 25) to make it darker much sooner.
+            // Adjust the 25 to a higher number (like 40) for even thicker darkness.
+            let brightness = Math.max(0, 255 - (realDist * 25)); 
             ctx.fillStyle = `rgb(0, ${brightness}, 0)`;
         }
 
         ctx.fillRect(x, y0, 1, h);
     }
 }
-
-function loop() {
-    update();
-    draw();
-    requestAnimationFrame(loop);
-}
-
-initLevel();
-loop();
-</script>
-</body>
-</html>
