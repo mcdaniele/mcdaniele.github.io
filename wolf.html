@@ -11,7 +11,7 @@
 </head>
 <body>
     <canvas id="view"></canvas>
-    <div class="hud">LVL: <span id="lvl-num">1</span> | HIGH-CONTRAST DISTANCE SHADER</div>
+    <div class="hud">LVL: <span id="lvl-num">1</span> | HIGH-CONTRAST DISTANCE SHADER 25</div>
 
 <script>
 const canvas = document.getElementById('view');
@@ -108,7 +108,7 @@ function draw() {
         } else {
             // HIGHER DISTANCE SHADER: 
             // 35 is the multiplier. Higher = darker hallways.
-            let brightness = Math.max(0, 255 - (realDist * 30));
+            let brightness = Math.max(0, 255 - (realDist * 25));
             ctx.fillStyle = `rgb(0, ${brightness}, 0)`;
         }
 
