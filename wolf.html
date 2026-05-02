@@ -108,7 +108,7 @@ function draw() {
         } else {
             // HIGHER DISTANCE SHADER: 
             // 35 is the multiplier. Higher = darker hallways.
-            let brightness = Math.max(0, 255 - (realDist * 35));
+            let brightness = Math.max(0, 255 - (realDist * 30));
             ctx.fillStyle = `rgb(0, ${brightness}, 0)`;
         }
 
