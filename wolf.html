@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Maze Runner: Fixed Vision</title>
+    <title>Maze Runner: Performance Edition</title>
     <style>
-        body { background: #000; margin: 0; padding: 0; overflow: hidden; color: #fff; font-family: 'Courier New', monospace; }
+        body { background: #000; margin: 0; padding: 0; overflow: hidden; color: #0f0; font-family: 'Courier New', monospace; }
         canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
-        .hud { position: absolute; bottom: 20px; width: 100%; text-align: center; pointer-events: none; text-shadow: 2px 2px #000; }
+        .hud { position: absolute; bottom: 20px; width: 100%; text-align: center; pointer-events: none; text-shadow: 2px 2px #000; font-size: 1.2rem; }
     </style>
 </head>
 <body>
     <canvas id="view"></canvas>
-    <div class="hud">LVL: <span id="lvl-num">1</span> | N: Green, S: Red, W: Blue, E: Yellow</div>
+    <div class="hud">LVL: <span id="lvl-num">1</span> | FIND THE GOLD EXIT</div>
 
 <script>
 const canvas = document.getElementById('view');
@@ -24,29 +24,10 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-const texSize = 128;
 const FOV = Math.PI / 3;
 let currentLevel = 1;
 let MAP = [];
 let player = { x: 1.5, y: 1.5, dir: 0, rotSpeed: 0.05, moveSpeed: 0.1 };
-
-// --- HONEYCOMB TEXTURE ASSET ---
-const wallTex = document.createElement('canvas');
-wallTex.width = wallTex.height = texSize;
-const wt = wallTex.getContext('2d');
-wt.fillStyle = "rgba(0,0,0,0)"; wt.fillRect(0,0,texSize,texSize);
-wt.strokeStyle = "rgba(255,255,255,0.5)"; wt.lineWidth = 2;
-for(let y=-20; y<texSize+20; y+=30){
-    for(let x=-20; x<texSize+20; x+=34){
-        let off = (Math.floor(y/30)%2===0)?0:17;
-        wt.beginPath();
-        for(let i=0;i<6;i++){
-            let a = (Math.PI/3)*i;
-            wt.lineTo(x+off+15*Math.cos(a), y+15*Math.sin(a));
-        }
-        wt.closePath(); wt.stroke();
-    }
-}
 
 function generateMaze(size) {
     let maze = Array.from({ length: size }, () => Array(size).fill(1));
@@ -89,16 +70,16 @@ function update() {
 }
 
 function draw() {
-    // Background
-    ctx.globalAlpha = 1.0; 
-    ctx.fillStyle = "#000"; ctx.fillRect(0,0,canvas.width, canvas.height/2); // Ceiling
-    ctx.fillStyle = "#111"; ctx.fillRect(0,canvas.height/2,canvas.width, canvas.height/2); // Floor
+    // Background: Ceiling (Black) and Floor (Dark Gray)
+    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height/2);
+    ctx.fillStyle = "#111"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
 
     for (let x = 0; x < canvas.width; x++) {
         let rayAngle = (player.dir - FOV/2) + (x/canvas.width) * FOV;
         let dist = 0;
         let cosA = Math.cos(rayAngle), sinA = Math.sin(rayAngle);
 
+        // Fast raycasting loop
         while (dist < 20) {
             dist += 0.05;
             let tx = Math.floor(player.x + cosA * dist);
@@ -110,43 +91,27 @@ function draw() {
         let h = canvas.height / realDist;
         let y0 = (canvas.height/2) - (h/2);
 
-        let tx = player.x + cosA * dist;
-        let ty = player.y + sinA * dist;
-        let cell = MAP[Math.floor(ty)]?.[Math.floor(tx)];
+        // Get the specific tile we hit
+        let tx = Math.floor(player.x + cosA * dist);
+        let ty = Math.floor(player.y + sinA * dist);
+        let cell = MAP[ty]?.[tx];
 
         if (cell === 3) {
             ctx.fillStyle = "gold";
-            ctx.fillRect(x, y0, 1, h);
         } else {
-            // 1. Determine Color by Direction
-            let hitX = tx - Math.floor(tx);
-            let hitY = ty - Math.floor(ty);
-            let isSide = Math.abs(hitX - 0.5) > Math.abs(hitY - 0.5);
-
-            if (!isSide) {
-                ctx.fillStyle = sinA < 0 ? "green" : "red";
-            } else {
-                ctx.fillStyle = cosA < 0 ? "blue" : "yellow";
-            }
-
-            // 2. Draw the base colored wall slice
-            ctx.fillRect(x, y0, 1, h);
-
-            // 3. Draw Honeycomb Texture Overlay
-            let texX = Math.floor((isSide ? hitY : hitX) * texSize);
-            ctx.drawImage(wallTex, texX, 0, 1, texSize, x, y0, 1, h);
-
-            // 4. Fog Shading
-            ctx.fillStyle = `rgba(0,0,0,${Math.min(1, realDist/15)})`;
-            ctx.fillRect(x, y0, 1, h);
+            // Static Green color with depth shading (the farther away, the darker it gets)
+            let brightness = Math.max(0, 255 - (realDist * 12));
+            ctx.fillStyle = `rgb(0, ${brightness}, 0)`;
         }
+
+        ctx.fillRect(x, y0, 1, h);
     }
-    requestAnimationFrame(loop);
 }
 
 function loop() {
     update();
     draw();
+    requestAnimationFrame(loop);
 }
 
 initLevel();
