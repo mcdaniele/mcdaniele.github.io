@@ -2,39 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Procedural Maze Runner</title>
+    <title>Maze Runner: Fullscreen Edition</title>
     <style>
-        body { background: #000; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: #0f0; font-family: 'Courier New', monospace; overflow: hidden; }
-        canvas { border: 4px solid #333; image-rendering: pixelated; background: #000; }
-        .hud { margin-top: 10px; font-size: 1.5rem; text-align: center; }
-        #level-banner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; background: rgba(0,0,0,0.8); padding: 20px; border: 2px solid #0f0; display: none; z-index: 10; }
+        body { 
+            background: #000; 
+            margin: 0; 
+            padding: 0;
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            width: 100vw;
+            color: #0f0; 
+            font-family: 'Courier New', monospace; 
+            overflow: hidden; 
+        }
+        canvas { 
+            display: block; 
+            image-rendering: pixelated; 
+            background: #000; 
+            width: 100vw;
+            height: 100vh;
+        }
+        .hud { 
+            position: absolute; 
+            bottom: 20px; 
+            width: 100%;
+            text-align: center;
+            font-size: 1.5rem; 
+            text-shadow: 2px 2px #000;
+            pointer-events: none;
+            z-index: 5;
+        }
+        #level-banner { 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            font-size: 5rem; 
+            background: rgba(0,0,0,0.85); 
+            padding: 40px; 
+            border: 4px solid #0f0; 
+            display: none; 
+            z-index: 10; 
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
     <div id="level-banner">LEVEL 1</div>
     <canvas id="view"></canvas>
-    <div class="hud">LEVEL: <span id="lvl-num">1</span> | FIND THE GOLD EXIT</div>
+    <div class="hud">LEVEL: <span id="lvl-num">1</span> | <span id="hint">FIND THE GOLD EXIT</span></div>
 
 <script>
 const canvas = document.getElementById('view');
 const ctx = canvas.getContext('2d');
-canvas.width = 640;
-canvas.height = 400;
+
+// Set Canvas to full window resolution
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
 
 const texSize = 64;
 const FOV = Math.PI / 3;
 let currentLevel = 1;
 let MAP = [];
 let MAP_W, MAP_H;
-let zBuffer = new Array(canvas.width);
+let zBuffer = [];
 let player = { x: 1.5, y: 1.5, dir: 0, rotSpeed: 0.05, moveSpeed: 0.08 };
 
-// --- PROCEDURAL MAZE GENERATION (Recursive Backtracker) ---
+// --- MAZE GENERATION ---
 function generateMaze(size) {
     MAP_W = size; MAP_H = size;
     let maze = Array.from({ length: size }, () => Array(size).fill(1));
-
     function walk(x, y) {
         maze[y][x] = 0;
         let dirs = [[0, -2], [0, 2], [-2, 0], [2, 0]].sort(() => Math.random() - 0.5);
@@ -47,32 +90,33 @@ function generateMaze(size) {
         }
     }
     walk(1, 1);
-    maze[1][1] = 0; // Start
-    maze[size - 2][size - 2] = 3; // End Point (Gold)
+    maze[1][1] = 0; 
+    maze[size - 2][size - 2] = 3; 
     return maze;
 }
 
-// --- TEXTURES ---
+// --- SINGLE UNIFORM WALL TEXTURE ---
 const wallTex = document.createElement('canvas').getContext('2d');
 wallTex.canvas.width = wallTex.canvas.height = texSize;
-wallTex.fillStyle = "#222"; wallTex.fillRect(0,0,64,64);
-wallTex.strokeStyle = "#0f0"; wallTex.lineWidth = 2;
-wallTex.strokeRect(5, 5, 54, 54); // Cyber-grid walls
+wallTex.fillStyle = "#0a1a0a"; 
+wallTex.fillRect(0,0,64,64);
+wallTex.strokeStyle = "#0f0"; 
+wallTex.lineWidth = 4;
+wallTex.strokeRect(0, 0, 64, 64); // Simple uniform frame for all walls
 
 function initLevel() {
-    const size = 11 + (currentLevel * 2); // Mazes get bigger
+    const size = 11 + (currentLevel * 2);
     MAP = generateMaze(size);
     player.x = 1.5; player.y = 1.5; player.dir = 0;
     document.getElementById('lvl-num').innerText = currentLevel;
     
-    // Show banner
     const banner = document.getElementById('level-banner');
     banner.innerText = "LEVEL " + currentLevel;
     banner.style.display = "block";
-    setTimeout(() => banner.style.display = "none", 2000);
+    setTimeout(() => banner.style.display = "none", 1500);
 }
 
-// --- INPUT ---
+// --- KEYBOARD CONTROLS ---
 const keys = {};
 document.addEventListener('keydown', e => keys[e.code] = true);
 document.addEventListener('keyup', e => keys[e.code] = false);
@@ -85,13 +129,10 @@ function update() {
     if (move !== 0) {
         let nx = player.x + Math.cos(player.dir) * move;
         let ny = player.y + Math.sin(player.dir) * move;
-        
         let cell = MAP[Math.floor(ny)][Math.floor(nx)];
         if (cell === 0 || cell === 3) {
             player.x = nx; player.y = ny;
         }
-        
-        // Check for level completion
         if (cell === 3) {
             currentLevel++;
             initLevel();
@@ -100,9 +141,9 @@ function update() {
 }
 
 function draw() {
-    // Floor & Ceiling
-    ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, canvas.width, canvas.height/2);
-    ctx.fillStyle = "#111"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
+    // Ceiling & Floor
+    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height/2);
+    ctx.fillStyle = "#080808"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
 
     for (let x = 0; x < canvas.width; x++) {
         let rayAngle = (player.dir - FOV / 2) + (x / canvas.width) * FOV;
@@ -110,8 +151,8 @@ function draw() {
         let eyeX = Math.cos(rayAngle), eyeY = Math.sin(rayAngle);
         let hitEnd = false;
 
-        while (dist < 30) {
-            dist += 0.05;
+        while (dist < 40) {
+            dist += 0.04;
             let tx = Math.floor(player.x + eyeX * dist);
             let ty = Math.floor(player.y + eyeY * dist);
             if (MAP[ty]?.[tx] === 1) break;
@@ -122,31 +163,38 @@ function draw() {
         let h = canvas.height / correctedDist;
 
         if (hitEnd) {
-            // Draw Gold Exit Column
-            ctx.fillStyle = `rgb(${255/correctedDist*2}, ${215/correctedDist*2}, 0)`;
+            // Gold Exit Column
+            ctx.fillStyle = `rgb(${255/correctedDist*3}, ${215/correctedDist*3}, 0)`;
             ctx.fillRect(x, (canvas.height/2)-(h/2), 1, h);
         } else {
-            // Draw Textured Wall
+            // Textured Uniform Wall
             let hitX = (player.x + eyeX * dist) % 1;
             let hitY = (player.y + eyeY * dist) % 1;
             let texX = Math.floor((Math.abs(hitX) > Math.abs(hitY) ? hitX : hitY) * texSize);
             ctx.drawImage(wallTex.canvas, texX, 0, 1, texSize, x, (canvas.height/2)-(h/2), 1, h);
             
-            // Fog
-            ctx.fillStyle = `rgba(0,0,0,${Math.min(1, correctedDist/15)})`;
+            // Fog / Depth Shading
+            ctx.fillStyle = `rgba(0,0,0,${Math.min(1, correctedDist/20)})`;
             ctx.fillRect(x, (canvas.height/2)-(h/2), 1, h);
         }
     }
     
-    // Start Point Indicator (Floor marker)
-    if (Math.sqrt((player.x-1.5)**2 + (player.y-1.5)**2) < 1) {
-        ctx.fillStyle = "#0f0";
-        ctx.font = "20px monospace";
-        ctx.fillText("START POINT", canvas.width/2 - 60, canvas.height - 50);
+    // Start Point HUD Overlay
+    if (Math.sqrt((player.x-1.5)**2 + (player.y-1.5)**2) < 0.8) {
+        document.getElementById('hint').innerText = "START POINT - LEVEL " + currentLevel;
+        document.getElementById('hint').style.color = "#0f0";
+    } else {
+        document.getElementById('hint').innerText = "FIND THE GOLD EXIT";
+        document.getElementById('hint').style.color = "#0f0";
     }
 }
 
-function loop() { update(); draw(); requestAnimationFrame(loop); }
+function loop() { 
+    update(); 
+    draw(); 
+    requestAnimationFrame(loop); 
+}
+
 initLevel();
 loop();
 </script>
