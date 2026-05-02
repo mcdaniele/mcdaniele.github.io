@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Maze Runner: Pure Honeycomb</title>
+    <title>Maze Runner: Directional Tints</title>
     <style>
-        body { background: #000; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; width: 100vw; color: #0f0; font-family: 'Courier New', monospace; overflow: hidden; }
+        body { background: #000; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; width: 100vw; color: #fff; font-family: 'Courier New', monospace; overflow: hidden; }
         canvas { display: block; image-rendering: pixelated; width: 100vw; height: 100vh; }
-        .hud { position: absolute; bottom: 20px; width: 100%; text-align: center; font-size: 1.5rem; text-shadow: 2px 2px #000; pointer-events: none; z-index: 5; }
-        #level-banner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 5rem; background: rgba(0,0,0,0.85); padding: 40px; border: 4px solid #0f0; display: none; z-index: 10; text-align: center; }
+        .hud { position: absolute; bottom: 20px; width: 100%; text-align: center; font-size: 1.2rem; text-shadow: 2px 2px #000; pointer-events: none; z-index: 5; }
+        #level-banner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; background: rgba(0,0,0,0.9); padding: 40px; border: 4px solid #fff; display: none; z-index: 10; text-align: center; color: #fff; }
     </style>
 </head>
 <body>
 
     <div id="level-banner">LEVEL 1</div>
     <canvas id="view"></canvas>
-    <div class="hud">LEVEL: <span id="lvl-num">1</span> | <span id="hint">FIND THE GOLD EXIT</span></div>
+    <div class="hud">LVL: <span id="lvl-num">1</span> | <span id="hint">FIND THE GOLD EXIT</span></div>
 
 <script>
 const canvas = document.getElementById('view');
@@ -27,21 +27,20 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-const texSize = 256; // High res for cleaner patterns
+const texSize = 256;
 const FOV = Math.PI / 3;
 let currentLevel = 1;
 let MAP = [];
 let player = { x: 1.5, y: 1.5, dir: 0, rotSpeed: 0.05, moveSpeed: 0.08 };
 
-// --- CLEAN HONEYCOMB TEXTURE ---
+// --- MONOCHROME HONEYCOMB TEXTURE (White lines for easier tinting) ---
 const wallTex = document.createElement('canvas').getContext('2d');
 wallTex.canvas.width = wallTex.canvas.height = texSize;
 
 function drawHoneycomb() {
     const wt = wallTex;
-    wt.fillStyle = "#020502"; wt.fillRect(0, 0, texSize, texSize);
-    wt.strokeStyle = "#0f0"; wt.lineWidth = 3;
-
+    wt.fillStyle = "#111"; wt.fillRect(0, 0, texSize, texSize);
+    wt.strokeStyle = "#fff"; wt.lineWidth = 3;
     const hexRadius = 30;
     const horizDist = hexRadius * Math.sqrt(3);
     const vertDist = hexRadius * 1.5;
@@ -116,39 +115,54 @@ function draw() {
         let rayAngle = (player.dir - FOV / 2) + (x / canvas.width) * FOV;
         let dist = 0;
         let eyeX = Math.cos(rayAngle), eyeY = Math.sin(rayAngle);
-        let side = 0; // 0 for vertical wall, 1 for horizontal
 
         while (dist < 40) {
-            dist += 0.01; // Higher precision ray
+            dist += 0.01;
             let tx = Math.floor(player.x + eyeX * dist);
             let ty = Math.floor(player.y + eyeY * dist);
             if (MAP[ty]?.[tx] > 0) break;
         }
 
-        let tx = player.x + eyeX * dist;
-        let ty = player.y + eyeY * dist;
-        
-        // Correct wall texture mapping logic:
-        let hitX = tx - Math.floor(tx);
-        let hitY = ty - Math.floor(ty);
-        // Determine which side of the block we hit to prevent "lines"
-        let texX = Math.floor((Math.abs(hitX - 0.5) > Math.abs(hitY - 0.5) ? hitY : hitX) * texSize);
+        let finalX = player.x + eyeX * dist;
+        let finalY = player.y + eyeY * dist;
+        let hitX = finalX - Math.floor(finalX);
+        let hitY = finalY - Math.floor(finalY);
 
+        // --- DIRECTION DETECTION ---
+        let tintColor = "green";
+        let isSideWall = Math.abs(hitX - 0.5) > Math.abs(hitY - 0.5);
+        
+        if (!isSideWall) { // Hitting top or bottom face (Y-axis change)
+            tintColor = eyeY < 0 ? "green" : "red"; // UP vs DOWN
+        } else { // Hitting left or right face (X-axis change)
+            tintColor = eyeX < 0 ? "blue" : "yellow"; // LEFT vs RIGHT
+        }
+
+        let texX = Math.floor((isSideWall ? hitY : hitX) * texSize);
         let correctedDist = dist * Math.cos(rayAngle - player.dir);
         let h = canvas.height / correctedDist;
 
-        if (MAP[Math.floor(ty)]?.[Math.floor(tx)] === 3) {
+        if (MAP[Math.floor(finalY)]?.[Math.floor(finalX)] === 3) {
             ctx.fillStyle = `rgb(${255/correctedDist*3}, ${215/correctedDist*3}, 0)`;
             ctx.fillRect(x, (canvas.height/2)-(h/2), 1, h);
         } else {
+            // Draw Texture
             ctx.drawImage(wallTex.canvas, texX, 0, 1, texSize, x, (canvas.height/2)-(h/2), 1, h);
+            
+            // Apply Directional Color Overlay
+            ctx.globalCompositeOperation = "multiply";
+            ctx.fillStyle = tintColor;
+            ctx.fillRect(x, (canvas.height/2)-(h/2), 1, h);
+            ctx.globalCompositeOperation = "source-over";
+
+            // Depth Fog
             ctx.fillStyle = `rgba(0,0,0,${Math.min(1, correctedDist/20)})`;
             ctx.fillRect(x, (canvas.height/2)-(h/2), 1, h);
         }
     }
     
     let isStart = Math.sqrt((player.x-1.5)**2 + (player.y-1.5)**2) < 0.8;
-    document.getElementById('hint').innerText = isStart ? "START POINT - LEVEL " + currentLevel : "FIND THE GOLD EXIT";
+    document.getElementById('hint').innerText = isStart ? "START POINT - LEVEL " + currentLevel : "FIND THE EXIT";
 }
 
 function loop() { update(); draw(); requestAnimationFrame(loop); }
