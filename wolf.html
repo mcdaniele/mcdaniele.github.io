@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Maze Runner: Performance Edition</title>
+    <title>Maze Runner: Smooth Sliding</title>
     <style>
         body { background: #000; margin: 0; padding: 0; overflow: hidden; color: #0f0; font-family: 'Courier New', monospace; }
         canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
@@ -11,7 +11,7 @@
 </head>
 <body>
     <canvas id="view"></canvas>
-    <div class="hud">LVL: <span id="lvl-num">1</span> | FIND THE GOLD EXIT</div>
+    <div class="hud">LVL: <span id="lvl-num">1</span> | SMOOTH SLIDING ENABLED</div>
 
 <script>
 const canvas = document.getElementById('view');
@@ -58,19 +58,35 @@ document.addEventListener('keydown', e => keys[e.code] = true);
 document.addEventListener('keyup', e => keys[e.code] = false);
 
 function update() {
+    // Rotation
     if (keys['KeyA'] || keys['ArrowLeft']) player.dir -= player.rotSpeed;
     if (keys['KeyD'] || keys['ArrowRight']) player.dir += player.rotSpeed;
+    
+    // Movement Calculation
     let move = (keys['KeyW'] || keys['ArrowUp'] ? 1 : keys['KeyS'] || keys['ArrowDown'] ? -1 : 0) * player.moveSpeed;
+    
     if (move !== 0) {
-        let nx = player.x + Math.cos(player.dir) * move;
-        let ny = player.y + Math.sin(player.dir) * move;
-        if(MAP[Math.floor(ny)]?.[Math.floor(nx)] !== 1){ player.x=nx; player.y=ny; }
-        if(MAP[Math.floor(player.y)][Math.floor(player.x)] === 3){ currentLevel++; initLevel(); }
+        let newX = player.x + Math.cos(player.dir) * move;
+        let newY = player.y + Math.sin(player.dir) * move;
+        
+        // SLIDING LOGIC: Check X and Y independently
+        // This allows the player to move along the X-axis even if the Y-axis is blocked (and vice versa)
+        if (MAP[Math.floor(player.y)][Math.floor(newX)] !== 1) {
+            player.x = newX;
+        }
+        if (MAP[Math.floor(newY)][Math.floor(player.x)] !== 1) {
+            player.y = newY;
+        }
+
+        // Check for Exit
+        if (MAP[Math.floor(player.y)][Math.floor(player.x)] === 3) {
+            currentLevel++;
+            initLevel();
+        }
     }
 }
 
 function draw() {
-    // Background: Ceiling (Black) and Floor (Dark Gray)
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height/2);
     ctx.fillStyle = "#111"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
 
@@ -79,7 +95,6 @@ function draw() {
         let dist = 0;
         let cosA = Math.cos(rayAngle), sinA = Math.sin(rayAngle);
 
-        // Fast raycasting loop
         while (dist < 20) {
             dist += 0.05;
             let tx = Math.floor(player.x + cosA * dist);
@@ -91,7 +106,6 @@ function draw() {
         let h = canvas.height / realDist;
         let y0 = (canvas.height/2) - (h/2);
 
-        // Get the specific tile we hit
         let tx = Math.floor(player.x + cosA * dist);
         let ty = Math.floor(player.y + sinA * dist);
         let cell = MAP[ty]?.[tx];
@@ -99,7 +113,6 @@ function draw() {
         if (cell === 3) {
             ctx.fillStyle = "gold";
         } else {
-            // Static Green color with depth shading (the farther away, the darker it gets)
             let brightness = Math.max(0, 255 - (realDist * 12));
             ctx.fillStyle = `rgb(0, ${brightness}, 0)`;
         }
