@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Maze Runner: Fullscreen Edition</title>
+    <title>Maze Runner: Honeycomb Edition</title>
     <style>
         body { 
             background: #000; 
@@ -58,7 +58,6 @@
 const canvas = document.getElementById('view');
 const ctx = canvas.getContext('2d');
 
-// Set Canvas to full window resolution
 function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -66,12 +65,11 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-const texSize = 64;
+const texSize = 128; // Increased for better hex detail
 const FOV = Math.PI / 3;
 let currentLevel = 1;
 let MAP = [];
 let MAP_W, MAP_H;
-let zBuffer = [];
 let player = { x: 1.5, y: 1.5, dir: 0, rotSpeed: 0.05, moveSpeed: 0.08 };
 
 // --- MAZE GENERATION ---
@@ -95,14 +93,42 @@ function generateMaze(size) {
     return maze;
 }
 
-// --- SINGLE UNIFORM WALL TEXTURE ---
+// --- PROCEDURAL HONEYCOMB TEXTURE ---
 const wallTex = document.createElement('canvas').getContext('2d');
 wallTex.canvas.width = wallTex.canvas.height = texSize;
-wallTex.fillStyle = "#0a1a0a"; 
-wallTex.fillRect(0,0,64,64);
-wallTex.strokeStyle = "#0f0"; 
-wallTex.lineWidth = 4;
-wallTex.strokeRect(0, 0, 64, 64); // Simple uniform frame for all walls
+
+function drawHoneycomb() {
+    const wt = wallTex;
+    wt.fillStyle = "#050a05"; // Dark green base
+    wt.fillRect(0, 0, texSize, texSize);
+    wt.strokeStyle = "#0f0";
+    wt.lineWidth = 2;
+
+    const hexRadius = 22;
+    const horizDist = hexRadius * Math.sqrt(3);
+    const vertDist = hexRadius * 1.5;
+
+    for (let y = -vertDist; y < texSize + vertDist; y += vertDist) {
+        let xOffset = (Math.floor(y / vertDist) % 2 === 0) ? 0 : horizDist / 2;
+        for (let x = -horizDist; x < texSize + horizDist; x += horizDist) {
+            wt.beginPath();
+            for (let i = 0; i < 6; i++) {
+                let angle = (Math.PI / 3) * i + (Math.PI / 6);
+                let px = x + xOffset + hexRadius * Math.cos(angle);
+                let py = y + hexRadius * Math.sin(angle);
+                if (i === 0) wt.moveTo(px, py);
+                else wt.lineTo(px, py);
+            }
+            wt.closePath();
+            wt.stroke();
+            
+            // Sub-glow effect inside hex
+            wt.fillStyle = "rgba(0, 255, 0, 0.05)";
+            wt.fill();
+        }
+    }
+}
+drawHoneycomb();
 
 function initLevel() {
     const size = 11 + (currentLevel * 2);
@@ -116,7 +142,7 @@ function initLevel() {
     setTimeout(() => banner.style.display = "none", 1500);
 }
 
-// --- KEYBOARD CONTROLS ---
+// --- INPUTS ---
 const keys = {};
 document.addEventListener('keydown', e => keys[e.code] = true);
 document.addEventListener('keyup', e => keys[e.code] = false);
@@ -143,7 +169,7 @@ function update() {
 function draw() {
     // Ceiling & Floor
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height/2);
-    ctx.fillStyle = "#080808"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
+    ctx.fillStyle = "#050505"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
 
     for (let x = 0; x < canvas.width; x++) {
         let rayAngle = (player.dir - FOV / 2) + (x / canvas.width) * FOV;
@@ -163,23 +189,23 @@ function draw() {
         let h = canvas.height / correctedDist;
 
         if (hitEnd) {
-            // Gold Exit Column
+            // Glowing Gold Exit
             ctx.fillStyle = `rgb(${255/correctedDist*3}, ${215/correctedDist*3}, 0)`;
             ctx.fillRect(x, (canvas.height/2)-(h/2), 1, h);
         } else {
-            // Textured Uniform Wall
+            // Honeycomb Texture Mapping
             let hitX = (player.x + eyeX * dist) % 1;
             let hitY = (player.y + eyeY * dist) % 1;
             let texX = Math.floor((Math.abs(hitX) > Math.abs(hitY) ? hitX : hitY) * texSize);
             ctx.drawImage(wallTex.canvas, texX, 0, 1, texSize, x, (canvas.height/2)-(h/2), 1, h);
             
-            // Fog / Depth Shading
-            ctx.fillStyle = `rgba(0,0,0,${Math.min(1, correctedDist/20)})`;
+            // Depth Fog
+            ctx.fillStyle = `rgba(0,0,0,${Math.min(1, correctedDist/22)})`;
             ctx.fillRect(x, (canvas.height/2)-(h/2), 1, h);
         }
     }
     
-    // Start Point HUD Overlay
+    // Start Point Logic
     if (Math.sqrt((player.x-1.5)**2 + (player.y-1.5)**2) < 0.8) {
         document.getElementById('hint').innerText = "START POINT - LEVEL " + currentLevel;
         document.getElementById('hint').style.color = "#0f0";
