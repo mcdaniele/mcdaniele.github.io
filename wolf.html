@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Maze Runner: Deep Shadows</title>
+    <title>Maze Runner: Deep Sky Blue</title>
     <style>
-        body { background: #000; margin: 0; padding: 0; overflow: hidden; color: #0f0; font-family: 'Courier New', monospace; }
+        body { background: #000; margin: 0; padding: 0; overflow: hidden; color: #00bfff; font-family: 'Courier New', monospace; }
         canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
         .hud { position: absolute; bottom: 20px; width: 100%; text-align: center; pointer-events: none; text-shadow: 2px 2px #000; font-size: 1.2rem; }
     </style>
 </head>
 <body>
     <canvas id="view"></canvas>
-    <div class="hud">LVL: <span id="lvl-num">1</span> | HIGH-CONTRAST DISTANCE SHADER 25</div>
+    <div class="hud">LVL: <span id="lvl-num">1</span> | COLOR: DEEP SKY BLUE | SHADER: 25x</div>
 
 <script>
 const canvas = document.getElementById('view');
@@ -67,7 +67,7 @@ function update() {
         let newX = player.x + Math.cos(player.dir) * move;
         let newY = player.y + Math.sin(player.dir) * move;
         
-        // Sliding Logic
+        // Sliding Logic preserved
         if (MAP[Math.floor(player.y)][Math.floor(newX)] !== 1) player.x = newX;
         if (MAP[Math.floor(newY)][Math.floor(player.x)] !== 1) player.y = newY;
 
@@ -79,16 +79,16 @@ function update() {
 }
 
 function draw() {
-    // Ceiling and Floor
+    // Ceiling (Pitch Black) and Floor (Very Dark Gray)
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height/2);
-    ctx.fillStyle = "#050505"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
+    ctx.fillStyle = "#080808"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
 
     for (let x = 0; x < canvas.width; x++) {
         let rayAngle = (player.dir - FOV/2) + (x/canvas.width) * FOV;
         let dist = 0;
         let cosA = Math.cos(rayAngle), sinA = Math.sin(rayAngle);
 
-        while (dist < 15) { // Reduced max distance to focus on shadows
+        while (dist < 20) {
             dist += 0.05;
             let tx = Math.floor(player.x + cosA * dist);
             let ty = Math.floor(player.y + sinA * dist);
@@ -106,10 +106,11 @@ function draw() {
         if (cell === 3) {
             ctx.fillStyle = "gold";
         } else {
-            // HIGHER DISTANCE SHADER: 
-            // 35 is the multiplier. Higher = darker hallways.
-            let brightness = Math.max(0, 255 - (realDist * 25));
-            ctx.fillStyle = `rgb(0, ${brightness}, 0)`;
+            // Updated Color Logic: Deep Sky Blue (0, 191, 255)
+            // Multiplier set to 25 as requested
+            let b = Math.max(0, 255 - (realDist * 25));
+            let g = Math.max(0, 191 - (realDist * (191/10))); // Scale green relative to blue
+            ctx.fillStyle = `rgb(0, ${g}, ${b})`;
         }
 
         ctx.fillRect(x, y0, 1, h);
