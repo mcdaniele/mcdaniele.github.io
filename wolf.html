@@ -2,50 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Maze Runner: Honeycomb Edition</title>
+    <title>Maze Runner: Pure Honeycomb</title>
     <style>
-        body { 
-            background: #000; 
-            margin: 0; 
-            padding: 0;
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-            width: 100vw;
-            color: #0f0; 
-            font-family: 'Courier New', monospace; 
-            overflow: hidden; 
-        }
-        canvas { 
-            display: block; 
-            image-rendering: pixelated; 
-            background: #000; 
-            width: 100vw;
-            height: 100vh;
-        }
-        .hud { 
-            position: absolute; 
-            bottom: 20px; 
-            width: 100%;
-            text-align: center;
-            font-size: 1.5rem; 
-            text-shadow: 2px 2px #000;
-            pointer-events: none;
-            z-index: 5;
-        }
-        #level-banner { 
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            font-size: 5rem; 
-            background: rgba(0,0,0,0.85); 
-            padding: 40px; 
-            border: 4px solid #0f0; 
-            display: none; 
-            z-index: 10; 
-            text-align: center;
-        }
+        body { background: #000; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; width: 100vw; color: #0f0; font-family: 'Courier New', monospace; overflow: hidden; }
+        canvas { display: block; image-rendering: pixelated; width: 100vw; height: 100vh; }
+        .hud { position: absolute; bottom: 20px; width: 100%; text-align: center; font-size: 1.5rem; text-shadow: 2px 2px #000; pointer-events: none; z-index: 5; }
+        #level-banner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 5rem; background: rgba(0,0,0,0.85); padding: 40px; border: 4px solid #0f0; display: none; z-index: 10; text-align: center; }
     </style>
 </head>
 <body>
@@ -65,16 +27,42 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-const texSize = 128; // Increased for better hex detail
+const texSize = 256; // High res for cleaner patterns
 const FOV = Math.PI / 3;
 let currentLevel = 1;
 let MAP = [];
-let MAP_W, MAP_H;
 let player = { x: 1.5, y: 1.5, dir: 0, rotSpeed: 0.05, moveSpeed: 0.08 };
 
-// --- MAZE GENERATION ---
+// --- CLEAN HONEYCOMB TEXTURE ---
+const wallTex = document.createElement('canvas').getContext('2d');
+wallTex.canvas.width = wallTex.canvas.height = texSize;
+
+function drawHoneycomb() {
+    const wt = wallTex;
+    wt.fillStyle = "#020502"; wt.fillRect(0, 0, texSize, texSize);
+    wt.strokeStyle = "#0f0"; wt.lineWidth = 3;
+
+    const hexRadius = 30;
+    const horizDist = hexRadius * Math.sqrt(3);
+    const vertDist = hexRadius * 1.5;
+
+    for (let y = -vertDist; y < texSize + vertDist; y += vertDist) {
+        let xOffset = (Math.floor(y / vertDist) % 2 === 0) ? 0 : horizDist / 2;
+        for (let x = -horizDist; x < texSize + horizDist; x += horizDist) {
+            wt.beginPath();
+            for (let i = 0; i < 6; i++) {
+                let a = (Math.PI / 3) * i + (Math.PI / 6);
+                let px = x + xOffset + hexRadius * Math.cos(a);
+                let py = y + hexRadius * Math.sin(a);
+                if (i === 0) wt.moveTo(px, py); else wt.lineTo(px, py);
+            }
+            wt.closePath(); wt.stroke();
+        }
+    }
+}
+drawHoneycomb();
+
 function generateMaze(size) {
-    MAP_W = size; MAP_H = size;
     let maze = Array.from({ length: size }, () => Array(size).fill(1));
     function walk(x, y) {
         maze[y][x] = 0;
@@ -93,56 +81,17 @@ function generateMaze(size) {
     return maze;
 }
 
-// --- PROCEDURAL HONEYCOMB TEXTURE ---
-const wallTex = document.createElement('canvas').getContext('2d');
-wallTex.canvas.width = wallTex.canvas.height = texSize;
-
-function drawHoneycomb() {
-    const wt = wallTex;
-    wt.fillStyle = "#050a05"; // Dark green base
-    wt.fillRect(0, 0, texSize, texSize);
-    wt.strokeStyle = "#0f0";
-    wt.lineWidth = 2;
-
-    const hexRadius = 22;
-    const horizDist = hexRadius * Math.sqrt(3);
-    const vertDist = hexRadius * 1.5;
-
-    for (let y = -vertDist; y < texSize + vertDist; y += vertDist) {
-        let xOffset = (Math.floor(y / vertDist) % 2 === 0) ? 0 : horizDist / 2;
-        for (let x = -horizDist; x < texSize + horizDist; x += horizDist) {
-            wt.beginPath();
-            for (let i = 0; i < 6; i++) {
-                let angle = (Math.PI / 3) * i + (Math.PI / 6);
-                let px = x + xOffset + hexRadius * Math.cos(angle);
-                let py = y + hexRadius * Math.sin(angle);
-                if (i === 0) wt.moveTo(px, py);
-                else wt.lineTo(px, py);
-            }
-            wt.closePath();
-            wt.stroke();
-            
-            // Sub-glow effect inside hex
-            wt.fillStyle = "rgba(0, 255, 0, 0.05)";
-            wt.fill();
-        }
-    }
-}
-drawHoneycomb();
-
 function initLevel() {
     const size = 11 + (currentLevel * 2);
     MAP = generateMaze(size);
     player.x = 1.5; player.y = 1.5; player.dir = 0;
     document.getElementById('lvl-num').innerText = currentLevel;
-    
     const banner = document.getElementById('level-banner');
     banner.innerText = "LEVEL " + currentLevel;
     banner.style.display = "block";
     setTimeout(() => banner.style.display = "none", 1500);
 }
 
-// --- INPUTS ---
 const keys = {};
 document.addEventListener('keydown', e => keys[e.code] = true);
 document.addEventListener('keyup', e => keys[e.code] = false);
@@ -150,24 +99,16 @@ document.addEventListener('keyup', e => keys[e.code] = false);
 function update() {
     if (keys['KeyA'] || keys['ArrowLeft']) player.dir -= player.rotSpeed;
     if (keys['KeyD'] || keys['ArrowRight']) player.dir += player.rotSpeed;
-    
     let move = (keys['KeyW'] || keys['ArrowUp'] ? 1 : keys['KeyS'] || keys['ArrowDown'] ? -1 : 0) * player.moveSpeed;
     if (move !== 0) {
         let nx = player.x + Math.cos(player.dir) * move;
         let ny = player.y + Math.sin(player.dir) * move;
-        let cell = MAP[Math.floor(ny)][Math.floor(nx)];
-        if (cell === 0 || cell === 3) {
-            player.x = nx; player.y = ny;
-        }
-        if (cell === 3) {
-            currentLevel++;
-            initLevel();
-        }
+        if (MAP[Math.floor(ny)]?.[Math.floor(nx)] !== 1) { player.x = nx; player.y = ny; }
+        if (MAP[Math.floor(player.y)][Math.floor(player.x)] === 3) { currentLevel++; initLevel(); }
     }
 }
 
 function draw() {
-    // Ceiling & Floor
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height/2);
     ctx.fillStyle = "#050505"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
 
@@ -175,52 +116,42 @@ function draw() {
         let rayAngle = (player.dir - FOV / 2) + (x / canvas.width) * FOV;
         let dist = 0;
         let eyeX = Math.cos(rayAngle), eyeY = Math.sin(rayAngle);
-        let hitEnd = false;
+        let side = 0; // 0 for vertical wall, 1 for horizontal
 
         while (dist < 40) {
-            dist += 0.04;
+            dist += 0.01; // Higher precision ray
             let tx = Math.floor(player.x + eyeX * dist);
             let ty = Math.floor(player.y + eyeY * dist);
-            if (MAP[ty]?.[tx] === 1) break;
-            if (MAP[ty]?.[tx] === 3) { hitEnd = true; break; }
+            if (MAP[ty]?.[tx] > 0) break;
         }
+
+        let tx = player.x + eyeX * dist;
+        let ty = player.y + eyeY * dist;
+        
+        // Correct wall texture mapping logic:
+        let hitX = tx - Math.floor(tx);
+        let hitY = ty - Math.floor(ty);
+        // Determine which side of the block we hit to prevent "lines"
+        let texX = Math.floor((Math.abs(hitX - 0.5) > Math.abs(hitY - 0.5) ? hitY : hitX) * texSize);
 
         let correctedDist = dist * Math.cos(rayAngle - player.dir);
         let h = canvas.height / correctedDist;
 
-        if (hitEnd) {
-            // Glowing Gold Exit
+        if (MAP[Math.floor(ty)]?.[Math.floor(tx)] === 3) {
             ctx.fillStyle = `rgb(${255/correctedDist*3}, ${215/correctedDist*3}, 0)`;
             ctx.fillRect(x, (canvas.height/2)-(h/2), 1, h);
         } else {
-            // Honeycomb Texture Mapping
-            let hitX = (player.x + eyeX * dist) % 1;
-            let hitY = (player.y + eyeY * dist) % 1;
-            let texX = Math.floor((Math.abs(hitX) > Math.abs(hitY) ? hitX : hitY) * texSize);
             ctx.drawImage(wallTex.canvas, texX, 0, 1, texSize, x, (canvas.height/2)-(h/2), 1, h);
-            
-            // Depth Fog
-            ctx.fillStyle = `rgba(0,0,0,${Math.min(1, correctedDist/22)})`;
+            ctx.fillStyle = `rgba(0,0,0,${Math.min(1, correctedDist/20)})`;
             ctx.fillRect(x, (canvas.height/2)-(h/2), 1, h);
         }
     }
     
-    // Start Point Logic
-    if (Math.sqrt((player.x-1.5)**2 + (player.y-1.5)**2) < 0.8) {
-        document.getElementById('hint').innerText = "START POINT - LEVEL " + currentLevel;
-        document.getElementById('hint').style.color = "#0f0";
-    } else {
-        document.getElementById('hint').innerText = "FIND THE GOLD EXIT";
-        document.getElementById('hint').style.color = "#0f0";
-    }
+    let isStart = Math.sqrt((player.x-1.5)**2 + (player.y-1.5)**2) < 0.8;
+    document.getElementById('hint').innerText = isStart ? "START POINT - LEVEL " + currentLevel : "FIND THE GOLD EXIT";
 }
 
-function loop() { 
-    update(); 
-    draw(); 
-    requestAnimationFrame(loop); 
-}
-
+function loop() { update(); draw(); requestAnimationFrame(loop); }
 initLevel();
 loop();
 </script>
