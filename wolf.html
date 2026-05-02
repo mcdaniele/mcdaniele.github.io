@@ -2,171 +2,152 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Retro Raycaster: Sprite Edition</title>
+    <title>Procedural Maze Runner</title>
     <style>
-        body { background: #000; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: #0f0; font-family: monospace; overflow: hidden; }
-        canvas { border: 4px solid #333; image-rendering: pixelated; background: #000; cursor: crosshair; }
-        .hud { margin-top: 10px; font-size: 1.2rem; text-shadow: 2px 2px #000; }
+        body { background: #000; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: #0f0; font-family: 'Courier New', monospace; overflow: hidden; }
+        canvas { border: 4px solid #333; image-rendering: pixelated; background: #000; }
+        .hud { margin-top: 10px; font-size: 1.5rem; text-align: center; }
+        #level-banner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; background: rgba(0,0,0,0.8); padding: 20px; border: 2px solid #0f0; display: none; z-index: 10; }
     </style>
 </head>
 <body>
 
+    <div id="level-banner">LEVEL 1</div>
     <canvas id="view"></canvas>
-    <div class="hud">HEALTH: 100% | AMMO: ∞ | <span id="msg">FIND THE ENEMIES</span></div>
+    <div class="hud">LEVEL: <span id="lvl-num">1</span> | FIND THE GOLD EXIT</div>
 
 <script>
-/**
- * TEXT-BASED LEVEL CREATOR
- */
-const MAP = [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,1,1,0,1,1,0,1,1,0,1,1,0,0,1],
-    [1,0,0,2,0,0,0,0,0,0,0,0,0,2,0,1],
-    [1,0,1,1,0,1,1,0,1,1,0,1,1,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,2,0,0,0,2,0,0,0,2,0,0,0,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-];
-
 const canvas = document.getElementById('view');
 const ctx = canvas.getContext('2d');
 canvas.width = 640;
 canvas.height = 400;
 
-const texSize = 64; // Texture resolution
-const MAP_W = MAP[0].length;
-const MAP_H = MAP.length;
+const texSize = 64;
 const FOV = Math.PI / 3;
-
-let player = { x: 2, y: 2, dir: 0, rotSpeed: 0.05, moveSpeed: 0.07 };
-let enemies = [];
+let currentLevel = 1;
+let MAP = [];
+let MAP_W, MAP_H;
 let zBuffer = new Array(canvas.width);
-let isShooting = 0;
+let player = { x: 1.5, y: 1.5, dir: 0, rotSpeed: 0.05, moveSpeed: 0.08 };
 
-// --- PROCEDURAL TEXTURE GENERATION ---
-const wallTex = document.createElement('canvas').getContext('2d');
-const enemyTex = document.createElement('canvas').getContext('2d');
-wallTex.canvas.width = enemyTex.canvas.width = texSize;
-wallTex.canvas.height = enemyTex.canvas.height = texSize;
+// --- PROCEDURAL MAZE GENERATION (Recursive Backtracker) ---
+function generateMaze(size) {
+    MAP_W = size; MAP_H = size;
+    let maze = Array.from({ length: size }, () => Array(size).fill(1));
 
-// Generate Brick Wall
-wallTex.fillStyle = "#500"; wallTex.fillRect(0,0,64,64);
-wallTex.fillStyle = "#800"; 
-for(let i=0; i<4; i++) wallTex.fillRect(0, i*16, 64, 2); // Mortar
-for(let i=0; i<4; i++) {
-    for(let j=0; j<2; j++) wallTex.fillRect((j*32) + (i%2?16:0), i*16, 2, 16);
-}
-
-// Generate Guard Sprite
-enemyTex.fillStyle = "blue"; enemyTex.fillRect(20, 10, 24, 40); // Body
-enemyTex.fillStyle = "#ffdbac"; enemyTex.fillRect(24, 5, 16, 12); // Head
-enemyTex.fillStyle = "black"; enemyTex.fillRect(22, 15, 20, 5); // Visor
-
-// Init Enemies
-for(let y=0; y<MAP_H; y++) {
-    for(let x=0; x<MAP_W; x++) {
-        if(MAP[y][x] === 2) {
-            enemies.push({ x: x + 0.5, y: y + 0.5, alive: true });
-            MAP[y][x] = 0;
+    function walk(x, y) {
+        maze[y][x] = 0;
+        let dirs = [[0, -2], [0, 2], [-2, 0], [2, 0]].sort(() => Math.random() - 0.5);
+        for (let [dx, dy] of dirs) {
+            let nx = x + dx, ny = y + dy;
+            if (nx > 0 && nx < size - 1 && ny > 0 && ny < size - 1 && maze[ny][nx] === 1) {
+                maze[y + dy / 2][x + dx / 2] = 0;
+                walk(nx, ny);
+            }
         }
     }
+    walk(1, 1);
+    maze[1][1] = 0; // Start
+    maze[size - 2][size - 2] = 3; // End Point (Gold)
+    return maze;
 }
 
+// --- TEXTURES ---
+const wallTex = document.createElement('canvas').getContext('2d');
+wallTex.canvas.width = wallTex.canvas.height = texSize;
+wallTex.fillStyle = "#222"; wallTex.fillRect(0,0,64,64);
+wallTex.strokeStyle = "#0f0"; wallTex.lineWidth = 2;
+wallTex.strokeRect(5, 5, 54, 54); // Cyber-grid walls
+
+function initLevel() {
+    const size = 11 + (currentLevel * 2); // Mazes get bigger
+    MAP = generateMaze(size);
+    player.x = 1.5; player.y = 1.5; player.dir = 0;
+    document.getElementById('lvl-num').innerText = currentLevel;
+    
+    // Show banner
+    const banner = document.getElementById('level-banner');
+    banner.innerText = "LEVEL " + currentLevel;
+    banner.style.display = "block";
+    setTimeout(() => banner.style.display = "none", 2000);
+}
+
+// --- INPUT ---
 const keys = {};
-document.addEventListener('keydown', e => {
-    keys[e.code] = true;
-    if(e.code === 'Space' && isShooting === 0) { isShooting = 15; checkHit(); }
-});
+document.addEventListener('keydown', e => keys[e.code] = true);
 document.addEventListener('keyup', e => keys[e.code] = false);
-
-function checkHit() {
-    enemies.forEach(en => {
-        if (!en.alive) return;
-        let angleToEnemy = Math.atan2(en.y - player.y, en.x - player.x);
-        let diff = angleToEnemy - player.dir;
-        while (diff < -Math.PI) diff += Math.PI * 2;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        if (Math.abs(diff) < 0.15) { 
-            en.alive = false;
-            document.getElementById('msg').innerText = "TARGET NEUTRALIZED";
-            setTimeout(() => { document.getElementById('msg').innerText = "SEEKING TARGETS"; }, 2000);
-        }
-    });
-}
 
 function update() {
     if (keys['KeyA'] || keys['ArrowLeft']) player.dir -= player.rotSpeed;
     if (keys['KeyD'] || keys['ArrowRight']) player.dir += player.rotSpeed;
-    let moveX = (keys['KeyW'] || keys['ArrowUp'] ? 1 : keys['KeyS'] || keys['ArrowDown'] ? -1 : 0) * player.moveSpeed;
-    if (moveX !== 0) {
-        let nx = player.x + Math.cos(player.dir) * moveX;
-        let ny = player.y + Math.sin(player.dir) * moveX;
-        if (MAP[Math.floor(player.y)][Math.floor(nx)] === 0) player.x = nx;
-        if (MAP[Math.floor(ny)][Math.floor(player.x)] === 0) player.y = ny;
+    
+    let move = (keys['KeyW'] || keys['ArrowUp'] ? 1 : keys['KeyS'] || keys['ArrowDown'] ? -1 : 0) * player.moveSpeed;
+    if (move !== 0) {
+        let nx = player.x + Math.cos(player.dir) * move;
+        let ny = player.y + Math.sin(player.dir) * move;
+        
+        let cell = MAP[Math.floor(ny)][Math.floor(nx)];
+        if (cell === 0 || cell === 3) {
+            player.x = nx; player.y = ny;
+        }
+        
+        // Check for level completion
+        if (cell === 3) {
+            currentLevel++;
+            initLevel();
+        }
     }
-    if (isShooting > 0) isShooting--;
 }
 
 function draw() {
-    ctx.fillStyle = "#111"; ctx.fillRect(0,0,canvas.width, canvas.height/2); // Ceiling
-    ctx.fillStyle = "#333"; ctx.fillRect(0,canvas.height/2,canvas.width, canvas.height/2); // Floor
+    // Floor & Ceiling
+    ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, canvas.width, canvas.height/2);
+    ctx.fillStyle = "#111"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
 
-    // 1. Draw Textured Walls
     for (let x = 0; x < canvas.width; x++) {
         let rayAngle = (player.dir - FOV / 2) + (x / canvas.width) * FOV;
-        let distanceToWall = 0;
+        let dist = 0;
         let eyeX = Math.cos(rayAngle), eyeY = Math.sin(rayAngle);
-        
-        while (distanceToWall < 20) {
-            distanceToWall += 0.02;
-            var testX = player.x + eyeX * distanceToWall;
-            var testY = player.y + eyeY * distanceToWall;
-            if (MAP[Math.floor(testY)]?.[Math.floor(testX)] === 1) break;
+        let hitEnd = false;
+
+        while (dist < 30) {
+            dist += 0.05;
+            let tx = Math.floor(player.x + eyeX * dist);
+            let ty = Math.floor(player.y + eyeY * dist);
+            if (MAP[ty]?.[tx] === 1) break;
+            if (MAP[ty]?.[tx] === 3) { hitEnd = true; break; }
         }
 
-        let correctedDist = distanceToWall * Math.cos(rayAngle - player.dir);
-        zBuffer[x] = correctedDist;
-        let wallHeight = canvas.height / correctedDist;
+        let correctedDist = dist * Math.cos(rayAngle - player.dir);
+        let h = canvas.height / correctedDist;
 
-        // Texture Mapping: Find hit point on the tile
-        let hitX = testX - Math.floor(testX);
-        let hitY = testY - Math.floor(testY);
-        let texX = Math.floor((Math.abs(hitX) > Math.abs(hitY) ? hitX : hitY) * texSize);
-
-        ctx.drawImage(wallTex.canvas, texX, 0, 1, texSize, x, (canvas.height/2)-(wallHeight/2), 1, wallHeight);
-        
-        // Distance Fog
-        ctx.fillStyle = `rgba(0,0,0,${Math.min(1, correctedDist/15)})`;
-        ctx.fillRect(x, (canvas.height/2)-(wallHeight/2), 1, wallHeight);
+        if (hitEnd) {
+            // Draw Gold Exit Column
+            ctx.fillStyle = `rgb(${255/correctedDist*2}, ${215/correctedDist*2}, 0)`;
+            ctx.fillRect(x, (canvas.height/2)-(h/2), 1, h);
+        } else {
+            // Draw Textured Wall
+            let hitX = (player.x + eyeX * dist) % 1;
+            let hitY = (player.y + eyeY * dist) % 1;
+            let texX = Math.floor((Math.abs(hitX) > Math.abs(hitY) ? hitX : hitY) * texSize);
+            ctx.drawImage(wallTex.canvas, texX, 0, 1, texSize, x, (canvas.height/2)-(h/2), 1, h);
+            
+            // Fog
+            ctx.fillStyle = `rgba(0,0,0,${Math.min(1, correctedDist/15)})`;
+            ctx.fillRect(x, (canvas.height/2)-(h/2), 1, h);
+        }
     }
-
-    // 2. Draw Sprites (Enemies)
-    enemies.filter(e => e.alive).forEach(en => {
-        let dx = en.x - player.x, dy = en.y - player.y;
-        let dist = Math.sqrt(dx*dx + dy*dy);
-        let angle = Math.atan2(dy, dx) - player.dir;
-        while (angle < -Math.PI) angle += Math.PI * 2;
-        while (angle > Math.PI) angle -= Math.PI * 2;
-
-        if (Math.abs(angle) < FOV) {
-            let spriteHeight = canvas.height / dist;
-            let screenX = (0.5 * (angle / (FOV/2)) + 0.5) * canvas.width;
-            if (zBuffer[Math.floor(screenX)] > dist) {
-                ctx.drawImage(enemyTex.canvas, screenX - spriteHeight/2, canvas.height/2 - spriteHeight/2, spriteHeight, spriteHeight);
-            }
-        }
-    });
-
-    // 3. Gun / Muzzle Flash
-    if (isShooting > 0) {
-        ctx.fillStyle = "white"; ctx.fillRect(canvas.width/2 - 2, canvas.height/2 - 2, 4, 4); // Sight
-        ctx.fillStyle = "rgba(255,200,0,0.8)";
-        ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height-20, 100 * (isShooting/15), 0, Math.PI*2); ctx.fill();
+    
+    // Start Point Indicator (Floor marker)
+    if (Math.sqrt((player.x-1.5)**2 + (player.y-1.5)**2) < 1) {
+        ctx.fillStyle = "#0f0";
+        ctx.font = "20px monospace";
+        ctx.fillText("START POINT", canvas.width/2 - 60, canvas.height - 50);
     }
 }
 
 function loop() { update(); draw(); requestAnimationFrame(loop); }
+initLevel();
 loop();
 </script>
 </body>
