@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fixed Neon Pinball</title>
+    <title>Pinball: Stable Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background: #000; color: #00bfff; font-family: 'Courier New', monospace; }
@@ -33,27 +33,30 @@ const runner = Runner.create();
 Runner.run(runner, engine);
 
 let score = 0;
-
-// --- TABLE PIECES ---
 const wallAttr = { isStatic: true, render: { fillStyle: '#00bfff' }, restitution: 0.2 };
 
-// Outer Frame
+// --- CABINET ---
 const leftWall = Bodies.rectangle(w * 0.2, h / 2, 20, h, wallAttr);
 const rightWall = Bodies.rectangle(w * 0.8, h / 2, 20, h, wallAttr);
 const topWall = Bodies.rectangle(w / 2, 50, w * 0.4, 20, wallAttr);
 
-// Launcher Lane Wall
+// The Launcher Tube
 const launcherWall = Bodies.rectangle(w * 0.75, h * 0.6, 15, h * 0.8, wallAttr);
+// NEW: The Launcher Base (The ball rests here)
+const launcherBase = Bodies.rectangle(w * 0.775, h * 0.95, 40, 20, { 
+    isStatic: true, 
+    render: { fillStyle: '#ff0055' } 
+});
 
-// Rounded Corner Logic (Properly Aligned)
+// Rounded Corners
 function createArc(centerX, centerY, radius, startAngle, endAngle) {
-    const segments = 12;
+    const segments = 15;
     const group = Composite.create();
     for (let i = 0; i <= segments; i++) {
         const angle = startAngle + (i / segments) * (endAngle - startAngle);
         const x = centerX + Math.cos(angle) * radius;
         const y = centerY + Math.sin(angle) * radius;
-        const seg = Bodies.rectangle(x, y, 30, 20, {
+        const seg = Bodies.rectangle(x, y, 40, 20, {
             isStatic: true,
             angle: angle + Math.PI/2,
             render: { fillStyle: '#00bfff' }
@@ -62,56 +65,66 @@ function createArc(centerX, centerY, radius, startAngle, endAngle) {
     }
     return group;
 }
-
-// These center points now align perfectly with the intersection of walls
 const leftCorner = createArc(w * 0.2 + 100, 150, 100, Math.PI, Math.PI * 1.5);
 const rightCorner = createArc(w * 0.8 - 100, 150, 100, Math.PI * 1.5, Math.PI * 2);
 
-// Guides & Drain
+// Table Bottom
 const leftSlant = Bodies.rectangle(w * 0.32, h * 0.82, 180, 20, { isStatic: true, angle: 0.5, render: { fillStyle: '#005577' } });
 const rightSlant = Bodies.rectangle(w * 0.63, h * 0.82, 180, 20, { isStatic: true, angle: -0.5, render: { fillStyle: '#005577' } });
 const drain = Bodies.rectangle(w / 2, h + 50, w, 100, { isStatic: true, isSensor: true, label: 'drain' });
 
-// Bumpers
 const bumpers = [
-    createBumper(w * 0.45, h * 0.25),
-    createBumper(w * 0.55, h * 0.25),
-    createBumper(w * 0.5, h * 0.45)
+    Bodies.circle(w * 0.45, h * 0.3, 25, { isStatic: true, label: 'bumper', render: { fillStyle: '#000', strokeStyle: '#00bfff', lineWidth: 4 }, restitution: 1.8 }),
+    Bodies.circle(w * 0.55, h * 0.3, 25, { isStatic: true, label: 'bumper', render: { fillStyle: '#000', strokeStyle: '#00bfff', lineWidth: 4 }, restitution: 1.8 }),
 ];
 
-function createBumper(x, y) {
-    const b = Bodies.circle(x, y, 25, { isStatic: true, label: 'bumper', render: { fillStyle: '#000', strokeStyle: '#00bfff', lineWidth: 4 } });
-    b.restitution = 1.8;
-    return b;
-}
-
-// --- FLIPPERS ---
+// --- REBUILT ULTRA-STABLE FLIPPERS ---
 function createFlipper(x, y, side) {
-    const length = 100;
-    const group = Body.nextGroup(true);
+    const length = 110;
     const flipper = Bodies.rectangle(x, y, length, 20, {
-        collisionFilter: { group: group },
         render: { fillStyle: '#ff0055' },
-        chamfer: { radius: 10 }
+        chamfer: { radius: 10 },
+        isStatic: false,
+        density: 0.1
     });
+
     const pivotX = side === 'left' ? x - length/2 : x + length/2;
     const pivot = Bodies.circle(pivotX, y, 2, { isStatic: true, render: { visible: false } });
-    const joint = Constraint.create({ bodyA: flipper, pointA: { x: side === 'left' ? -length/2 : length/2, y: 0 }, bodyB: pivot, stiffness: 1 });
-    return flipper;
+
+    const constraint = Constraint.create({
+        bodyA: flipper,
+        pointA: { x: side === 'left' ? -length/2 : length/2, y: 0 },
+        bodyB: pivot,
+        stiffness: 1,
+        length: 0
+    });
+
+    return { body: flipper, constraint, pivot };
 }
 
-const fLeft = createFlipper(w * 0.43, h * 0.88, 'left');
-const fRight = createFlipper(w * 0.57, h * 0.88, 'right');
+const leftFlip = createFlipper(w * 0.43, h * 0.88, 'left');
+const rightFlip = createFlipper(w * 0.57, h * 0.88, 'right');
 
 // --- BALL ---
 let ball;
 function spawnBall() {
     if(ball) Composite.remove(world, ball);
-    ball = Bodies.circle(w * 0.775, h * 0.85, 12, { restitution: 0.5, label: 'ball', render: { fillStyle: '#fff' } });
+    // Spawning slightly higher so it drops onto the new launcherBase
+    ball = Bodies.circle(w * 0.775, h * 0.9, 12, { 
+        restitution: 0.4, 
+        label: 'ball', 
+        render: { fillStyle: '#fff' } 
+    });
     Composite.add(world, ball);
 }
 
-Composite.add(world, [leftWall, rightWall, topWall, launcherWall, leftCorner, rightCorner, leftSlant, rightSlant, drain, ...bumpers, fLeft, fRight]);
+Composite.add(world, [
+    leftWall, rightWall, topWall, launcherWall, launcherBase,
+    leftCorner, rightCorner, leftSlant, rightSlant, drain, ...bumpers,
+    leftFlip.body, leftFlip.constraint, leftFlip.pivot,
+    rightFlip.body, rightFlip.constraint, rightFlip.pivot
+]);
+
 spawnBall();
 
 // --- CONTROLS ---
@@ -120,14 +133,26 @@ window.onkeydown = (e) => keys[e.code] = true;
 window.onkeyup = (e) => keys[e.code] = false;
 
 Events.on(engine, 'beforeUpdate', () => {
-    if (keys['ArrowLeft']) Body.setAngularVelocity(fLeft, -0.2);
-    else Body.setAngularVelocity(fLeft, 0.1);
+    // Left Flipper Physics
+    if (keys['ArrowLeft']) {
+        Body.setAngularVelocity(leftFlip.body, -0.3);
+    } else {
+        Body.setAngularVelocity(leftFlip.body, 0.15);
+        // Force the flipper to stay at a certain resting angle
+        if (leftFlip.body.angle > 0.5) Body.setAngle(leftFlip.body, 0.5);
+    }
 
-    if (keys['ArrowRight']) Body.setAngularVelocity(fRight, 0.2);
-    else Body.setAngularVelocity(fRight, -0.1);
+    // Right Flipper Physics
+    if (keys['ArrowRight']) {
+        Body.setAngularVelocity(rightFlip.body, 0.3);
+    } else {
+        Body.setAngularVelocity(rightFlip.body, -0.15);
+        if (rightFlip.body.angle < -0.5) Body.setAngle(rightFlip.body, -0.5);
+    }
 
-    if (keys['Space'] && ball.position.x > w * 0.7) {
-        Body.applyForce(ball, ball.position, { x: 0, y: -0.05 });
+    // LAUNCHER (Force 0.02)
+    if (keys['Space'] && ball.position.x > w * 0.75) {
+        Body.applyForce(ball, ball.position, { x: 0, y: -0.02 });
     }
 });
 
