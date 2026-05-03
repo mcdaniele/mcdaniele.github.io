@@ -1,385 +1,177 @@
-<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vanilla Physics Pinball</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; color: #00bfff; font-family: monospace; }
+        canvas { display: block; width: 100vw; height: 100vh; }
+        #hud { position: absolute; top: 20px; left: 20px; font-size: 24px; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div id="hud">SCORE: <span id="s">0</span></div>
+    <canvas id="c"></canvas>
 
-Lu1ky Pinball 🍀
-a tiny magic pinball physics game
-by Frank Force
-for js1024 2023
-
-how to play
-- z = left flipper
-- x = right flipper
-- c = ball launcher
-- free ball every 64 points
-- chrome browser recommended
-
-features
-- slingshots
-- ball launcher
-- rotating flipper
-- score bumper animation
-- score and ball display
-- free ball every 64 points
-- four leaf clover arrangement
-
--->
-<html>
-<head><title>Lu1ky Pinball 🍀</title></head>
-<body id=b style=margin:0;touch-action:none;user-select:none;-webkit-user-select:none>
-<canvas id=a style=background:#fff>
 <script>
+const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('s');
+let w, h, score = 0;
 
-// js1024 shim
-'use strict';
-a.width = innerWidth;
-a.height = innerHeight;
-const c = a.getContext("2d");
-const d = document;
+// Game State
+let ball = { x: 0, y: 0, vx: 0, vy: 0, r: 12 };
+let flipA = 0.5, flipB = -0.5; // Flipper angles
+const keys = {};
 
-// enable mouse
-const ENHANCED = 1;
+// Table definition (Lines: x1, y1, x2, y2)
+let lines = [];
+let bumpers = [];
 
-// constants (will be auto replace in minified)
-const TABLE_WIDTH = 800;
-const TABLE_HEIGHT = 800;
-const MAX_BALL_HEIGHT = TABLE_HEIGHT+200;
-const CENTER = TABLE_WIDTH/2+100;
-const BALL_RADIUS = 9;
-const WALL_RADIUS = 9;
-const DOME_RADIUS = 200;
-const FLIPPER_RADIUS = 15;
-const FLIPPER_PIECES = 65
-const FLIPPER_SPACE = 80;
-const FLIPPER_CENTER = CENTER-BALL_RADIUS-WALL_RADIUS;
-const FLIPPER_HEIGHT = TABLE_HEIGHT-40;
-const SHOOTER_HEIGHT = TABLE_HEIGHT-40;
-const SHOOTER_MAX_HEIGHT = TABLE_HEIGHT-10;
-const FLIPPER_COUNT = 2;
-const BALL_INDEX = FLIPPER_COUNT;
-const RESTITUTION = 1.3;
-const BUMPER_RESTITUTION = 1.7;
-const PHYSICS_SUBSTEPS = 9;
-
-// object types
-const TYPE_WALL       = 0;
-const TYPE_BUMPER     = 1;
-
-// locals (remove from minified)
-let i, j, dx, dy, s, h, o, frame;
-
-// global variables
-let objects, score, ballCount;
-
-// spawn object
-let makeObject =
-(
-    x, y,          // position
-    t,             // type and bumper strength
-    r=WALL_RADIUS  // radius
-)=> objects.push({x, y, t, r, v:0, w:0});
-
-let drawCircle = (x,y,r)=> c.beginPath(c.fill(c.arc(x,y,r,0,9)));
-
-// int global variables
-objects = [ballCount = 3, 1];
-
-// make ball and init
-makeObject(frame = score = 0, MAX_BALL_HEIGHT);
-
-// flippers and shooter
-for(i = FLIPPER_PIECES; i--;)
-{
-    for(s=FLIPPER_COUNT;s--;)
-        makeObject();
-    makeObject(CENTER+DOME_RADIUS-BALL_RADIUS,SHOOTER_MAX_HEIGHT, TYPE_WALL, 6);
-}
-
-// build symmetric table
-for(s=2;s--;)
-{
-    // bottom pin
-    makeObject(FLIPPER_CENTER, FLIPPER_HEIGHT+56);
-
-    // score bumpers
-    const BUMPER_CENTER = 180;
-    makeObject(CENTER, BUMPER_CENTER, TYPE_BUMPER, 15);
-    makeObject(CENTER+(s*2-1)*60, BUMPER_CENTER-60, TYPE_BUMPER, 45);
-    makeObject(CENTER+(s*2-1)*60, BUMPER_CENTER+60, TYPE_BUMPER, 45);
-
-    // side bummpers
-    makeObject(FLIPPER_CENTER-(s*2-1)*210, DOME_RADIUS+120, TYPE_BUMPER, 70);
-
-    // side walls
-    for(i=115;i--;)
-        makeObject(CENTER+(s*2-1)*(DOME_RADIUS+WALL_RADIUS),TABLE_HEIGHT-7*i);
+function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    const m = w * 0.5, L = w * 0.2, R = w * 0.8;
     
-    // safety bumpers
-    makeObject(FLIPPER_CENTER+(s*2-1)*182, FLIPPER_HEIGHT-221,TYPE_BUMPER,15);
-    
-    for(i=60;i--;)
-    {
-        // shooter wall
-        makeObject(CENTER+DOME_RADIUS-BALL_RADIUS*2-WALL_RADIUS,
-            TABLE_HEIGHT-7*i);
-            
-        // top dome
-        const DOME_BOTH_RADIUS = DOME_RADIUS+WALL_RADIUS;
-        makeObject(
-            CENTER+(s*2-1)*DOME_BOTH_RADIUS*Math.cos(i/38),
-            DOME_BOTH_RADIUS-DOME_BOTH_RADIUS*Math.sin(i/38));
-    }
+    lines = [
+        {x1: L, y1: h, x2: L, y2: 200}, // Left wall
+        {x1: R, y1: h, x2: R, y2: 200}, // Right wall
+        {x1: R-40, y1: h, x2: R-40, y2: 300}, // Launcher wall
+        {x1: L, y1: h*0.8, x2: m-100, y2: h*0.9}, // Left slant
+        {x1: R-40, y1: h*0.8, x2: m+100, y2: h*0.9} // Right slant
+    ];
 
-    for(i=19;i--;)
-    {  
-        // flipper lane side
-        makeObject(FLIPPER_CENTER + (s*2-1)*(FLIPPER_SPACE+74),
-            FLIPPER_HEIGHT-63 - i*7);
-
-        // flipper lane bottom
-        makeObject(FLIPPER_CENTER + (s*2-1)*(FLIPPER_SPACE+74-i*4),
-            FLIPPER_HEIGHT-63 + i*3);
-
-        // slingshots
-        makeObject(FLIPPER_CENTER + (s*2-1)*(FLIPPER_SPACE+20+i), FLIPPER_HEIGHT-70-i*3, TYPE_BUMPER, 5);
-
-        // bumper grid
-        makeObject(CENTER+(i%3*24)*(s*2-1), BUMPER_CENTER+258-i%9*20, TYPE_BUMPER, 5);
-    }
-}
-
-// main game loop
-const update = substep=>
-{
-    // update physics
-    for(substep = PHYSICS_SUBSTEPS; substep--;)
-    {
-        // flippers
-        for(s = FLIPPER_COUNT; s--;)
-        {
-            // control flipper angle
-            objects[s] = Math.max(-1, Math.min(1, 
-                objects[s] += objects['zx'[s]]? -.07 : .05));
-
-            // update flipper and shooter physics
-            for(i = FLIPPER_PIECES; i--;)
-            {
-                // update flippers
-                o = objects[1+FLIPPER_COUNT+s*FLIPPER_PIECES+i];
-                o.v = -o.x + (o.x = FLIPPER_CENTER + (s*2-1) * 
-                    (FLIPPER_SPACE - i*Math.cos(objects[s]/2)));
-                o.w = -o.y + (o.y = FLIPPER_HEIGHT + i*Math.sin(objects[s]/2));
-                o.r = FLIPPER_RADIUS - i/8;
-
-                // update shooter
-                o = objects[1+FLIPPER_COUNT+FLIPPER_COUNT*FLIPPER_PIECES+i];
-                o.y = Math.min(SHOOTER_MAX_HEIGHT+i,    // clamp shooter pos
-                      o.y += o.w = objects['c'] ? .05 : // pull back shooter
-                      Math.sin(++frame)/99+             // randomness
-                      (SHOOTER_HEIGHT+i-o.y)/19);       // shooter spring
-            }
-        }
-
-        // clear canvas and get ball
-        a.width |= o = objects[BALL_INDEX];
-
-        // update ball movement and gravity
-        o.x += o.v;
-        o.y += o.w += .0017;
-
-        // check if ball is out
-        if (o.y > MAX_BALL_HEIGHT && ballCount)
-        {
-            // respawn ball
-            o.x = CENTER+DOME_RADIUS-BALL_RADIUS;
-            o.y = FLIPPER_HEIGHT-20;
-            o.w = o.v = 0;
-            ballCount--;
-        }
-
-        // for each object
-        objects.map(p=>
-        {
-            // draw object
-            substep || // fix local var being created in minified
-                c.beginPath(c.fill(c.arc(p.x, p.y, 
-                    p.b ? --p.b + p.r: p.r,0,9)));
-
-            // get collision distance
-            h = Math.hypot(dx = o.x - p.x, dy = o.y - p.y);
-            
-            // relative velocity
-            i = p.v - o.v;
-            j = p.w - o.w;
-
-            // resolve collision
-            if (h - o.r - p.r < 0 & // is inside
-                i*dx + j*dy > 0 &   // moving towards
-                !(p.t & !o.v))      // can collide
-            {
-                // move outside collision
-                o.x -= (h - o.r - p.r) * dx / h;
-                o.y -= (h - o.r - p.r) * dy / h;
-
-                // tangent length
-                h *= h / (j * dx - i * dy);
-
-                // get restitution and update bumper
-                s =  !p.t | p.b ?  RESTITUTION :
-                (
-                    // start bounce animation
-                    p.b = 9,
-
-                    // don't give score for slingshots
-                    p.y > 600 ? 0 : 
-                    
-                    // apply score and award extra balls
-                    ++score % 64 || ++ballCount,
-
-                    // make it bouncy
-                    BUMPER_RESTITUTION
-                );
-
-                // reflect velocity and bounce
-                o.v += (i + dy / h) * s;
-                o.w += (j - dx / h) * s;
-            }
+    // Create top arch with line segments
+    for(let i=0; i<=10; i++) {
+        let a1 = Math.PI + (i/10)*Math.PI;
+        let a2 = Math.PI + ((i+1)/10)*Math.PI;
+        lines.push({
+            x1: m + Math.cos(a1)*300, y1: 200 + Math.sin(a1)*150,
+            x2: m + Math.cos(a2)*300, y2: 200 + Math.sin(a2)*150
         });
     }
 
-    // draw score
-    for(i = score+8>>3; i--;)
-        drawCircle(CENTER-DOME_RADIUS-40-i%8*20, 420+i*3, i?9:score%8);
-
-    // draw ball count
-    for(i = ballCount; i--;)
-        drawCircle(CENTER+DOME_RADIUS+60, 420+i*60, 25);
-
-    if (ENHANCED)
-    {
-        let y = 10;
-        c.font = '6em impact'
-        c.fillText('LU1KY☘', 15, y+=90,260);
-        c.fillText('PINBALL', 15, y+=90,260);
-        c.font = '3em impact'
-        c.fillText('By Frank Force', 15, y+=45,260);
-    }
+    bumpers = [
+        {x: m-60, y: 300, r: 30}, {x: m+60, y: 300, r: 30}, {x: m, y: 150, r: 40}
+    ];
+    resetBall();
 }
 
-// keyboard input
-onkeydown = e => objects[e.key] = 1;
-onkeyup   = e => objects[e.key] = 0;
+function resetBall() {
+    ball.x = w * 0.785; ball.y = h - 50;
+    ball.vx = 0; ball.vy = 0;
+}
 
-if (!ENHANCED)
-    setInterval(update, 16); // 60 fps update
-else
-{
-    // enhanced rendering system for smoother frame rate
-    let frameTimeLastMS = 0, frameTimeBufferMS=0;
-    const updateAnimation = (frameTimeMS=0)=>
-    {
-        requestAnimationFrame(updateAnimation);
+window.onkeydown = e => keys[e.code] = 1;
+window.onkeyup = e => keys[e.code] = 0;
+
+function update() {
+    // Flipper Logic
+    flipA += (keys.ArrowLeft ? -0.4 : 0.2);
+    flipB += (keys.ArrowRight ? 0.4 : -0.2);
+    flipA = Math.max(-0.6, Math.min(0.6, flipA));
+    flipB = Math.max(-0.6, Math.min(0.6, flipB));
+
+    // Launcher
+    if (keys.Space && ball.x > w*0.75 && ball.y > h-100) ball.vy -= 1.5;
+
+    // Physics
+    ball.vy += 0.25; // Gravity
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    ball.vx *= 0.99; ball.vy *= 0.99; // Air resist
+
+    const m = w * 0.5;
+    const flippers = [
+        {x: m-120, y: h*0.9, a: flipA, l: 120, s: 1},
+        {x: m+120, y: h*0.9, a: flipB + Math.PI, l: 120, s: -1}
+    ];
+
+    // Static Line Collisions
+    lines.forEach(l => {
+        let dx = l.x2 - l.x1, dy = l.y2 - l.y1;
+        let len = Math.sqrt(dx*dx + dy*dy);
+        let dot = (((ball.x - l.x1) * dx) + ((ball.y - l.y1) * dy)) / (len*len);
+        let closestX = l.x1 + Math.max(0, Math.min(1, dot)) * dx;
+        let closestY = l.y1 + Math.max(0, Math.min(1, dot)) * dy;
         
-        // update time keeping
-        let frameTimeDeltaMS = frameTimeMS - frameTimeLastMS;
-        frameTimeLastMS = frameTimeMS;
-        frameTimeBufferMS += frameTimeDeltaMS;
-        frameTimeBufferMS = Math.min(frameTimeBufferMS, 50);
-
-        // apply time delta smoothing, improves smoothness of framerate in some browsers
-        let deltaSmooth = 0;
-        if (frameTimeBufferMS < 0 && frameTimeBufferMS > -9)
-        {
-            // force an update each frame if time is close enough (not just a fast refresh rate)
-            deltaSmooth = frameTimeBufferMS;
-            frameTimeBufferMS = 0;
+        let dist = Math.sqrt((ball.x-closestX)**2 + (ball.y-closestY)**2);
+        if (dist < ball.r) {
+            let nx = (ball.x - closestX) / dist;
+            let ny = (ball.y - closestY) / dist;
+            let vdot = ball.vx * nx + ball.vy * ny;
+            ball.vx -= 2 * vdot * nx;
+            ball.vy -= 2 * vdot * ny;
+            ball.x = closestX + nx * ball.r;
+            ball.y = closestY + ny * ball.r;
         }
-        
-        // update multiple frames if necessary in case of slow framerate
-        for (;frameTimeBufferMS >= 0; frameTimeBufferMS -= 1e3 / 60)
-            update();
+    });
 
-        // add the time smoothing back in
-        frameTimeBufferMS += deltaSmooth;
-    }
+    // Flipper Collisions (Simplified line collision + velocity transfer)
+    flippers.forEach(f => {
+        let fx2 = f.x + Math.cos(f.a) * f.l;
+        let fy2 = f.y + Math.sin(f.a) * f.l;
+        let dx = fx2 - f.x, dy = fy2 - f.y;
+        let dot = (((ball.x - f.x) * dx) + ((ball.y - f.y) * dy)) / (dx*dx + dy*dy);
+        let cx = f.x + Math.max(0, Math.min(1, dot)) * dx;
+        let cy = f.y + Math.max(0, Math.min(1, dot)) * dy;
+        let dist = Math.sqrt((ball.x-cx)**2 + (ball.y-cy)**2);
+        
+        if (dist < ball.r) {
+            ball.vy -= 5; // Kick the ball up
+            ball.vx += f.s * 2;
+        }
+    });
+
+    // Bumper Collisions
+    bumpers.forEach(b => {
+        let dist = Math.sqrt((ball.x-b.x)**2 + (ball.y-b.y)**2);
+        if (dist < b.r + ball.r) {
+            let nx = (ball.x - b.x) / dist, ny = (ball.y - b.y) / dist;
+            let vdot = ball.vx * nx + ball.vy * ny;
+            ball.vx = (ball.vx - 2 * vdot * nx) * 1.5;
+            ball.vy = (ball.vy - 2 * vdot * ny) * 1.5;
+            score += 10;
+            scoreEl.innerText = score;
+        }
+    });
+
+    if (ball.y > h) { resetBall(); score = 0; scoreEl.innerText = 0; }
+}
+
+function draw() {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, h);
     
-    updateAnimation();
+    ctx.strokeStyle = '#00bfff';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    lines.forEach(l => { ctx.moveTo(l.x1, l.y1); ctx.lineTo(l.x2, l.y2); });
+    ctx.stroke();
 
-    // responsive canvas size
-    onresize = e => 
-    {
-        a.width  = innerWidth;
-        a.height = innerHeight;
-    }
-    onresize();
+    bumpers.forEach(b => {
+        ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.stroke();
+    });
 
-    // mouse control
-    onmousedown = e=>
-    {
-        if (e.button != 1)
-        {
-            if (!o.v)
-                objects['c'] = 1;
-            objects[e.button?'x':'z'] = 1;
-        }
+    // Draw Flippers
+    const m = w * 0.5;
+    [[m-120, h*0.9, flipA], [m+120, h*0.9, flipB + Math.PI]].forEach(f => {
+        ctx.beginPath();
+        ctx.moveTo(f[0], f[1]);
+        ctx.lineTo(f[0] + Math.cos(f[2])*120, f[1] + Math.sin(f[2])*120);
+        ctx.stroke();
+    });
 
-        else
-        {
-            const r = a.getBoundingClientRect();
-            const o = objects[BALL_INDEX];
-            o.x = e.x - r.left;
-            o.y = e.y - r.top;
-            o.v = o.w = 0.000001;
-        }
-        return false;
-    }
-    onmouseup = e=> objects['c'] = objects[e.button?'x':'z'] = 0;
-    oncontextmenu = e=> false;
-
-    // try to enable touch
-    if (window.ontouchstart !== undefined)
-    {
-        // override mouse events
-        let wasTouching, mouseDown = onmousedown, mouseUp = onmouseup;
-        onmousedown = onmouseup = ()=> 0;
-
-        // setup touch input
-        ontouchstart = (e)=>
-        {
-            // handle all touch events the same way
-            ontouchstart = ontouchmove = ontouchend = (e)=>
-            {
-                e.button = 0; // all touches are left click
-
-                // check if touching and pass to mouse events
-                const touching = e.touches.length;
-                if (touching)
-                {
-                    // set event pos and pass it along
-                    e.x = e.touches[0].clientX;
-                    e.y = e.touches[0].clientY;
-
-                    const r = a.getBoundingClientRect();
-                    if (e.x > r.left + (r.right-r.left)/2)
-                        e.button = 2; // if right side
-                    
-                    wasTouching || mouseDown(e);
-                }
-                else if (wasTouching)
-                {
-                    mouseUp(e);
-                    e.button = 2; // untouch right
-                    mouseUp(e);
-                }
-
-                // set was touching
-                wasTouching = touching;
-
-                // must return true so the document will get focus
-                return true;
-            }
-
-            return ontouchstart(e);
-        }
-    }
+    // Draw Ball
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, 7); ctx.fill();
+    
+    update();
+    requestAnimationFrame(draw);
 }
 
+window.onresize = resize;
+resize();
+draw();
 </script>
+</body>
+</html>
