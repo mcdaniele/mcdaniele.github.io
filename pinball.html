@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vanilla Physics Pinball</title>
+    <title>Vanilla Pinball: Playable Edition</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; color: #00bfff; font-family: monospace; }
         canvas { display: block; width: 100vw; height: 100vh; }
-        #hud { position: absolute; top: 20px; left: 20px; font-size: 24px; pointer-events: none; }
+        #hud { position: absolute; top: 20px; left: 20px; font-size: 24px; pointer-events: none; text-shadow: 2px 2px #000; }
     </style>
 </head>
 <body>
-    <div id="hud">SCORE: <span id="s">0</span></div>
+    <div id="hud">SCORE: <span id="s">0</span><br><small>SPACE TO LAUNCH | ARROWS TO FLIP</small></div>
     <canvas id="c"></canvas>
 
 <script>
@@ -18,46 +18,54 @@ const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('s');
 let w, h, score = 0;
 
-// Game State
 let ball = { x: 0, y: 0, vx: 0, vy: 0, r: 12 };
-let flipA = 0.5, flipB = -0.5; // Flipper angles
+let flipA = 0.5, flipB = -0.5;
 const keys = {};
 
-// Table definition (Lines: x1, y1, x2, y2)
 let lines = [];
 let bumpers = [];
 
 function resize() {
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
-    const m = w * 0.5, L = w * 0.2, R = w * 0.8;
+    const m = w * 0.5, L = w * 0.2, R = w * 0.8, pWidth = 50;
     
     lines = [
-        {x1: L, y1: h, x2: L, y2: 200}, // Left wall
-        {x1: R, y1: h, x2: R, y2: 200}, // Right wall
-        {x1: R-40, y1: h, x2: R-40, y2: 300}, // Launcher wall
-        {x1: L, y1: h*0.8, x2: m-100, y2: h*0.9}, // Left slant
-        {x1: R-40, y1: h*0.8, x2: m+100, y2: h*0.9} // Right slant
+        {x1: L, y1: h, x2: L, y2: 150}, // Left wall
+        {x1: R, y1: h, x2: R, y2: 150}, // Right wall
+        {x1: R - pWidth, y1: h, x2: R - pWidth, y2: 250}, // Launcher inner wall
+        {x1: L, y1: h * 0.8, x2: m - 120, y2: h * 0.95}, // Left bottom slant
+        {x1: R - pWidth, y1: h * 0.8, x2: m + 120, y2: h * 0.95} // Right bottom slant
     ];
 
-    // Create top arch with line segments
-    for(let i=0; i<=10; i++) {
-        let a1 = Math.PI + (i/10)*Math.PI;
-        let a2 = Math.PI + ((i+1)/10)*Math.PI;
+    // Main Top Arch
+    for(let i = 0; i <= 15; i++) {
+        let a1 = Math.PI + (i / 15) * Math.PI;
+        let a2 = Math.PI + ((i + 1) / 15) * Math.PI;
         lines.push({
-            x1: m + Math.cos(a1)*300, y1: 200 + Math.sin(a1)*150,
-            x2: m + Math.cos(a2)*300, y2: 200 + Math.sin(a2)*150
+            x1: m + Math.cos(a1) * (m - L), y1: 150 + Math.sin(a1) * 120,
+            x2: m + Math.cos(a2) * (m - L), y2: 150 + Math.sin(a2) * 120
+        });
+    }
+
+    // THE FIX: Launcher Guide (Curved line to push ball left)
+    for(let i = 0; i <= 5; i++) {
+        let a1 = -Math.PI * 0.1 + (i / 5) * (Math.PI * 0.4);
+        let a2 = -Math.PI * 0.1 + ((i + 1) / 5) * (Math.PI * 0.4);
+        lines.push({
+            x1: R - 25 + Math.cos(a1) * 25, y1: 250 + Math.sin(a1) * 50,
+            x2: R - 25 + Math.cos(a2) * 25, y2: 250 + Math.sin(a2) * 50
         });
     }
 
     bumpers = [
-        {x: m-60, y: 300, r: 30}, {x: m+60, y: 300, r: 30}, {x: m, y: 150, r: 40}
+        {x: m - 80, y: 350, r: 35}, {x: m + 80, y: 350, r: 35}, {x: m, y: 200, r: 45}
     ];
     resetBall();
 }
 
 function resetBall() {
-    ball.x = w * 0.785; ball.y = h - 50;
+    ball.x = w * 0.8 - 25; ball.y = h - 50;
     ball.vx = 0; ball.vy = 0;
 }
 
@@ -65,105 +73,109 @@ window.onkeydown = e => keys[e.code] = 1;
 window.onkeyup = e => keys[e.code] = 0;
 
 function update() {
-    // Flipper Logic
-    flipA += (keys.ArrowLeft ? -0.4 : 0.2);
-    flipB += (keys.ArrowRight ? 0.4 : -0.2);
-    flipA = Math.max(-0.6, Math.min(0.6, flipA));
-    flipB = Math.max(-0.6, Math.min(0.6, flipB));
+    // Flipper movement logic
+    flipA += (keys.ArrowLeft ? -0.5 : 0.25);
+    flipB += (keys.ArrowRight ? 0.5 : -0.25);
+    flipA = Math.max(-0.7, Math.min(0.5, flipA));
+    flipB = Math.max(-0.5, Math.min(0.7, flipB));
 
-    // Launcher
-    if (keys.Space && ball.x > w*0.75 && ball.y > h-100) ball.vy -= 1.5;
+    // Launcher (Smoother Force)
+    if (keys.Space && ball.x > w * 0.75 && ball.y > h - 100) {
+        ball.vy -= 1.8;
+    }
 
-    // Physics
-    ball.vy += 0.25; // Gravity
+    // Physics constants
+    ball.vy += 0.28; // Gravity
     ball.x += ball.vx;
     ball.y += ball.vy;
-    ball.vx *= 0.99; ball.vy *= 0.99; // Air resist
+    ball.vx *= 0.995; ball.vy *= 0.995;
 
-    const m = w * 0.5;
+    const m = w * 0.5, fY = h * 0.95;
     const flippers = [
-        {x: m-120, y: h*0.9, a: flipA, l: 120, s: 1},
-        {x: m+120, y: h*0.9, a: flipB + Math.PI, l: 120, s: -1}
+        {x: m - 120, y: fY, a: flipA, l: 110, side: -1},
+        {x: m + 120, y: fY, a: Math.PI - flipB, l: 110, side: 1}
     ];
 
-    // Static Line Collisions
+    // Static Line Collision Math
     lines.forEach(l => {
         let dx = l.x2 - l.x1, dy = l.y2 - l.y1;
-        let len = Math.sqrt(dx*dx + dy*dy);
-        let dot = (((ball.x - l.x1) * dx) + ((ball.y - l.y1) * dy)) / (len*len);
-        let closestX = l.x1 + Math.max(0, Math.min(1, dot)) * dx;
-        let closestY = l.y1 + Math.max(0, Math.min(1, dot)) * dy;
+        let lenSq = dx*dx + dy*dy;
+        let dot = ((ball.x - l.x1) * dx + (ball.y - l.y1) * dy) / lenSq;
+        let cx = l.x1 + Math.max(0, Math.min(1, dot)) * dx;
+        let cy = l.y1 + Math.max(0, Math.min(1, dot)) * dy;
+        let dist = Math.hypot(ball.x - cx, ball.y - cy);
         
-        let dist = Math.sqrt((ball.x-closestX)**2 + (ball.y-closestY)**2);
         if (dist < ball.r) {
-            let nx = (ball.x - closestX) / dist;
-            let ny = (ball.y - closestY) / dist;
+            let nx = (ball.x - cx) / dist, ny = (ball.y - cy) / dist;
             let vdot = ball.vx * nx + ball.vy * ny;
-            ball.vx -= 2 * vdot * nx;
-            ball.vy -= 2 * vdot * ny;
-            ball.x = closestX + nx * ball.r;
-            ball.y = closestY + ny * ball.r;
+            ball.vx = (ball.vx - 2 * vdot * nx) * 0.7;
+            ball.vy = (ball.vy - 2 * vdot * ny) * 0.7;
+            ball.x = cx + nx * ball.r;
+            ball.y = cy + ny * ball.r;
         }
     });
 
-    // Flipper Collisions (Simplified line collision + velocity transfer)
+    // Flipper Collision Math
     flippers.forEach(f => {
         let fx2 = f.x + Math.cos(f.a) * f.l;
         let fy2 = f.y + Math.sin(f.a) * f.l;
         let dx = fx2 - f.x, dy = fy2 - f.y;
-        let dot = (((ball.x - f.x) * dx) + ((ball.y - f.y) * dy)) / (dx*dx + dy*dy);
+        let dot = ((ball.x - f.x) * dx + (ball.y - f.y) * dy) / (dx*dx + dy*dy);
         let cx = f.x + Math.max(0, Math.min(1, dot)) * dx;
         let cy = f.y + Math.max(0, Math.min(1, dot)) * dy;
-        let dist = Math.sqrt((ball.x-cx)**2 + (ball.y-cy)**2);
+        let dist = Math.hypot(ball.x - cx, ball.y - cy);
         
         if (dist < ball.r) {
-            ball.vy -= 5; // Kick the ball up
-            ball.vx += f.s * 2;
+            // Impact logic: if key is pressed, give the ball a massive boost
+            let isMoving = (f.side === -1 && keys.ArrowLeft) || (f.side === 1 && keys.ArrowRight);
+            ball.vy = isMoving ? -15 : -5;
+            ball.vx += isMoving ? (ball.x - f.x) * 0.1 : 0;
+            ball.y = cy - ball.r;
         }
     });
 
-    // Bumper Collisions
+    // Bumper Logic
     bumpers.forEach(b => {
-        let dist = Math.sqrt((ball.x-b.x)**2 + (ball.y-b.y)**2);
+        let dist = Math.hypot(ball.x - b.x, ball.y - b.y);
         if (dist < b.r + ball.r) {
             let nx = (ball.x - b.x) / dist, ny = (ball.y - b.y) / dist;
             let vdot = ball.vx * nx + ball.vy * ny;
-            ball.vx = (ball.vx - 2 * vdot * nx) * 1.5;
-            ball.vy = (ball.vy - 2 * vdot * ny) * 1.5;
-            score += 10;
-            scoreEl.innerText = score;
+            ball.vx = (ball.vx - 2 * vdot * nx) * 1.8;
+            ball.vy = (ball.vy - 2 * vdot * ny) * 1.8;
+            score += 50; scoreEl.innerText = score;
         }
     });
 
-    if (ball.y > h) { resetBall(); score = 0; scoreEl.innerText = 0; }
+    if (ball.y > h + 100) { resetBall(); score = 0; scoreEl.innerText = 0; }
 }
 
 function draw() {
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = '#00bfff'; ctx.lineWidth = 5; ctx.lineCap = 'round';
     
-    ctx.strokeStyle = '#00bfff';
-    ctx.lineWidth = 4;
+    // Lines
     ctx.beginPath();
     lines.forEach(l => { ctx.moveTo(l.x1, l.y1); ctx.lineTo(l.x2, l.y2); });
     ctx.stroke();
 
+    // Bumpers
     bumpers.forEach(b => {
         ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.stroke();
+        ctx.fillStyle = '#002244'; ctx.fill();
     });
 
-    // Draw Flippers
-    const m = w * 0.5;
-    [[m-120, h*0.9, flipA], [m+120, h*0.9, flipB + Math.PI]].forEach(f => {
-        ctx.beginPath();
+    // Flippers
+    const m = w * 0.5, fY = h * 0.95;
+    [[m - 120, fY, flipA], [m + 120, fY, Math.PI - flipB]].forEach(f => {
+        ctx.beginPath(); ctx.lineWidth = 12; ctx.strokeStyle = '#ff0055';
         ctx.moveTo(f[0], f[1]);
-        ctx.lineTo(f[0] + Math.cos(f[2])*120, f[1] + Math.sin(f[2])*120);
+        ctx.lineTo(f[0] + Math.cos(f[2]) * 110, f[1] + Math.sin(f[2]) * 110);
         ctx.stroke();
     });
 
-    // Draw Ball
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, 7); ctx.fill();
+    // Ball
+    ctx.fillStyle = '#fff'; ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, 7); ctx.fill();
     
     update();
     requestAnimationFrame(draw);
