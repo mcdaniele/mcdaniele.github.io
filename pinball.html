@@ -2,34 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Physics Pinball</title>
+    <title>Neon Pinball: Rounded Corners</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background: #050505; color: #00bfff; font-family: 'Courier New', monospace; }
-        #score { position: absolute; top: 20px; left: 20px; font-size: 2rem; text-shadow: 0 0 10px #00bfff; pointer-events: none; }
-        #msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; opacity: 0.5; pointer-events: none; }
+        body { margin: 0; padding: 0; overflow: hidden; background: #000; color: #00bfff; font-family: 'Courier New', monospace; }
+        #score { position: absolute; top: 20px; left: 20px; font-size: 2rem; text-shadow: 0 0 10px #00bfff; pointer-events: none; z-index: 10; }
         canvas { display: block; }
     </style>
 </head>
 <body>
 
     <div id="score">000000</div>
-    <div id="msg">LEFT/RIGHT ARROWS TO FLIP | SPACE TO LAUNCH</div>
 
 <script>
-const { Engine, Render, Runner, Bodies, Composite, Body, Events, Constraint } = Matter;
+const { Engine, Render, Runner, Bodies, Composite, Body, Events, Constraint, Vector } = Matter;
 
-// Setup
 const engine = Engine.create();
 const world = engine.world;
+const w = window.innerWidth;
+const h = window.innerHeight;
+
 const render = Render.create({
     element: document.body,
     engine: engine,
     options: {
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: w,
+        height: h,
         wireframes: false,
-        background: '#050505'
+        background: '#000'
     }
 });
 
@@ -38,90 +38,103 @@ const runner = Runner.create();
 Runner.run(runner, engine);
 
 let score = 0;
-const scoreEl = document.getElementById('score');
 
-// --- GAME OBJECTS ---
+// --- TABLE GEOMETRY ---
+const wallOptions = { isStatic: true, render: { fillStyle: '#00bfff' }, restitution: 0.4 };
 
-// Walls & Table
-const wallOptions = { isStatic: true, render: { fillStyle: '#002244' }, restitution: 0.5 };
-const w = window.innerWidth;
-const h = window.innerHeight;
-
+// Main Walls
 const leftWall = Bodies.rectangle(w * 0.2, h / 2, 20, h, wallOptions);
 const rightWall = Bodies.rectangle(w * 0.8, h / 2, 20, h, wallOptions);
-const topWall = Bodies.rectangle(w / 2, 0, w * 0.6, 20, wallOptions);
-const drain = Bodies.rectangle(w / 2, h + 50, w, 100, { isStatic: true, isSensor: true, label: 'drain' });
+const topWall = Bodies.rectangle(w / 2, 20, w * 0.4, 20, wallOptions); // Narrower top to make room for curves
 
-// Slanted side walls (to guide ball to flippers)
-const leftSlant = Bodies.trapezoid(w * 0.3, h * 0.85, 250, 40, 0.5, { isStatic: true, angle: 0.5, render: { fillStyle: '#004466' } });
-const rightSlant = Bodies.trapezoid(w * 0.7, h * 0.85, 250, 40, 0.5, { isStatic: true, angle: -0.5, render: { fillStyle: '#004466' } });
+// Rounded Corner Function
+function createCorner(x, y, startAngle, side) {
+    const segments = 10;
+    const radius = 100;
+    const composite = Composite.create();
+    
+    for (let i = 0; i < segments; i++) {
+        const angle = startAngle + (i / segments) * (Math.PI / 2);
+        const posX = x + Math.cos(angle) * radius * (side === 'left' ? 1 : -1);
+        const posY = y + Math.sin(angle) * radius;
+        
+        const segment = Bodies.rectangle(posX, posY, 40, 20, {
+            isStatic: true,
+            angle: angle + Math.PI/2,
+            render: { fillStyle: '#00bfff' }
+        });
+        Composite.add(composite, segment);
+    }
+    return composite;
+}
+
+const topLeftCorner = createCorner(w * 0.2 + 80, 100, Math.PI, 'left');
+const topRightCorner = createCorner(w * 0.8 - 80, 100, Math.PI * 1.5, 'right');
+
+// Guides and Drain
+const leftSlant = Bodies.rectangle(w * 0.32, h * 0.82, 200, 20, { isStatic: true, angle: 0.6, render: { fillStyle: '#005577' } });
+const rightSlant = Bodies.rectangle(w * 0.68, h * 0.82, 200, 20, { isStatic: true, angle: -0.6, render: { fillStyle: '#005577' } });
+const drain = Bodies.rectangle(w / 2, h + 50, w, 100, { isStatic: true, isSensor: true, label: 'drain' });
 
 // Bumpers
 function createBumper(x, y) {
-    const b = Bodies.circle(x, y, 30, {
+    const b = Bodies.circle(x, y, 25, {
         isStatic: true,
         label: 'bumper',
-        render: { fillStyle: '#00bfff', strokeStyle: '#fff', lineWidth: 3 }
+        render: { fillStyle: '#000', strokeStyle: '#00bfff', lineWidth: 5 }
     });
-    b.restitution = 1.5; // Make it bouncy!
+    b.restitution = 1.6;
     return b;
 }
 
 const bumpers = [
-    createBumper(w * 0.4, h * 0.3),
-    createBumper(w * 0.6, h * 0.3),
-    createBumper(w * 0.5, h * 0.15),
-    createBumper(w * 0.35, h * 0.5),
-    createBumper(w * 0.65, h * 0.5)
+    createBumper(w * 0.5, h * 0.2),
+    createBumper(w * 0.4, h * 0.35),
+    createBumper(w * 0.6, h * 0.35),
+    createBumper(w * 0.5, h * 0.5)
 ];
 
 // --- FLIPPERS ---
 function createFlipper(x, y, side) {
-    const length = 120;
+    const length = 110;
     const group = Body.nextGroup(true);
-    
-    const flipper = Bodies.trapezoid(x, y, length, 25, 0.3, {
+    const flipper = Bodies.rectangle(x, y, length, 20, {
         collisionFilter: { group: group },
         render: { fillStyle: '#ff0055' },
-        chamfer: { radius: [10, 10, 5, 5] }
+        chamfer: { radius: 10 }
     });
 
-    const pivot = Bodies.circle(side === 'left' ? x - length/2 : x + length/2, y, 5, {
-        isStatic: true,
-        collisionFilter: { group: group },
-        render: { visible: false }
-    });
+    const pivotX = side === 'left' ? x - length/2 : x + length/2;
+    const pivot = Bodies.circle(pivotX, y, 5, { isStatic: true, collisionFilter: { group: group }, render: { visible: false } });
 
     const joint = Constraint.create({
-        bodyA: flipper,
-        pointA: { x: side === 'left' ? -length/2 : length/2, y: 0 },
-        bodyB: pivot,
-        stiffness: 1,
-        length: 0
+        bodyA: flipper, pointA: { x: side === 'left' ? -length/2 : length/2, y: 0 },
+        bodyB: pivot, stiffness: 1, length: 0
     });
 
-    return { body: flipper, joint, pivot, side };
+    return { body: flipper, side };
 }
 
-const leftFlip = createFlipper(w * 0.4, h * 0.88, 'left');
-const rightFlip = createFlipper(w * 0.6, h * 0.88, 'right');
+const leftFlip = createFlipper(w * 0.42, h * 0.88, 'left');
+const rightFlip = createFlipper(w * 0.58, h * 0.88, 'right');
 
-// --- THE BALL ---
+// --- BALL ---
 let ball;
 function spawnBall() {
     if(ball) Composite.remove(world, ball);
-    ball = Bodies.circle(w * 0.78, h * 0.8, 12, {
-        restitution: 0.6,
-        density: 0.001,
+    ball = Bodies.circle(w * 0.77, h * 0.7, 12, {
+        restitution: 0.5,
         label: 'ball',
-        render: { fillStyle: '#ffffff' }
+        render: { fillStyle: '#ffffff', shadowBlur: 15, shadowColor: '#fff' }
     });
     Composite.add(world, ball);
 }
 
-Composite.add(world, [leftWall, rightWall, topWall, drain, leftSlant, rightSlant, ...bumpers, 
-                      leftFlip.body, leftFlip.pivot, leftFlip.joint,
-                      rightFlip.body, rightFlip.pivot, rightFlip.joint]);
+Composite.add(world, [
+    leftWall, rightWall, topWall, drain, leftSlant, rightSlant,
+    topLeftCorner, topRightCorner, ...bumpers,
+    leftFlip.body, rightFlip.body
+]);
 
 spawnBall();
 
@@ -131,51 +144,29 @@ window.onkeydown = (e) => keys[e.code] = true;
 window.onkeyup = (e) => keys[e.code] = false;
 
 Events.on(engine, 'beforeUpdate', () => {
-    // Flipper Physics
-    const flipSpeed = 0.18;
-    const gravityForce = 0.08;
+    const force = 0.2;
+    if (keys['ArrowLeft']) Body.setAngularVelocity(leftFlip.body, -force);
+    else Body.setAngularVelocity(leftFlip.body, 0.1);
 
-    // Left Flipper
-    if (keys['ArrowLeft']) {
-        Body.setAngularVelocity(leftFlip.body, -flipSpeed);
-    } else {
-        Body.setAngularVelocity(leftFlip.body, gravityForce);
-    }
+    if (keys['ArrowRight']) Body.setAngularVelocity(rightFlip.body, force);
+    else Body.setAngularVelocity(rightFlip.body, -0.1);
 
-    // Right Flipper
-    if (keys['ArrowRight']) {
-        Body.setAngularVelocity(rightFlip.body, flipSpeed);
-    } else {
-        Body.setAngularVelocity(rightFlip.body, -gravityForce);
-    }
-
-    // Launcher
-    if (keys['Space'] && ball.position.x > w * 0.75) {
-        Body.applyForce(ball, ball.position, { x: 0, y: -0.05 });
+    if (keys['Space'] && ball.position.x > w * 0.7) {
+        Body.applyForce(ball, ball.position, { x: 0, y: -0.04 });
     }
 });
 
-// Collision Events
 Events.on(engine, 'collisionStart', (event) => {
     event.pairs.forEach((pair) => {
         if (pair.bodyA.label === 'bumper' || pair.bodyB.label === 'bumper') {
-            score += 100;
-            scoreEl.innerText = score.toString().padStart(6, '0');
+            score += 150;
+            document.getElementById('score').innerText = score.toString().padStart(6, '0');
         }
         if (pair.bodyA.label === 'drain' || pair.bodyB.label === 'drain') {
-            score = 0;
-            scoreEl.innerText = '000000';
-            spawnBall();
+            score = 0; spawnBall();
         }
     });
 });
-
-// Resize handler
-window.addEventListener('resize', () => {
-    render.canvas.width = window.innerWidth;
-    render.canvas.height = window.innerHeight;
-});
-
 </script>
 </body>
 </html>
