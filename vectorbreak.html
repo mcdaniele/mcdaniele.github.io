@@ -2,13 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vector Break: Levels</title>
+    <title>Vector Break: Smooth Restart</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; color: #00bfff; font-family: 'Courier New', monospace; }
         canvas { display: block; }
         #ui { position: absolute; top: 20px; width: 100%; text-align: center; pointer-events: none; text-shadow: 0 0 10px #00bfff; }
         .stat { margin: 0 20px; font-size: 24px; }
-        #msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; display: none; }
+        
+        /* Center Overlay for Messages and Buttons */
+        #overlay { 
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            text-align: center; 
+            z-index: 100;
+        }
+        #msg { font-size: 40px; margin-bottom: 20px; display: none; }
+        
+        button {
+            background: transparent;
+            color: #00bfff;
+            border: 2px solid #00bfff;
+            padding: 15px 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            cursor: pointer;
+            display: none;
+            transition: 0.3s;
+            box-shadow: 0 0 15px #00bfff;
+        }
+        button:hover {
+            background: #00bfff;
+            color: #000;
+        }
     </style>
 </head>
 <body>
@@ -17,14 +42,23 @@
         <span class="stat">SCORE: <span id="score">0</span></span>
         <span class="stat">LIVES: <span id="lives">3</span></span>
     </div>
-    <div id="msg">LEVEL COMPLETE!</div>
+
+    <div id="overlay">
+        <div id="msg">LEVEL COMPLETE!</div>
+        <button id="restartBtn" onclick="fullReset()">START OVER</button>
+    </div>
+
     <canvas id="c"></canvas>
 
 <script>
 const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
-const scoreEl = document.getElementById('score'), livesEl = document.getElementById('lives'), lvlEl = document.getElementById('lvl'), msgEl = document.getElementById('msg');
+const scoreEl = document.getElementById('score'), 
+      livesEl = document.getElementById('lives'), 
+      lvlEl = document.getElementById('lvl'), 
+      msgEl = document.getElementById('msg'),
+      restartBtn = document.getElementById('restartBtn');
 
-let w, h, score = 0, lives = 3, level = 1, paused = true;
+let w, h, score = 0, lives = 3, level = 1, paused = true, gameOver = false;
 let ballSpeed = 5;
 
 const ball = { x: 0, y: 0, vx: 0, vy: 0, r: 10 };
@@ -34,7 +68,7 @@ let bricks = [];
 const keys = {};
 window.onkeydown = e => { 
     keys[e.code] = true; 
-    if(paused && e.code === 'Space') { 
+    if(paused && e.code === 'Space' && !gameOver) { 
         paused = false; 
         ball.vx = ballSpeed; ball.vy = -ballSpeed; 
     }
@@ -46,11 +80,11 @@ function createLevel(lvl) {
     h = canvas.height = window.innerHeight;
     
     paddle.x = w / 2 - paddle.w / 2;
-    ballSpeed = 4 + lvl; // Increase speed every level
+    ballSpeed = 4 + lvl; 
     resetBall();
     
-    const cols = 8 + Math.min(lvl, 4); // More columns as you progress
-    const rows = 2 + lvl;             // More rows as you progress
+    const cols = 8 + Math.min(lvl, 4);
+    const rows = 2 + lvl;
     const padding = 10, offsetTop = 100, offsetLeft = 60;
     const bW = (w - (offsetLeft * 2)) / cols - padding;
     const bH = 25;
@@ -79,6 +113,7 @@ function resetBall() {
 function nextLevel() {
     level++;
     lvlEl.innerText = level;
+    msgEl.innerText = "LEVEL COMPLETE!";
     msgEl.style.display = 'block';
     paused = true;
     setTimeout(() => {
@@ -87,9 +122,25 @@ function nextLevel() {
     }, 2000);
 }
 
+function fullReset() {
+    score = 0;
+    lives = 3;
+    level = 1;
+    gameOver = false;
+    
+    scoreEl.innerText = score;
+    livesEl.innerText = lives;
+    lvlEl.innerText = level;
+    
+    restartBtn.style.display = 'none';
+    msgEl.style.display = 'none';
+    
+    createLevel(level);
+}
+
 function update() {
-    if (paused) {
-        if (msgEl.style.display === 'none') ball.x = paddle.x + paddle.w / 2;
+    if (paused || gameOver) {
+        if (msgEl.style.display === 'none' && !gameOver) ball.x = paddle.x + paddle.w / 2;
         return;
     }
 
@@ -102,14 +153,12 @@ function update() {
     if (ball.x + ball.r > w || ball.x - ball.r < 0) ball.vx *= -1;
     if (ball.y - ball.r < 0) ball.vy *= -1;
 
-    // Paddle Hit
     if (ball.y + ball.r > h - 40 && ball.x > paddle.x && ball.x < paddle.x + paddle.w) {
         ball.vy = -Math.abs(ball.vy);
         let diff = ball.x - (paddle.x + paddle.w / 2);
         ball.vx = diff * 0.15;
     }
 
-    // Brick Hit
     let activeBricks = 0;
     bricks.forEach(b => {
         if (!b.active) return;
@@ -128,16 +177,16 @@ function update() {
         }
     });
 
-    // Check Win Condition
     if (activeBricks === 0) nextLevel();
 
-    // Death Condition
     if (ball.y > h) {
         lives--;
         livesEl.innerText = lives;
         if (lives <= 0) {
-            alert("GAME OVER! SCORE: " + score);
-            location.reload();
+            gameOver = true;
+            msgEl.innerText = "GAME OVER";
+            msgEl.style.display = 'block';
+            restartBtn.style.display = 'inline-block';
         } else {
             resetBall();
         }
@@ -145,35 +194,28 @@ function update() {
 }
 
 function draw() {
-    ctx.fillStyle = 'rgba(0, 8, 20, 0.4)'; // Dark blue trail
+    ctx.fillStyle = 'rgba(0, 8, 20, 0.4)';
     ctx.fillRect(0, 0, w, h);
 
     bricks.forEach(b => {
         if (!b.active) return;
         ctx.strokeStyle = b.color;
-        ctx.lineWidth = 2;
         ctx.strokeRect(b.x, b.y, b.w, b.h);
-        ctx.fillStyle = b.color.replace('50%', '15%');
-        ctx.fillRect(b.x, b.y, b.w, b.h);
     });
 
-    // Paddle
     ctx.strokeStyle = '#00ffcc';
     ctx.lineWidth = 3;
     ctx.strokeRect(paddle.x, h - 40, paddle.w, paddle.h);
 
-    // Ball
     ctx.fillStyle = '#fff';
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = '#fff';
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.r, 0, 7);
     ctx.fill();
-    ctx.shadowBlur = 0;
 
-    if (paused && msgEl.style.display === 'none') {
+    if (paused && msgEl.style.display === 'none' && !gameOver) {
         ctx.fillStyle = '#00bfff';
         ctx.textAlign = 'center';
+        ctx.font = '24px Courier New';
         ctx.fillText('SPACE TO LAUNCH LEVEL ' + level, w/2, h/2);
     }
 
