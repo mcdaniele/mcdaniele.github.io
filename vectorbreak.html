@@ -1,19 +1,17 @@
-// --- Inside the update() function, replace the Paddle Hit section ---
-
+// --- Updated Paddle Collision Logic ---
 if (ball.y + ball.r > h - 40 && ball.x > paddle.x && ball.x < paddle.x + paddle.w) {
+    // 1. Position Correction: Snap ball to the top of the paddle
+    // This prevents the "vibration trap" at the screen edges
+    ball.y = h - 40 - ball.r;
+
+    // 2. Flip vertical velocity
     ball.vy = -Math.abs(ball.vy);
     
-    // Calculate how far from the center the ball hit
+    // 3. Calculate horizontal kick
     let diff = ball.x - (paddle.x + paddle.w / 2);
-    
-    // New Logic: Ensure the ball ALWAYS has a horizontal kick
-    // We multiply the diff by a factor, then ensure it's at least 2 or -2
     let newVx = diff * 0.15;
     
-    // If the hit is too "dead center", force a slight angle
-    if (Math.abs(newVx) < 2) {
-        newVx = newVx < 0 ? -2 : 2;
-    }
-    
+    // Ensure it doesn't go perfectly vertical
+    if (Math.abs(newVx) < 2) newVx = newVx < 0 ? -2 : 2;
     ball.vx = newVx;
 }
