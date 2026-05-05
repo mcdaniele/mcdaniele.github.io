@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vector Break: Pre-Launch Move</title>
+    <title>Vector Break: Mouse Control</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; color: #00bfff; font-family: 'Courier New', monospace; }
+        body { margin: 0; overflow: hidden; background: #000; color: #00bfff; font-family: 'Courier New', monospace; cursor: none; }
         canvas { display: block; }
         #ui { position: absolute; top: 20px; width: 100%; text-align: center; pointer-events: none; text-shadow: 0 0 10px #00bfff; }
         .stat { margin: 0 20px; font-size: 24px; }
@@ -28,6 +28,7 @@
             display: none;
             transition: 0.3s;
             box-shadow: 0 0 15px #00bfff;
+            pointer-events: auto; /* Allow clicking even when UI is passthrough */
         }
         button:hover { background: #00bfff; color: #000; }
     </style>
@@ -61,20 +62,32 @@ const ball = { x: 0, y: 0, vx: 0, vy: 0, r: 10 };
 const paddle = { x: 0, w: 140, h: 15 };
 let bricks = [];
 
-const keys = {};
-window.onkeydown = e => { 
-    keys[e.code] = true; 
-    if(paused && e.code === 'Space' && !gameOver) { 
-        paused = false; 
-        ball.vx = ballSpeed; ball.vy = -ballSpeed; 
+// --- MOUSE CONTROLS ---
+window.addEventListener('mousemove', e => {
+    if (gameOver) return;
+    
+    // Center the paddle on the mouse cursor
+    let nextX = e.clientX - paddle.w / 2;
+    
+    // Boundary constraints
+    if (nextX < 0) nextX = 0;
+    if (nextX > w - paddle.w) nextX = w - paddle.w;
+    
+    paddle.x = nextX;
+});
+
+// Click to launch
+window.addEventListener('mousedown', () => {
+    if (paused && !gameOver && msgEl.style.display === 'none') {
+        paused = false;
+        ball.vx = ballSpeed;
+        ball.vy = -ballSpeed;
     }
-};
-window.onkeyup = e => keys[e.code] = false;
+});
 
 function createLevel(lvl) {
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
-    paddle.x = w / 2 - paddle.w / 2;
     ballSpeed = 4 + lvl; 
     resetBall();
     
@@ -126,11 +139,6 @@ function nextLevel() {
 function update() {
     if (gameOver) return;
 
-    // --- PADDLE MOVEMENT (Now works even when paused) ---
-    if (keys.ArrowLeft && paddle.x > 0) paddle.x -= 10;
-    if (keys.ArrowRight && paddle.x < w - paddle.w) paddle.x += 10;
-
-    // If paused, keep ball locked to paddle center
     if (paused) {
         if (msgEl.style.display === 'none') {
             ball.x = paddle.x + paddle.w / 2;
@@ -138,7 +146,6 @@ function update() {
         return;
     }
 
-    // --- BALL PHYSICS (Only runs when NOT paused) ---
     ball.x += ball.vx;
     ball.y += ball.vy;
 
@@ -206,7 +213,7 @@ function draw() {
         ctx.fillStyle = '#00bfff';
         ctx.textAlign = 'center';
         ctx.font = '24px Courier New';
-        ctx.fillText('ARROWS TO AIM | SPACE TO LAUNCH', w/2, h/2);
+        ctx.fillText('MOVE MOUSE TO AIM | CLICK TO LAUNCH', w/2, h/2);
     }
 
     update();
