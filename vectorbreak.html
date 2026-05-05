@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vector Break: Smooth Restart</title>
+    <title>Vector Break: Pre-Launch Move</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; color: #00bfff; font-family: 'Courier New', monospace; }
         canvas { display: block; }
         #ui { position: absolute; top: 20px; width: 100%; text-align: center; pointer-events: none; text-shadow: 0 0 10px #00bfff; }
         .stat { margin: 0 20px; font-size: 24px; }
         
-        /* Center Overlay for Messages and Buttons */
         #overlay { 
             position: absolute; top: 50%; left: 50%; 
             transform: translate(-50%, -50%); 
@@ -30,10 +29,7 @@
             transition: 0.3s;
             box-shadow: 0 0 15px #00bfff;
         }
-        button:hover {
-            background: #00bfff;
-            color: #000;
-        }
+        button:hover { background: #00bfff; color: #000; }
     </style>
 </head>
 <body>
@@ -78,7 +74,6 @@ window.onkeyup = e => keys[e.code] = false;
 function createLevel(lvl) {
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
-    
     paddle.x = w / 2 - paddle.w / 2;
     ballSpeed = 4 + lvl; 
     resetBall();
@@ -104,10 +99,16 @@ function createLevel(lvl) {
 }
 
 function resetBall() {
-    ball.x = paddle.x + paddle.w / 2;
     ball.y = h - 70;
     ball.vx = 0; ball.vy = 0;
     paused = true;
+}
+
+function fullReset() {
+    score = 0; lives = 3; level = 1; gameOver = false;
+    scoreEl.innerText = score; livesEl.innerText = lives; lvlEl.innerText = level;
+    restartBtn.style.display = 'none'; msgEl.style.display = 'none';
+    createLevel(level);
 }
 
 function nextLevel() {
@@ -122,31 +123,22 @@ function nextLevel() {
     }, 2000);
 }
 
-function fullReset() {
-    score = 0;
-    lives = 3;
-    level = 1;
-    gameOver = false;
-    
-    scoreEl.innerText = score;
-    livesEl.innerText = lives;
-    lvlEl.innerText = level;
-    
-    restartBtn.style.display = 'none';
-    msgEl.style.display = 'none';
-    
-    createLevel(level);
-}
-
 function update() {
-    if (paused || gameOver) {
-        if (msgEl.style.display === 'none' && !gameOver) ball.x = paddle.x + paddle.w / 2;
-        return;
-    }
+    if (gameOver) return;
 
+    // --- PADDLE MOVEMENT (Now works even when paused) ---
     if (keys.ArrowLeft && paddle.x > 0) paddle.x -= 10;
     if (keys.ArrowRight && paddle.x < w - paddle.w) paddle.x += 10;
 
+    // If paused, keep ball locked to paddle center
+    if (paused) {
+        if (msgEl.style.display === 'none') {
+            ball.x = paddle.x + paddle.w / 2;
+        }
+        return;
+    }
+
+    // --- BALL PHYSICS (Only runs when NOT paused) ---
     ball.x += ball.vx;
     ball.y += ball.vy;
 
@@ -163,11 +155,9 @@ function update() {
     bricks.forEach(b => {
         if (!b.active) return;
         activeBricks++;
-
         let cx = Math.max(b.x, Math.min(ball.x, b.x + b.w));
         let cy = Math.max(b.y, Math.min(ball.y, b.y + b.h));
         let dist = Math.hypot(ball.x - cx, ball.y - cy);
-
         if (dist < ball.r) {
             b.active = false;
             score += 10 * level;
@@ -216,7 +206,7 @@ function draw() {
         ctx.fillStyle = '#00bfff';
         ctx.textAlign = 'center';
         ctx.font = '24px Courier New';
-        ctx.fillText('SPACE TO LAUNCH LEVEL ' + level, w/2, h/2);
+        ctx.fillText('ARROWS TO AIM | SPACE TO LAUNCH', w/2, h/2);
     }
 
     update();
