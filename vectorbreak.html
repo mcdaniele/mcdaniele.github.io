@@ -2,23 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vector Break: Mouse Control</title>
+    <title>Vector Break: Fixed Controls</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; color: #00bfff; font-family: 'Courier New', monospace; cursor: none; }
+        body { margin: 0; overflow: hidden; background: #000; color: #00bfff; font-family: 'Courier New', monospace; cursor: crosshair; }
         canvas { display: block; }
+        
+        /* Stats UI */
         #ui { position: absolute; top: 20px; width: 100%; text-align: center; pointer-events: none; text-shadow: 0 0 10px #00bfff; }
         .stat { margin: 0 20px; font-size: 24px; }
         
+        /* Message Overlay */
         #overlay { 
             position: absolute; top: 50%; left: 50%; 
             transform: translate(-50%, -50%); 
             text-align: center; 
             z-index: 100;
+            pointer-events: none; /* Crucial: clicks go THROUGH this to the canvas */
         }
-        #msg { font-size: 40px; margin-bottom: 20px; display: none; }
+        #msg { font-size: 40px; margin-bottom: 20px; display: none; color: #fff; text-shadow: 0 0 20px #ff0055; }
         
+        /* Restart Button */
         button {
-            background: transparent;
+            background: #000;
             color: #00bfff;
             border: 2px solid #00bfff;
             padding: 15px 30px;
@@ -28,12 +33,12 @@
             display: none;
             transition: 0.3s;
             box-shadow: 0 0 15px #00bfff;
-            pointer-events: auto; /* Allow clicking even when UI is passthrough */
+            pointer-events: auto; /* Re-enable clicks just for the button */
         }
         button:hover { background: #00bfff; color: #000; }
     </style>
 </head>
-<body>
+<body onmousedown="handleStart(event)">
     <div id="ui">
         <span class="stat">LEVEL: <span id="lvl">1</span></span>
         <span class="stat">SCORE: <span id="score">0</span></span>
@@ -55,34 +60,37 @@ const scoreEl = document.getElementById('score'),
       msgEl = document.getElementById('msg'),
       restartBtn = document.getElementById('restartBtn');
 
-let w, h, score = 0, lives = 3, level = 1, paused = true, gameOver = false;
+let w, h, score = 0, lives = 3, level = 1, paused = true, gameOver = false, levelTransition = false;
 let ballSpeed = 5;
 
 const ball = { x: 0, y: 0, vx: 0, vy: 0, r: 10 };
 const paddle = { x: 0, w: 140, h: 15 };
 let bricks = [];
 
-// --- MOUSE CONTROLS ---
-window.addEventListener('mousemove', e => {
-    if (gameOver) return;
-    
-    // Center the paddle on the mouse cursor
-    let nextX = e.clientX - paddle.w / 2;
-    
-    // Boundary constraints
-    if (nextX < 0) nextX = 0;
-    if (nextX > w - paddle.w) nextX = w - paddle.w;
-    
-    paddle.x = nextX;
-});
+// --- THE FIX: GLOBAL START HANDLER ---
+function handleStart(e) {
+    // Don't trigger if they clicked the Restart button itself
+    if (e.target.tagName === 'BUTTON') return;
 
-// Click to launch
-window.addEventListener('mousedown', () => {
-    if (paused && !gameOver && msgEl.style.display === 'none') {
+    if (paused && !gameOver && !levelTransition) {
         paused = false;
         ball.vx = ballSpeed;
         ball.vy = -ballSpeed;
     }
+}
+
+// Keep keyboard Spacebar as a backup
+window.onkeydown = e => {
+    if (e.code === 'Space') handleStart(e);
+};
+
+// Mouse movement
+window.addEventListener('mousemove', e => {
+    if (gameOver) return;
+    let nextX = e.clientX - paddle.w / 2;
+    if (nextX < 0) nextX = 0;
+    if (nextX > w - paddle.w) nextX = w - paddle.w;
+    paddle.x = nextX;
 });
 
 function createLevel(lvl) {
@@ -130,17 +138,20 @@ function nextLevel() {
     msgEl.innerText = "LEVEL COMPLETE!";
     msgEl.style.display = 'block';
     paused = true;
+    levelTransition = true; // Block clicking while message is up
+    
     setTimeout(() => {
         msgEl.style.display = 'none';
+        levelTransition = false;
         createLevel(level);
-    }, 2000);
+    }, 1800);
 }
 
 function update() {
     if (gameOver) return;
 
     if (paused) {
-        if (msgEl.style.display === 'none') {
+        if (!levelTransition) {
             ball.x = paddle.x + paddle.w / 2;
         }
         return;
@@ -149,15 +160,18 @@ function update() {
     ball.x += ball.vx;
     ball.y += ball.vy;
 
+    // Walls
     if (ball.x + ball.r > w || ball.x - ball.r < 0) ball.vx *= -1;
     if (ball.y - ball.r < 0) ball.vy *= -1;
 
+    // Paddle Hit
     if (ball.y + ball.r > h - 40 && ball.x > paddle.x && ball.x < paddle.x + paddle.w) {
         ball.vy = -Math.abs(ball.vy);
         let diff = ball.x - (paddle.x + paddle.w / 2);
         ball.vx = diff * 0.15;
     }
 
+    // Brick Hit
     let activeBricks = 0;
     bricks.forEach(b => {
         if (!b.active) return;
@@ -174,7 +188,7 @@ function update() {
         }
     });
 
-    if (activeBricks === 0) nextLevel();
+    if (activeBricks === 0 && bricks.length > 0) nextLevel();
 
     if (ball.y > h) {
         lives--;
@@ -197,6 +211,7 @@ function draw() {
     bricks.forEach(b => {
         if (!b.active) return;
         ctx.strokeStyle = b.color;
+        ctx.lineWidth = 2;
         ctx.strokeRect(b.x, b.y, b.w, b.h);
     });
 
@@ -209,11 +224,11 @@ function draw() {
     ctx.arc(ball.x, ball.y, ball.r, 0, 7);
     ctx.fill();
 
-    if (paused && msgEl.style.display === 'none' && !gameOver) {
+    if (paused && !levelTransition && !gameOver) {
         ctx.fillStyle = '#00bfff';
         ctx.textAlign = 'center';
         ctx.font = '24px Courier New';
-        ctx.fillText('MOVE MOUSE TO AIM | CLICK TO LAUNCH', w/2, h/2);
+        ctx.fillText('CLICK ANYWHERE OR SPACE TO LAUNCH', w/2, h/2);
     }
 
     update();
