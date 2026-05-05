@@ -2,28 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vector Break</title>
+    <title>Vector Break: Levels</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; color: #00bfff; font-family: 'Courier New', monospace; }
         canvas { display: block; }
         #ui { position: absolute; top: 20px; width: 100%; text-align: center; pointer-events: none; text-shadow: 0 0 10px #00bfff; }
         .stat { margin: 0 20px; font-size: 24px; }
+        #msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; display: none; }
     </style>
 </head>
 <body>
     <div id="ui">
+        <span class="stat">LEVEL: <span id="lvl">1</span></span>
         <span class="stat">SCORE: <span id="score">0</span></span>
         <span class="stat">LIVES: <span id="lives">3</span></span>
     </div>
+    <div id="msg">LEVEL COMPLETE!</div>
     <canvas id="c"></canvas>
 
 <script>
 const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
-let w, h, score = 0, lives = 3, paused = true;
+const scoreEl = document.getElementById('score'), livesEl = document.getElementById('lives'), lvlEl = document.getElementById('lvl'), msgEl = document.getElementById('msg');
 
-// Game Objects
+let w, h, score = 0, lives = 3, level = 1, paused = true;
+let ballSpeed = 5;
+
 const ball = { x: 0, y: 0, vx: 0, vy: 0, r: 10 };
-const paddle = { x: 0, w: 120, h: 15 };
+const paddle = { x: 0, w: 140, h: 15 };
 let bricks = [];
 
 const keys = {};
@@ -31,23 +36,24 @@ window.onkeydown = e => {
     keys[e.code] = true; 
     if(paused && e.code === 'Space') { 
         paused = false; 
-        ball.vx = 5; ball.vy = -5; 
+        ball.vx = ballSpeed; ball.vy = -ballSpeed; 
     }
 };
 window.onkeyup = e => keys[e.code] = false;
 
-function init() {
+function createLevel(lvl) {
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
     
     paddle.x = w / 2 - paddle.w / 2;
+    ballSpeed = 4 + lvl; // Increase speed every level
     resetBall();
     
-    // Generate Brick Grid
-    const cols = 10, rows = 5;
-    const padding = 10, offsetTop = 80, offsetLeft = 50;
+    const cols = 8 + Math.min(lvl, 4); // More columns as you progress
+    const rows = 2 + lvl;             // More rows as you progress
+    const padding = 10, offsetTop = 100, offsetLeft = 60;
     const bW = (w - (offsetLeft * 2)) / cols - padding;
-    const bH = 30;
+    const bH = 25;
 
     bricks = [];
     for(let r = 0; r < rows; r++) {
@@ -57,7 +63,7 @@ function init() {
                 y: offsetTop + r * (bH + padding),
                 w: bW, h: bH,
                 active: true,
-                color: `hsl(${200 + (r * 20)}, 100%, 50%)`
+                color: `hsl(${(lvl * 40) + (r * 15)}, 100%, 50%)`
             });
         }
     }
@@ -65,66 +71,73 @@ function init() {
 
 function resetBall() {
     ball.x = paddle.x + paddle.w / 2;
-    ball.y = h - 60;
+    ball.y = h - 70;
     ball.vx = 0; ball.vy = 0;
     paused = true;
 }
 
+function nextLevel() {
+    level++;
+    lvlEl.innerText = level;
+    msgEl.style.display = 'block';
+    paused = true;
+    setTimeout(() => {
+        msgEl.style.display = 'none';
+        createLevel(level);
+    }, 2000);
+}
+
 function update() {
     if (paused) {
-        ball.x = paddle.x + paddle.w / 2;
+        if (msgEl.style.display === 'none') ball.x = paddle.x + paddle.w / 2;
         return;
     }
 
-    // Move Paddle
-    if (keys.ArrowLeft && paddle.x > 0) paddle.x -= 8;
-    if (keys.ArrowRight && paddle.x < w - paddle.w) paddle.x += 8;
+    if (keys.ArrowLeft && paddle.x > 0) paddle.x -= 10;
+    if (keys.ArrowRight && paddle.x < w - paddle.w) paddle.x += 10;
 
-    // Move Ball
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    // Wall Bounces
     if (ball.x + ball.r > w || ball.x - ball.r < 0) ball.vx *= -1;
     if (ball.y - ball.r < 0) ball.vy *= -1;
 
-    // Paddle Collision
+    // Paddle Hit
     if (ball.y + ball.r > h - 40 && ball.x > paddle.x && ball.x < paddle.x + paddle.w) {
         ball.vy = -Math.abs(ball.vy);
-        // Add "spin" based on where it hits the paddle
         let diff = ball.x - (paddle.x + paddle.w / 2);
         ball.vx = diff * 0.15;
     }
 
-    // Brick Collision
+    // Brick Hit
+    let activeBricks = 0;
     bricks.forEach(b => {
         if (!b.active) return;
+        activeBricks++;
 
-        // Find closest point on brick to ball
-        let closestX = Math.max(b.x, Math.min(ball.x, b.x + b.w));
-        let closestY = Math.max(b.y, Math.min(ball.y, b.y + b.h));
-        
-        let dist = Math.hypot(ball.x - closestX, ball.y - closestY);
+        let cx = Math.max(b.x, Math.min(ball.x, b.x + b.w));
+        let cy = Math.max(b.y, Math.min(ball.y, b.y + b.h));
+        let dist = Math.hypot(ball.x - cx, ball.y - cy);
 
         if (dist < ball.r) {
             b.active = false;
-            score += 10;
-            document.getElementById('score').innerText = score;
-
-            // Determine flip axis
+            score += 10 * level;
+            scoreEl.innerText = score;
             if (ball.x < b.x || ball.x > b.x + b.w) ball.vx *= -1;
             else ball.vy *= -1;
         }
     });
 
-    // Death
+    // Check Win Condition
+    if (activeBricks === 0) nextLevel();
+
+    // Death Condition
     if (ball.y > h) {
         lives--;
-        document.getElementById('lives').innerText = lives;
+        livesEl.innerText = lives;
         if (lives <= 0) {
-            alert("GAME OVER. Final Score: " + score);
-            score = 0; lives = 3;
-            init();
+            alert("GAME OVER! SCORE: " + score);
+            location.reload();
         } else {
             resetBall();
         }
@@ -132,48 +145,44 @@ function update() {
 }
 
 function draw() {
-    // Clear with slight trail
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillStyle = 'rgba(0, 8, 20, 0.4)'; // Dark blue trail
     ctx.fillRect(0, 0, w, h);
 
-    // Draw Bricks
     bricks.forEach(b => {
         if (!b.active) return;
         ctx.strokeStyle = b.color;
         ctx.lineWidth = 2;
         ctx.strokeRect(b.x, b.y, b.w, b.h);
-        // Interior glow
-        ctx.fillStyle = b.color.replace('50%', '10%');
+        ctx.fillStyle = b.color.replace('50%', '15%');
         ctx.fillRect(b.x, b.y, b.w, b.h);
     });
 
-    // Draw Paddle
-    ctx.strokeStyle = '#ff0055';
-    ctx.lineWidth = 4;
+    // Paddle
+    ctx.strokeStyle = '#00ffcc';
+    ctx.lineWidth = 3;
     ctx.strokeRect(paddle.x, h - 40, paddle.w, paddle.h);
 
-    // Draw Ball
+    // Ball
     ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-    ctx.fill();
-    // Ball Glow
     ctx.shadowBlur = 15;
     ctx.shadowColor = '#fff';
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, 7);
+    ctx.fill();
+    ctx.shadowBlur = 0;
 
-    if (paused) {
+    if (paused && msgEl.style.display === 'none') {
         ctx.fillStyle = '#00bfff';
-        ctx.font = '20px Courier New';
         ctx.textAlign = 'center';
-        ctx.fillText('PRESS SPACE TO START', w/2, h/2 + 50);
+        ctx.fillText('SPACE TO LAUNCH LEVEL ' + level, w/2, h/2);
     }
 
     update();
     requestAnimationFrame(draw);
 }
 
-window.onresize = init;
-init();
+window.onresize = () => createLevel(level);
+createLevel(level);
 draw();
 </script>
 </body>
