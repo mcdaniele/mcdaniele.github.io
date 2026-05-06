@@ -190,6 +190,10 @@
 
             let topIndex = Math.floor(((Math.PI * 1.5 - normalized) % (Math.PI * 2)) / (Math.PI / 3));
             if (topIndex < 0) topIndex += 6;
+            let leftIndex = Math.floor(((Math.PI * 1.5 - leftnorm) % (Math.PI * 2)) / (Math.PI / 3));
+            if (leftIndex < 0) leftIndex += 6;
+            let rightIndex = Math.floor(((Math.PI * 1.5 - rightnorm) % (Math.PI * 2)) / (Math.PI / 3));
+            if (rightIndex < 0) rightIndex += 6;
 
             if ((topIndex === targetIndex)||(leftnorm === targetIndex)||(rightnorm === targetIndex)) {
                 win();
