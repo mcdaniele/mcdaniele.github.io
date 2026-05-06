@@ -2,263 +2,111 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="icon.png">
-    <title>Color Stop Pro</title>
+    <title>Neon Spinner: Top Half Win</title>
     <style>
-        :root { --bg: #2c3e50; }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            touch-action: none;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+        body { background: #000; color: #00bfff; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
         
-        #ui-layer { z-index: 10; text-align: center; color: white; }
-        #canvas-bg { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 1; }
-        
-        #game-canvas {
-            background: transparent;
-            margin-top: 10px;
-            margin-bottom: 20px;
-            z-index: 5;
-            cursor: pointer;
-        }
+        #game-container { position: relative; }
 
-        .btn {
-            padding: 20px 60px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            background: #f1c40f;
-            color: #2c3e50;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-            transition: transform 0.1s;
-        }
-        .btn:active { transform: scale(0.95); }
-
-        #victory-text {
-            position: fixed;
-            top: 20%;
-            font-size: 4rem;
-            font-weight: 900;
-            display: none;
-            text-shadow: 0 0 20px rgba(255,255,255,0.5);
-            z-index: 100;
-            color: white;
+        /* The Win Zone Indicator (Top Half) */
+        #win-zone {
+            position: absolute;
+            top: -10px; left: -10px;
+            width: 320px; height: 160px; /* Half circle */
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-bottom: none;
+            border-radius: 160px 160px 0 0;
             pointer-events: none;
-            animation: bounce 0.6s infinite alternate;
+            z-index: 10;
         }
-        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+        #wheel {
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            border: 5px solid #00bfff;
+            position: relative;
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+            box-shadow: 0 0 20px #00bfff;
+            background: conic-gradient(
+                #ff0055 0deg 90deg, 
+                #00ffcc 90deg 180deg, 
+                #ffcc00 180deg 270deg, 
+                #9d00ff 270deg 360deg
+            );
+        }
+
+        #spin-btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: transparent;
+            color: #00bfff;
+            border: 2px solid #00bfff;
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 0 10px #00bfff;
+        }
+
+        #result { margin-top: 20px; font-size: 24px; height: 30px; text-shadow: 0 0 10px #fff; }
     </style>
 </head>
 <body>
 
-    <canvas id="canvas-bg"></canvas>
-    <div id="victory-text">WINNER!</div>
-
-    <div id="ui-layer">
-        <div id="match-label" style="margin-bottom: -15px; font-weight: bold;">MATCH THIS:</div>
-        <canvas id="game-canvas" width="340" height="420"></canvas>
-        <br>
-        <button id="action-btn" class="btn" onclick="handleAction()">STOP</button>
+    <div id="game-container">
+        <div id="win-zone"></div>
+        <div id="wheel"></div>
     </div>
 
-    <script>
-        const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#e67e22'];
-        const spinnerRadius = 140;
-        const targetWidth = spinnerRadius * 2 * Math.sin((30 * Math.PI) / 180);
+    <button id="spin-btn">SPIN THE WHEEL</button>
+    <div id="result"></div>
+
+<script>
+    const wheel = document.getElementById('wheel');
+    const btn = document.getElementById('spin-btn');
+    const result = document.getElementById('result');
+    
+    let currentRotation = 0;
+
+    // Define our segments (0-90 is Red, etc.)
+    // Note: Since the wheel rotates clockwise, we have to account for 
+    // the "top half" being the area that moves INTO that 0-180 space.
+    const segments = [
+        { name: "PURPLE", color: "#9d00ff", min: 0, max: 90 },
+        { name: "YELLOW", color: "#ffcc00", min: 90, max: 180 },
+        { name: "TEAL", color: "#00ffcc", min: 180, max: 270 },
+        { name: "RED", color: "#ff0055", min: 270, max: 360 }
+    ];
+
+    btn.addEventListener('click', () => {
+        result.innerText = "Spinning...";
+        const extraDegrees = Math.floor(Math.random() * 360) + 1440; // At least 4 full spins
+        currentRotation += extraDegrees;
         
-        let targetIndex = 0;
-        let currentAngle = 0;
-        let rotationSpeed = 0.02; // Base speed halved
-        let isSpinning = true;
-        let fireworksActive = false;
-        let lastWin = false; // Flag to check if we need a new color
+        wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-        const canvas = document.getElementById('game-canvas');
-        const ctx = canvas.getContext('2d');
-        const btn = document.getElementById('action-btn');
-        const victoryText = document.getElementById('victory-text');
+        // Wait for transition to finish (4s)
+        setTimeout(checkWin, 4000);
+    });
 
-        const cx = canvas.width / 2;
-        const cy = 250;
-        const targetBottomEdgeY = cy - spinnerRadius;
+    function checkWin() {
+        // 1. Get the actual rotation within 360 degrees
+        // We use a negative because CSS 'rotate' moves clockwise, 
+        // but the math for segments effectively moves counter to the pointer.
+        let actualAngle = (360 - (currentRotation % 360)) % 360;
 
-        canvas.addEventListener('mousedown', (e) => { handleAction(); });
-        canvas.addEventListener('touchstart', (e) => { 
-            e.preventDefault(); 
-            handleAction(); 
-        }, {passive: false});
+        // 2. Adjust for the "Center" of the top half (which is 90 degrees in standard math)
+        // To simplify: we find which segment is at the 90-degree marker (the top center)
+        let winningSegment = segments.find(s => actualAngle >= s.min && actualAngle < s.max);
 
-        function setTarget() {
-            targetIndex = Math.floor(Math.random() * colors.length);
-        }
-
-        function drawTargetZone() {
-            const targetHeight = 60;
-            const targetTopY = targetBottomEdgeY - targetHeight;
-            const targetCX = cx;
-
-            ctx.save();
-            ctx.fillStyle = colors[targetIndex];
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 4;
+        if (winningSegment) {
+            result.innerText = `WINNER: ${winningSegment.name}!`;
+            result.style.color = winningSegment.color;
             
-            ctx.beginPath();
-            ctx.moveTo(targetCX - targetWidth / 2, targetTopY);
-            ctx.lineTo(targetCX + targetWidth / 2, targetTopY);
-            ctx.lineTo(targetCX + targetWidth / 2, targetBottomEdgeY);
-            ctx.arc(cx, cy, spinnerRadius, Math.asin((targetWidth/2)/spinnerRadius) - Math.PI/2, -Math.asin((targetWidth/2)/spinnerRadius) - Math.PI/2, true);
-            ctx.closePath();
-            
-            ctx.shadowColor = 'rgba(0,0,0,0.3)';
-            ctx.shadowBlur = 15;
-            ctx.shadowOffsetY = 5;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.stroke();
-            ctx.restore();
+            // Neon flash effect
+            document.body.style.boxShadow = `inset 0 0 100px ${winningSegment.color}`;
+            setTimeout(() => document.body.style.boxShadow = "none", 500);
         }
-
-        function drawSpinner() {
-            for (let i = 0; i < 6; i++) {
-                const startAngle = currentAngle + (i * Math.PI * 2) / 6;
-                const endAngle = currentAngle + ((i + 1) * Math.PI * 2) / 6;
-
-                ctx.beginPath();
-                ctx.moveTo(cx, cy);
-                ctx.arc(cx, cy, spinnerRadius, startAngle, endAngle);
-                ctx.fillStyle = colors[i];
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            }
-
-            ctx.beginPath();
-            ctx.arc(cx, cy, 15, 0, Math.PI * 2);
-            ctx.fillStyle = 'white';
-            ctx.fill();
-            ctx.strokeStyle = 'silver';
-            ctx.stroke();
-        }
-
-        function drawFrame() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawSpinner();
-            drawTargetZone();
-        }
-
-        function update() {
-            if (isSpinning) {
-                currentAngle += rotationSpeed;
-            }
-            drawFrame();
-            requestAnimationFrame(update);
-        }
-
-        function handleAction() {
-            if (isSpinning) {
-                stopSpin();
-            } else {
-                startSpin();
-            }
-        }
-
-        function stopSpin() {
-            isSpinning = false;
-            let normalized = currentAngle % (Math.PI * 2);
-            if (normalized < 0) normalized += (Math.PI * 2);
-
-            let topIndex = Math.floor(((Math.PI * 1.5 - normalized) % (Math.PI * 2)) / (Math.PI / 3));
-            if (topIndex < 0) topIndex += 6;
-
-            if (topIndex === targetIndex) {
-                win();
-            } else {
-                lastWin = false; // Player missed, keep the same color
-                btn.innerText = "SPIN AGAIN";
-            }
-        }
-
-        function startSpin() {
-            isSpinning = true;
-            fireworksActive = false;
-            victoryText.style.display = 'none';
-            btn.innerText = "STOP";
-            
-            // Only change color if the player won the last round
-            if (lastWin) {
-                setTarget();
-            }
-            
-            rotationSpeed = 0.02 + (Math.random() * 0.015); // Offset halved
-        }
-
-        function win() {
-            victoryText.style.display = 'block';
-            fireworksActive = true;
-            btn.innerText = "SPIN AGAIN";
-            lastWin = true; // Set flag so color changes on next spin
-        }
-
-        // --- FIREWORKS ---
-        const bgCanvas = document.getElementById('canvas-bg');
-        const bgCtx = bgCanvas.getContext('2d');
-        let particles = [];
-        function resize() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Particle {
-            constructor(x, y, color) {
-                this.x = x; this.y = y; this.color = color;
-                this.velocity = { x: (Math.random() - 0.5) * 12, y: (Math.random() - 0.5) * 12 };
-                this.alpha = 1; this.friction = 0.95;
-            }
-            update() {
-                this.velocity.x *= this.friction; this.velocity.y *= this.friction;
-                this.velocity.y += 0.1; this.x += this.velocity.x; this.y += this.velocity.y;
-                this.alpha -= 0.01;
-            }
-            draw() {
-                bgCtx.globalAlpha = this.alpha; bgCtx.beginPath();
-                bgCtx.arc(this.x, this.y, 4, 0, Math.PI * 2);
-                bgCtx.fillStyle = this.color; bgCtx.fill();
-            }
-        }
-
-        function animateBg() {
-            requestAnimationFrame(animateBg);
-            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
-            if (fireworksActive && Math.random() < 0.1) {
-                const x = Math.random() * bgCanvas.width;
-                const y = Math.random() * bgCanvas.height * 0.4;
-                const color = `hsl(${Math.random() * 360}, 80%, 60%)`;
-                for (let i = 0; i < 50; i++) particles.push(new Particle(x, y, color));
-            }
-            particles.forEach((p, i) => {
-                if (p.alpha <= 0) particles.splice(i, 1);
-                else { p.update(); p.draw(); }
-            });
-        }
-
-        setTarget();
-        animateBg();
-        update();
-    </script>
+    }
+</script>
 </body>
 </html>
