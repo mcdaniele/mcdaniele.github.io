@@ -2,109 +2,128 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Spinner: Top Half Win</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iPad Spinner: Top Half Win</title>
     <style>
-        body { background: #000; color: #00bfff; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-        
-        #game-container { position: relative; }
+        :root { --neon: #00bfff; }
+        body { 
+            margin: 0; background: #050505; color: white; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            height: 100vh; overflow: hidden; touch-action: none;
+        }
 
-        /* The Win Zone Indicator (Top Half) */
-        #win-zone {
-            position: absolute;
-            top: -10px; left: -10px;
-            width: 320px; height: 160px; /* Half circle */
-            border: 3px solid rgba(255, 255, 255, 0.2);
+        /* The Goal indicator for the top half */
+        #top-half-glow {
+            position: absolute; width: 340px; height: 170px;
+            background: rgba(0, 191, 255, 0.1);
+            border: 2px solid var(--neon);
             border-bottom: none;
-            border-radius: 160px 160px 0 0;
+            border-radius: 170px 170px 0 0;
+            top: calc(50% - 170px);
+            z-index: 1;
             pointer-events: none;
-            z-index: 10;
         }
 
         #wheel {
-            width: 300px; height: 300px;
+            width: 320px; height: 320px;
             border-radius: 50%;
-            border: 5px solid #00bfff;
-            position: relative;
-            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
-            box-shadow: 0 0 20px #00bfff;
+            border: 4px solid #222;
             background: conic-gradient(
                 #ff0055 0deg 90deg, 
                 #00ffcc 90deg 180deg, 
                 #ffcc00 180deg 270deg, 
                 #9d00ff 270deg 360deg
             );
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            z-index: 2;
+            transition: transform 3s cubic-bezier(0.2, 0, 0.2, 1);
         }
 
-        #spin-btn {
-            margin-top: 30px;
-            padding: 15px 40px;
-            background: transparent;
-            color: #00bfff;
-            border: 2px solid #00bfff;
-            font-family: 'Courier New', monospace;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: 0 0 10px #00bfff;
+        #needle {
+            position: absolute; width: 4px; height: 160px;
+            background: white; top: calc(50% - 160px); left: 50%;
+            transform-origin: bottom center; z-index: 3;
+            box-shadow: 0 0 10px white;
         }
 
-        #result { margin-top: 20px; font-size: 24px; height: 30px; text-shadow: 0 0 10px #fff; }
+        #ui { margin-top: 40px; text-align: center; z-index: 4; }
+        button {
+            padding: 15px 40px; font-size: 20px; background: transparent;
+            color: var(--neon); border: 2px solid var(--neon);
+            border-radius: 30px; cursor: pointer; font-weight: bold;
+        }
+        #msg { margin-top: 20px; font-size: 24px; min-height: 30px; color: var(--neon); }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <div id="win-zone"></div>
-        <div id="wheel"></div>
+    <div id="top-half-glow"></div>
+    <div id="needle"></div>
+    <div id="wheel"></div>
+
+    <div id="ui">
+        <button onclick="spin()">SPIN</button>
+        <div id="msg">LAND IN THE GLOW!</div>
     </div>
 
-    <button id="spin-btn">SPIN THE WHEEL</button>
-    <div id="result"></div>
-
 <script>
+    let rotation = 0;
     const wheel = document.getElementById('wheel');
-    const btn = document.getElementById('spin-btn');
-    const result = document.getElementById('result');
-    
-    let currentRotation = 0;
+    const msg = document.getElementById('msg');
 
-    // Define our segments (0-90 is Red, etc.)
-    // Note: Since the wheel rotates clockwise, we have to account for 
-    // the "top half" being the area that moves INTO that 0-180 space.
+    // Segment definitions
     const segments = [
-        { name: "PURPLE", color: "#9d00ff", min: 0, max: 90 },
-        { name: "YELLOW", color: "#ffcc00", min: 90, max: 180 },
-        { name: "TEAL", color: "#00ffcc", min: 180, max: 270 },
-        { name: "RED", color: "#ff0055", min: 270, max: 360 }
+        { name: "RED", start: 0, end: 90, color: "#ff0055" },
+        { name: "TEAL", start: 90, end: 180, color: "#00ffcc" },
+        { name: "YELLOW", start: 180, end: 270, color: "#ffcc00" },
+        { name: "PURPLE", start: 270, end: 360, color: "#9d00ff" }
     ];
 
-    btn.addEventListener('click', () => {
-        result.innerText = "Spinning...";
-        const extraDegrees = Math.floor(Math.random() * 360) + 1440; // At least 4 full spins
-        currentRotation += extraDegrees;
-        
-        wheel.style.transform = `rotate(${currentRotation}deg)`;
+    function spin() {
+        msg.innerText = "SPINNING...";
+        const extra = Math.floor(Math.random() * 360) + 1800; 
+        rotation += extra;
+        wheel.style.transform = `rotate(${rotation}deg)`;
 
-        // Wait for transition to finish (4s)
-        setTimeout(checkWin, 4000);
-    });
+        setTimeout(evaluate, 3000);
+    }
 
-    function checkWin() {
-        // 1. Get the actual rotation within 360 degrees
-        // We use a negative because CSS 'rotate' moves clockwise, 
-        // but the math for segments effectively moves counter to the pointer.
-        let actualAngle = (360 - (currentRotation % 360)) % 360;
+    function evaluate() {
+        // Find the "upright" angle of the wheel
+        // (360 - rotation % 360) tells us what degree is at the 12 o'clock position
+        let currentPos = (360 - (rotation % 360)) % 360;
 
-        // 2. Adjust for the "Center" of the top half (which is 90 degrees in standard math)
-        // To simplify: we find which segment is at the 90-degree marker (the top center)
-        let winningSegment = segments.find(s => actualAngle >= s.min && actualAngle < s.max);
+        let foundWin = false;
 
-        if (winningSegment) {
-            result.innerText = `WINNER: ${winningSegment.name}!`;
-            result.style.color = winningSegment.color;
+        segments.forEach(seg => {
+            // Calculate where this segment now sits in world space
+            let worldStart = (seg.start + (rotation % 360)) % 360;
+            let worldEnd = (seg.end + (rotation % 360)) % 360;
+
+            // Logic: Is the entire segment between 0 and 180?
+            // Note: worldEnd < worldStart happens if it wraps around 360
+            let isInsideTopHalf = false;
             
-            // Neon flash effect
-            document.body.style.boxShadow = `inset 0 0 100px ${winningSegment.color}`;
-            setTimeout(() => document.body.style.boxShadow = "none", 500);
+            if (worldEnd > worldStart) {
+                // Standard range
+                if (worldStart >= 0 && worldEnd <= 180) isInsideTopHalf = true;
+            } else {
+                // Wrapped range (e.g., starts at 350, ends at 80)
+                // In this case, it's NOT "totally above" because part is below 0/360
+                isInsideTopHalf = false;
+            }
+
+            if (isInsideTopHalf) {
+                msg.innerText = `WIN! ${seg.name} IS CLEAR!`;
+                msg.style.color = seg.color;
+                foundWin = true;
+            }
+        });
+
+        if (!foundWin) {
+            msg.innerText = "TRY AGAIN!";
+            msg.style.color = "#00bfff";
         }
     }
 </script>
