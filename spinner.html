@@ -2,130 +2,264 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>iPad Spinner: Top Half Win</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.png">
+    <title>Color Stop Pro</title>
     <style>
-        :root { --neon: #00bfff; }
-        body { 
-            margin: 0; background: #050505; color: white; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            height: 100vh; overflow: hidden; touch-action: none;
+        :root { --bg: #2c3e50; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        /* The Goal indicator for the top half */
-        #top-half-glow {
-            position: absolute; width: 340px; height: 170px;
-            background: rgba(0, 191, 255, 0.1);
-            border: 2px solid var(--neon);
-            border-bottom: none;
-            border-radius: 170px 170px 0 0;
-            top: calc(50% - 170px);
-            z-index: 1;
+        #ui-layer { z-index: 10; text-align: center; color: white; }
+        #canvas-bg { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 1; }
+
+        #game-canvas {
+            background: transparent;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            z-index: 5;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 20px 60px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            background: #f1c40f;
+            color: #2c3e50;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        #victory-text {
+            position: fixed;
+            top: 20%;
+            font-size: 4rem;
+            font-weight: 900;
+            display: none;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            z-index: 100;
+            color: white;
             pointer-events: none;
+            animation: bounce 0.6s infinite alternate;
         }
-
-        #wheel {
-            width: 320px; height: 320px;
-            border-radius: 50%;
-            border: 4px solid #222;
-            background: conic-gradient(
-                #ff0055 0deg 90deg, 
-                #00ffcc 90deg 180deg, 
-                #ffcc00 180deg 270deg, 
-                #9d00ff 270deg 360deg
-            );
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            z-index: 2;
-            transition: transform 3s cubic-bezier(0.2, 0, 0.2, 1);
-        }
-
-        #needle {
-            position: absolute; width: 4px; height: 160px;
-            background: white; top: calc(50% - 160px); left: 50%;
-            transform-origin: bottom center; z-index: 3;
-            box-shadow: 0 0 10px white;
-        }
-
-        #ui { margin-top: 40px; text-align: center; z-index: 4; }
-        button {
-            padding: 15px 40px; font-size: 20px; background: transparent;
-            color: var(--neon); border: 2px solid var(--neon);
-            border-radius: 30px; cursor: pointer; font-weight: bold;
-        }
-        #msg { margin-top: 20px; font-size: 24px; min-height: 30px; color: var(--neon); }
+        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
     </style>
 </head>
 <body>
 
-    <div id="top-half-glow"></div>
-    <div id="needle"></div>
-    <div id="wheel"></div>
+    <canvas id="canvas-bg"></canvas>
+    <div id="victory-text">WINNER!</div>
 
-    <div id="ui">
-        <button onclick="spin()">SPIN</button>
-        <div id="msg">LAND IN THE GLOW!</div>
+    <div id="ui-layer">
+        <div id="match-label" style="margin-bottom: -15px; font-weight: bold;">MATCH THIS:</div>
+        <canvas id="game-canvas" width="340" height="420"></canvas>
+        <br>
+        <button id="action-btn" class="btn" onclick="handleAction()">STOP</button>
     </div>
 
-<script>
-    let rotation = 0;
-    const wheel = document.getElementById('wheel');
-    const msg = document.getElementById('msg');
+    <script>
+        const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#e67e22'];
+        const spinnerRadius = 140;
+        const targetWidth = spinnerRadius * 2 * Math.sin((30 * Math.PI) / 180);
 
-    // Segment definitions
-    const segments = [
-        { name: "RED", start: 0, end: 90, color: "#ff0055" },
-        { name: "TEAL", start: 90, end: 180, color: "#00ffcc" },
-        { name: "YELLOW", start: 180, end: 270, color: "#ffcc00" },
-        { name: "PURPLE", start: 270, end: 360, color: "#9d00ff" }
-    ];
+        let targetIndex = 0;
+        let currentAngle = 0;
+        let rotationSpeed = 0.02; // Base speed halved
+        let isSpinning = true;
+        let fireworksActive = false;
+        let lastWin = false; // Flag to check if we need a new color
 
-    function spin() {
-        msg.innerText = "SPINNING...";
-        const extra = Math.floor(Math.random() * 360) + 1800; 
-        rotation += extra;
-        wheel.style.transform = `rotate(${rotation}deg)`;
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const btn = document.getElementById('action-btn');
+        const victoryText = document.getElementById('victory-text');
 
-        setTimeout(evaluate, 3000);
-    }
+        const cx = canvas.width / 2;
+        const cy = 250;
+        const targetBottomEdgeY = cy - spinnerRadius;
 
-    function evaluate() {
-        // Find the "upright" angle of the wheel
-        // (360 - rotation % 360) tells us what degree is at the 12 o'clock position
-        let currentPos = (360 - (rotation % 360)) % 360;
+        // Interaction Listeners for the Canvas
+        canvas.addEventListener('mousedown', (e) => { handleAction(); });
+        canvas.addEventListener('touchstart', (e) => { 
+            e.preventDefault(); 
+            handleAction(); 
+        }, {passive: false});
 
-        let foundWin = false;
-
-        segments.forEach(seg => {
-            // Calculate where this segment now sits in world space
-            let worldStart = (seg.start + (rotation % 360)) % 360;
-            let worldEnd = (seg.end + (rotation % 360)) % 360;
-
-            // Logic: Is the entire segment between 0 and 180?
-            // Note: worldEnd < worldStart happens if it wraps around 360
-            let isInsideTopHalf = false;
-            
-            if (worldEnd > worldStart) {
-                // Standard range
-                if (worldStart >= 0 && worldEnd <= 180) isInsideTopHalf = true;
-            } else {
-                // Wrapped range (e.g., starts at 350, ends at 80)
-                // In this case, it's NOT "totally above" because part is below 0/360
-                isInsideTopHalf = false;
-            }
-
-            if (isInsideTopHalf) {
-                msg.innerText = `WIN! ${seg.name} IS CLEAR!`;
-                msg.style.color = seg.color;
-                foundWin = true;
-            }
-        });
-
-        if (!foundWin) {
-            msg.innerText = "TRY AGAIN!";
-            msg.style.color = "#00bfff";
+        function setTarget() {
+            targetIndex = Math.floor(Math.random() * colors.length);
         }
-    }
-</script>
+
+        function drawTargetZone() {
+            const targetHeight = 60;
+            const targetTopY = targetBottomEdgeY - targetHeight;
+            const targetCX = cx;
+
+            ctx.save();
+            ctx.fillStyle = colors[targetIndex];
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 4;
+
+            ctx.beginPath();
+            ctx.moveTo(targetCX - targetWidth / 2, targetTopY);
+            ctx.lineTo(targetCX + targetWidth / 2, targetTopY);
+            ctx.lineTo(targetCX + targetWidth / 2, targetBottomEdgeY);
+            ctx.arc(cx, cy, spinnerRadius, Math.asin((targetWidth/2)/spinnerRadius) - Math.PI/2, -Math.asin((targetWidth/2)/spinnerRadius) - Math.PI/2, true);
+            ctx.closePath();
+
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetY = 5;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawSpinner() {
+            for (let i = 0; i < 6; i++) {
+                const startAngle = currentAngle + (i * Math.PI * 2) / 6;
+                const endAngle = currentAngle + ((i + 1) * Math.PI * 2) / 6;
+
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, spinnerRadius, startAngle, endAngle);
+                ctx.fillStyle = colors[i];
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.strokeStyle = 'silver';
+            ctx.stroke();
+        }
+
+        function drawFrame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawSpinner();
+            drawTargetZone();
+        }
+
+        function update() {
+            if (isSpinning) {
+                currentAngle += rotationSpeed;
+            }
+            drawFrame();
+            requestAnimationFrame(update);
+        }
+
+        function handleAction() {
+            if (isSpinning) {
+                stopSpin();
+            } else {
+                startSpin();
+            }
+        }
+
+        function stopSpin() {
+            isSpinning = false;
+            let normalized = currentAngle % (Math.PI * 2);
+            if (normalized < 0) normalized += (Math.PI * 2);
+
+            let topIndex = Math.floor(((Math.PI * 1.5 - normalized) % (Math.PI * 2)) / (Math.PI / 3));
+            if (topIndex < 0) topIndex += 6;
+
+            if (topIndex === targetIndex) {
+                win();
+            } else {
+                lastWin = false; // Player missed, keep the same color
+                btn.innerText = "SPIN AGAIN";
+            }
+        }
+
+        function startSpin() {
+            isSpinning = true;
+            fireworksActive = false;
+            victoryText.style.display = 'none';
+            btn.innerText = "STOP";
+            
+            // Only change color if the player won the last round
+            if (lastWin) {
+                setTarget();
+            }
+            
+            rotationSpeed = 0.02 + (Math.random() * 0.015); // Offset halved
+        }
+
+        function win() {
+            victoryText.style.display = 'block';
+            fireworksActive = true;
+            btn.innerText = "SPIN AGAIN";
+            lastWin = true; // Set flag so color changes on next spin
+        }
+
+        // --- FIREWORKS ---
+        const bgCanvas = document.getElementById('canvas-bg');
+        const bgCtx = bgCanvas.getContext('2d');
+        let particles = [];
+        function resize() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y; this.color = color;
+                this.velocity = { x: (Math.random() - 0.5) * 12, y: (Math.random() - 0.5) * 12 };
+                this.alpha = 1; this.friction = 0.95;
+            }
+            update() {
+                this.velocity.x *= this.friction; this.velocity.y *= this.friction;
+                this.velocity.y += 0.1; this.x += this.velocity.x; this.y += this.velocity.y;
+                this.alpha -= 0.01;
+            }
+            draw() {
+                bgCtx.globalAlpha = this.alpha; bgCtx.beginPath();
+                bgCtx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+                bgCtx.fillStyle = this.color; bgCtx.fill();
+            }
+        }
+
+        function animateBg() {
+            requestAnimationFrame(animateBg);
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            if (fireworksActive && Math.random() < 0.1) {
+                const x = Math.random() * bgCanvas.width;
+                const y = Math.random() * bgCanvas.height * 0.4;
+                const color = `hsl(${Math.random() * 360}, 80%, 60%)`;
+                for (let i = 0; i < 50; i++) particles.push(new Particle(x, y, color));
+            }
+            particles.forEach((p, i) => {
+                if (p.alpha <= 0) particles.splice(i, 1);
+                else { p.update(); p.draw(); }
+            });
+        }
+
+        setTarget();
+        animateBg();
+        update();
+    </script>
 </body>
 </html>
