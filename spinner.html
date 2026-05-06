@@ -195,7 +195,7 @@
             let rightIndex = Math.floor(((Math.PI * 1.5 - rightnorm) % (Math.PI * 2)) / (Math.PI / 3));
             if (rightIndex < 0) rightIndex += 6;
 
-            if ((topIndex === targetIndex)||(leftnorm === targetIndex)||(rightnorm === targetIndex)) {
+            if ((topIndex === targetIndex)||(leftIndex === targetIndex)||(rightIndex === targetIndex)) {
                 win();
             } else {
                 lastWin = false; // Player missed, keep the same color
