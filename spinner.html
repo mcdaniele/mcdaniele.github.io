@@ -183,11 +183,15 @@
             isSpinning = false;
             let normalized = currentAngle % (Math.PI * 2);
             if (normalized < 0) normalized += (Math.PI * 2);
+            let leftnorm = (currentAngle - (Math.PI / 3)) % (Math.PI * 2);
+            if (leftnorm < 0) leftnorm += (Math.PI * 2);
+            let rightnorm = (currentAngle + (Math.PI / 3)) % (Math.PI * 2);
+            if (rightnorm < 0) rightnorm += (Math.PI * 2);
 
             let topIndex = Math.floor(((Math.PI * 1.5 - normalized) % (Math.PI * 2)) / (Math.PI / 3));
             if (topIndex < 0) topIndex += 6;
 
-            if (topIndex === targetIndex) {
+            if ((topIndex === targetIndex)||(leftnorm === targetIndex)||(rightnorm === targetIndex)) {
                 win();
             } else {
                 lastWin = false; // Player missed, keep the same color
