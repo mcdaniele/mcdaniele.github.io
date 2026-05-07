@@ -116,7 +116,34 @@
             { n: 'key', p: 'M160 224c-35 0-64 29-64 64s29 64 64 64 64-29 64-64c0-5-1-10-2-15l162-162V32h80v80h-40v40h-40l-80 80c-5-1-10-2-15-2z', c: '#95a5a6' },
             { n: 'paw', p: 'M256 192c-53 0-96 43-96 96s43 96 96 96 96-43 96-96-43-96-96-96z', c: '#a29bfe' }
         ];
+function startDrag(e) {
+    activeCard = e.target;
+    const rect = activeCard.getBoundingClientRect();
+    const boardRect = board.getBoundingClientRect(); // Get board position
+    
+    // Calculate mouse position RELATIVE to the board
+    // This removes the "window vs board" math error
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
 
+    activeCard.style.zIndex = 1000;
+    
+    window.addEventListener('pointermove', drag);
+    window.addEventListener('pointerup', endDrag);
+}
+
+function drag(e) {
+    if (!activeCard) return;
+
+    const boardRect = board.getBoundingClientRect();
+    
+    // Standardize the math: (Mouse Position) - (Board Offset) - (Click Offset)
+    let x = e.clientX - boardRect.left - offsetX;
+    let y = e.clientY - boardRect.top - offsetY;
+
+    activeCard.style.left = x + 'px';
+    activeCard.style.top = y + 'px';
+}
         let currentLevel = 0;
         let pairsToMatch = 0;
         let matchesFound = 0;
