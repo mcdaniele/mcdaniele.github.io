@@ -1,211 +1,288 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Match: Pro Web Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="apple-touch-icon" href="icon.png">
+    <title>Pile Match Pro - Fixed</title>
     <style>
-        :root {
-            --bg: #0a0a0c;
-            --neon: #00bfff;
-            --match: #00ffcc;
-            --error: #ff0055;
-        }
-
+        :root { --bg: #2c3e50; --card-size: 100px; }
         body {
-            margin: 0;
+            font-family: system-ui, -apple-system, sans-serif;
             background: var(--bg);
-            color: white;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
             overflow: hidden;
-            user-select: none; 
+            touch-action: none;
+            user-select: none;
             -webkit-user-select: none;
         }
-
-        #game-board {
+        #canvas { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 1000; }
+        .header { color: white; text-align: center; padding: 20px; z-index: 10; pointer-events: none; }
+        #level-indicator { font-size: 1.2rem; opacity: 0.8; }
+        
+        #game-container {
             position: relative;
-            width: 800px;
-            height: 500px;
-            border: 2px solid #222;
-            background: radial-gradient(circle at center, #111 0%, #050505 100%);
-            border-radius: 15px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            flex-grow: 1;
+            width: 100vw;
+            max-width: 800px;
         }
 
         .card {
             position: absolute;
-            width: 100px;
-            height: 140px;
-            background: #1a1a1c;
-            border: 2px solid var(--neon);
-            border-radius: 10px;
+            width: var(--card-size);
+            height: var(--card-size);
+            background: white;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 45px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             cursor: grab;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            z-index: 2;
-            /* Transition top/left for the 'return' animation */
-            transition: transform 0.1s, border-color 0.3s, box-shadow 0.3s;
-            touch-action: none;
-        }
-
-        /* Smoothing the return trip */
-        .returning {
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .card:active { cursor: grabbing; scale: 1.08; }
-
-        .slot {
-            position: absolute;
-            width: 110px;
-            height: 150px;
-            border: 2px dashed #333;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            letter-spacing: 2px;
-            color: #444;
-            transition: all 0.2s;
-        }
-
-        /* Hover effect when dragging over the right slot */
-        .slot.drag-over {
-            border-color: var(--neon);
-            background: rgba(0, 191, 255, 0.05);
-            color: var(--neon);
-        }
-
-        .matched {
-            border: 2px solid var(--match) !important;
-            box-shadow: 0 0 20px var(--match);
-            color: var(--match) !important;
-            pointer-events: none;
+            transition: transform 0.1s ease-out;
             z-index: 1;
         }
+        .card:active { cursor: grabbing; }
+        .icon { width: 70%; height: 70%; pointer-events: none; }
 
-        #ui { margin-bottom: 30px; text-align: center; }
-        h1 { margin: 0; font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); }
-        p { opacity: 0.6; margin-top: 5px; }
+        #victory-overlay {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            display: none;
+            z-index: 2000;
+            width: 100%;
+        }
+        #victory-text {
+            font-size: clamp(3rem, 10vw, 5rem);
+            font-weight: 900;
+            text-shadow: 0 0 30px rgba(255,255,255,0.6);
+            margin-bottom: 30px;
+            display: block;
+            animation: bounce 0.6s infinite alternate;
+        }
+        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
+        .btn {
+            padding: 20px 40px; font-size: 1.4rem;
+            background: #f1c40f; color: #2c3e50;
+            border: none; border-radius: 50px;
+            font-weight: bold; box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            pointer-events: auto;
+        }
     </style>
 </head>
 <body>
 
-    <div id="ui">
-        <h1>NEON MATCH</h1>
-        <p>Drop the element into its designated terminal</p>
+    <canvas id="canvas"></canvas>
+    <div class="header">
+        <div id="level-indicator">Level 1</div>
+        <h2 id="msg">Drag to Match!</h2>
     </div>
 
-    <div id="game-board">
-        <!-- Slots -->
-        <div class="slot" style="top:250px; left:100px;" data-match="fire">FIRE</div>
-        <div class="slot" style="top:250px; left:350px;" data-match="water">WATER</div>
-        <div class="slot" style="top:250px; left:600px;" data-match="bolt">BOLT</div>
+    <div id="game-container"></div>
 
-        <!-- Cards -->
-        <div class="card" id="fire" style="top:40px; left:100px;" data-start-x="100" data-start-y="40">🔥</div>
-        <div class="card" id="water" style="top:40px; left:350px;" data-start-x="350" data-start-y="40">💧</div>
-        <div class="card" id="bolt" style="top:40px; left:600px;" data-start-x="600" data-start-y="40">⚡</div>
+    <div id="victory-overlay">
+        <span id="victory-text"></span>
+        <button class="btn" onclick="resetGame()">Start Over</button>
     </div>
 
-<script>
-    let activeCard = null;
-    let offsetX = 0;
-    let offsetY = 0;
+    <script>
+        // EXPANDED LIBRARY TO 20 ICONS
+        const iconLibrary = [
+            { n: 'star', p: 'M256 38l68 139 154 22-111 108 26 153-137-72-137 72 26-153-111-108 154-22z', c: '#f1c40f' },
+            { n: 'heart', p: 'M462 62c-55-46-136-38-186 14L256 96l-20-20C186 24 104 16 50 62c-63 54-66 150-10 208l193 200c13 13 33 13 45 0l194-200c56-58 53-154-10-208z', c: '#e74c3c' },
+            { n: 'moon', p: 'M223 32C100 32 0 132 0 255s100 224 223 224c61 0 116-24 156-63 5-5 6-13 3-19s-10-10-17-9c-10 2-20 3-30 3-97 0-175-79-175-175 0-66 36-123 90-153 6-4 9-11 8-17s-7-12-14-13c-6-1-13-1-19-1z', c: '#f39c12' },
+            { n: 'bolt', p: 'M0 288c0-18 14-32 32-32h144V32c0-13 8-25 20-30s26-1 35 10l192 240c11 14 11 34 0 48s-32 19-51 11L272 288v224c0 13-8 25-20 30s-26 1-35-10l-192-240C11 312 8 300 8 288H0z', c: '#2ecc71' },
+            { n: 'cloud', p: 'M0 336c0 80 65 144 144 144h224c80 0 144-65 144-144 0-64-42-118-99-137 2-10 3-21 3-31 0-84-68-152-152-152-60 0-113 35-137 86-15-10-33-16-53-16-53 0-96 43-96 96 0 2 0 4 0 6C31 213 0 270 0 336z', c: '#3498db' },
+            { n: 'sun', p: 'M256 160c-53 0-96 43-96 96s43 96 96 96 96-43 96-96-43-96-96-96zm0-64c18 0 32-14 32-32V32c0-18-14-32-32-32s-32 14-32 32v32c0 18 14 32 32 32zm136 45c12 13 33 13 45 0s13-33 0-45l-23-23c-12-12-33-12-45 0s-13 33 0 45l23 23zM480 224h-32c-18 0-32 14-32 32s14 32 32 32h32c18 0 32-14 32-32s-14-32-32-32z', c: '#ff9f43' },
+            { n: 'bell', p: 'M256 0c-18 0-32 14-32 32v19C133 66 64 145 64 240v120c0 11-6 22-16 27L16 406c-14 8-19 26-12 40 7 15 25 21 39 14l33-15v35c0 18 14 32 32 32h304c18 0 32-14 32-32v-35l29 14c15 7 32 1 39-14 7-15 2-32-12-40l-32-18c-10-6-16-16-16-27V240c0-95-69-174-160-189V32c0-18-14-32-32-32z', c: '#9b59b6' },
+            { n: 'plane', p: 'M464 224h-80l-96-160h-48l48 160h-96l-32-48h-32l16 48-16 48h32l32-48h96l-48 160h48l96-160h80c27 0 48-21 48-48s-21-48-48-48z', c: '#74b9ff' },
+            { n: 'gem', p: 'M160 32L48 224l208 256 208-256L352 32H160zM90 216l84-143h164l84 143H90z', c: '#a29bfe' },
+            { n: 'crown', p: 'M480 128l-96 96-128-160-128 160-96-96 32 256h384l32-256z', c: '#ffeaa7' },
+            { n: 'leaf', p: 'M480 32C320 32 32 320 32 480c160 0 448-288 448-448z', c: '#55efc4' },
+            { n: 'music', p: 'M470 41c-11-5-24-2-29 9l-96 224v162c0 44-36 80-80 80s-80-36-80-80 36-80 80-80c12 0 24 3 34 8l3-192c1-26 19-48 44-53l128-30c12-3 25 4 29 16s-2 25-14 29l-114 27v14l96-22c11-3 22 4 25 15s-4 22-15 25z', c: '#fd79a8' },
+            { n: 'car', p: 'M496 304l-40-104c-12-32-42-54-76-54H132c-34 0-64 22-76 54L16 304c-10 26 9 54 37 54h11c-3 8-5 16-5 24 0 40 32 72 72 72s72-32 72-72c0-8-2-16-5-24h128c-3 8-5 16-5 24 0 40 32 72 72 72s72-32 72-72c0-8-2-16-5-24h11c28 0 47-28 37-54z', c: '#ff7675' },
+            { n: 'rocket', p: 'M480 32l-47 0-46 46c-40-3-80 6-114 28l-10-10c-13-13-33-13-45 0s-13 33 0 45l10 10c-22 34-31 74-28 114l-46 46c-13 13-13 33 0 45s33 13 45 0l46-46c40 3 80-6 114-28l10 10c13 13 33 13 45 0s13-33 0-45l-10-10c22-34 31-74 28-114l46-46', c: '#00d2d3' },
+            { n: 'bug', p: 'M256 64c-44 0-80 36-80 80v32h160v-32c0-44-36-80-80-80zM144 176c-27 0-48 21-48 48v160c0 44 36 80 80 80h160c44 0 80-36 80-80V224c0-27-21-48-48-48H144z', c: '#badc58' },
+            { n: 'tree', p: 'M256 32L96 224h64l-96 160h128v96h64v-96h128L320 224h64L256 32z', c: '#27ae60' },
+            { n: 'ghost', p: 'M256 32c-88 0-160 72-160 160v224l32-32 32 32 32-32 32 32 32-32 32 32 32-32 32 32V192c0-88-72-160-160-160z', c: '#dfe6e9' },
+            { n: 'apple', p: 'M256 96c-44 0-80 36-80 80s36 80 80 80 80-36 80-80-36-80-80-80z', c: '#ff7675' },
+            { n: 'key', p: 'M160 224c-35 0-64 29-64 64s29 64 64 64 64-29 64-64c0-5-1-10-2-15l162-162V32h80v80h-40v40h-40l-80 80c-5-1-10-2-15-2z', c: '#95a5a6' },
+            { n: 'paw', p: 'M256 192c-53 0-96 43-96 96s43 96 96 96 96-43 96-96-43-96-96-96z', c: '#a29bfe' }
+        ];
 
-    const cards = document.querySelectorAll('.card');
-    const slots = document.querySelectorAll('.slot');
-    const board = document.getElementById('game-board');
+        let currentLevel = 0;
+        let pairsToMatch = 0;
+        let matchesFound = 0;
+        let activeCard = null;
+        let highestZ = 10;
+        let fireworksActive = false;
 
-    cards.forEach(card => {
-        card.addEventListener('pointerdown', startDrag);
-    });
+        function initLevel() {
+            const container = document.getElementById('game-container');
+            const indicator = document.getElementById('level-indicator');
+            container.innerHTML = '';
+            matchesFound = 0;
+            fireworksActive = false;
+            document.getElementById('victory-overlay').style.display = 'none';
 
-    function startDrag(e) {
-        activeCard = e.target;
-        activeCard.classList.remove('returning'); // Interrupt return anim if clicked
-        
-        const rect = activeCard.getBoundingClientRect();
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
+            pairsToMatch = 8 + (currentLevel * 2);
+            indicator.innerText = `Level ${currentLevel + 1} - ${pairsToMatch} Pairs`;
 
-        activeCard.style.zIndex = 1000;
-        
-        window.addEventListener('pointermove', drag);
-        window.addEventListener('pointerup', endDrag);
-    }
+            // Randomly shuffle the library and pick the exact amount of pairs needed
+            let selectedIcons = [...iconLibrary].sort(() => Math.random() - 0.5).slice(0, pairsToMatch);
+            let gameSet = [...selectedIcons, ...selectedIcons].sort(() => Math.random() - 0.5);
 
-    function drag(e) {
-        if (!activeCard) return;
-
-        const boardRect = board.getBoundingClientRect();
-        let x = e.clientX - boardRect.left - offsetX;
-        let y = e.clientY - boardRect.top - offsetY;
-
-        activeCard.style.left = x + 'px';
-        activeCard.style.top = y + 'px';
-
-        // Check for "Hover" feedback
-        const cardRect = activeCard.getBoundingClientRect();
-        slots.forEach(slot => {
-            if (isOverlapping(cardRect, slot.getBoundingClientRect())) {
-                slot.classList.add('drag-over');
-            } else {
-                slot.classList.remove('drag-over');
-            }
-        });
-    }
-
-    function endDrag(e) {
-        if (!activeCard) return;
-
-        let matched = false;
-        const cardRect = activeCard.getBoundingClientRect();
-
-        slots.forEach(slot => {
-            const slotRect = slot.getBoundingClientRect();
-            slot.classList.remove('drag-over');
-
-            if (isOverlapping(cardRect, slotRect) && slot.dataset.match === activeCard.id) {
-                // SUCCESS MATCH
-                const boardRect = board.getBoundingClientRect();
-                activeCard.style.left = (slotRect.left - boardRect.left + 5) + 'px';
-                activeCard.style.top = (slotRect.top - boardRect.top + 5) + 'px';
+            gameSet.forEach((iconData) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.name = iconData.n;
+                card.innerHTML = `<svg class="icon" viewBox="0 0 512 512" style="fill: ${iconData.c}"><path d="${iconData.p}"/></svg>`;
                 
-                activeCard.classList.add('matched');
-                slot.classList.add('matched');
-                matched = true;
-            }
-        });
-
-        // IF NO MATCH: Snap back to start
-        if (!matched) {
-            activeCard.classList.add('returning');
-            activeCard.style.left = activeCard.dataset.startX + 'px';
-            activeCard.style.top = activeCard.dataset.startY + 'px';
-            activeCard.style.zIndex = 2;
+                const x = Math.random() * (window.innerWidth - 120);
+                const y = Math.random() * (container.offsetHeight - 120);
+                const rot = (Math.random() - 0.5) * 50;
+                
+                card.style.left = `${x}px`;
+                card.style.top = `${y}px`;
+                card.style.transform = `rotate(${rot}deg)`;
+                
+                addDragHandlers(card);
+                container.appendChild(card);
+            });
         }
 
-        window.removeEventListener('pointermove', drag);
-        window.removeEventListener('pointerup', endDrag);
-        activeCard = null;
-    }
+        function addDragHandlers(card) {
+            let offsetX, offsetY;
 
-    function isOverlapping(rect1, rect2) {
-        return !(rect1.right < rect2.left || 
-                 rect1.left > rect2.right || 
-                 rect1.bottom < rect2.top || 
-                 rect1.top > rect2.bottom);
-    }
-</script>
+            const onStart = (e) => {
+                activeCard = card;
+                card.style.zIndex = ++highestZ;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const rect = card.getBoundingClientRect();
+                offsetX = clientX - rect.left;
+                offsetY = clientY - rect.top;
+                card.style.transition = 'none';
+            };
+
+            const onMove = (e) => {
+                if (activeCard !== card) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                card.style.left = `${clientX - offsetX}px`;
+                card.style.top = `${clientY - offsetY - 80}px`; // Adjusted offset
+            };
+
+            const onEnd = () => {
+                if (activeCard !== card) return;
+                checkMatch(card);
+                activeCard = null;
+                card.style.transition = 'transform 0.1s ease-out, opacity 0.4s';
+            };
+
+            card.addEventListener('mousedown', onStart);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onEnd);
+            
+            card.addEventListener('touchstart', onStart, {passive: false});
+            window.addEventListener('touchmove', onMove, {passive: false});
+            window.addEventListener('touchend', onEnd);
+        }
+
+        function checkMatch(draggedCard) {
+            const rectA = draggedCard.getBoundingClientRect();
+            const cards = Array.from(document.getElementsByClassName('card'));
+
+            for (let targetCard of cards) {
+                if (targetCard === draggedCard || targetCard.style.opacity === '0') continue;
+
+                const rectB = targetCard.getBoundingClientRect();
+                const isOverlapping = !(rectA.right < rectB.left || rectA.left > rectB.right || rectA.bottom < rectB.top || rectA.top > rectB.bottom);
+
+                if (isOverlapping && draggedCard.dataset.name === targetCard.dataset.name) {
+                    draggedCard.style.opacity = '0';
+                    targetCard.style.opacity = '0';
+                    setTimeout(() => {
+                        draggedCard.remove();
+                        targetCard.remove();
+                    }, 400);
+
+                    matchesFound++;
+                    if (matchesFound === pairsToMatch) {
+                        if (currentLevel < 5) {
+                            currentLevel++;
+                            setTimeout(initLevel, 800);
+                        } else {
+                            triggerVictory();
+                        }
+                    }
+                    return;
+                }
+            }
+        }
+
+        function triggerVictory() {
+            const phrases = ["UNSTOPPABLE!", "PILE MASTER!", "YOU DID IT!", "AMAZING!"];
+            document.getElementById('victory-text').innerText = phrases[Math.floor(Math.random() * phrases.length)];
+            document.getElementById('victory-overlay').style.display = 'block';
+            fireworksActive = true;
+        }
+
+        function resetGame() {
+            currentLevel = 0;
+            initLevel();
+        }
+
+        // --- FIREWORKS ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y; this.color = color;
+                this.velocity = { x: (Math.random() - 0.5) * 12, y: (Math.random() - 0.5) * 12 };
+                this.alpha = 1; this.friction = 0.95;
+            }
+            update() {
+                this.velocity.x *= this.friction; this.velocity.y *= this.friction;
+                this.velocity.y += 0.1; this.x += this.velocity.x; this.y += this.velocity.y;
+                this.alpha -= 0.01;
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha; ctx.beginPath();
+                ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = this.color; ctx.fill();
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (fireworksActive && Math.random() < 0.1) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height * 0.4;
+                const color = `hsl(${Math.random() * 360}, 80%, 60%)`;
+                for (let i = 0; i < 50; i++) particles.push(new Particle(x, y, color));
+            }
+            particles.forEach((p, i) => {
+                if (p.alpha <= 0) particles.splice(i, 1);
+                else { p.update(); p.draw(); }
+            });
+        }
+
+        animate();
+        initLevel();
+    </script>
 </body>
 </html>
