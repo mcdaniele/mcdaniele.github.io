@@ -3,19 +3,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <link rel="apple-touch-icon" href="icon.png">
     <title>Pile Match Pro - Fixed</title>
     <style>
         :root { --bg: #2c3e50; --card-size: 100px; }
         body {
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: system-ui, sans-serif;
             background: var(--bg);
             margin: 0;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
+/*            align-items: center;*/
             overflow: hidden;
             touch-action: none;
             user-select: none;
@@ -116,34 +114,6 @@
             { n: 'key', p: 'M160 224c-35 0-64 29-64 64s29 64 64 64 64-29 64-64c0-5-1-10-2-15l162-162V32h80v80h-40v40h-40l-80 80c-5-1-10-2-15-2z', c: '#95a5a6' },
             { n: 'paw', p: 'M256 192c-53 0-96 43-96 96s43 96 96 96 96-43 96-96-43-96-96-96z', c: '#a29bfe' }
         ];
-function startDrag(e) {
-    activeCard = e.target;
-    const rect = activeCard.getBoundingClientRect();
-    const boardRect = board.getBoundingClientRect(); // Get board position
-    
-    // Calculate mouse position RELATIVE to the board
-    // This removes the "window vs board" math error
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
-
-    activeCard.style.zIndex = 1000;
-    
-    window.addEventListener('pointermove', drag);
-    window.addEventListener('pointerup', endDrag);
-}
-
-function drag(e) {
-    if (!activeCard) return;
-
-    const boardRect = board.getBoundingClientRect();
-    
-    // Standardize the math: (Mouse Position) - (Board Offset) - (Click Offset)
-    let x = e.clientX - boardRect.left - offsetX;
-    let y = e.clientY - boardRect.top - offsetY;
-
-    activeCard.style.left = x + 'px';
-    activeCard.style.top = y + 'px';
-}
         let currentLevel = 0;
         let pairsToMatch = 0;
         let matchesFound = 0;
@@ -172,7 +142,7 @@ function drag(e) {
                 card.dataset.name = iconData.n;
                 card.innerHTML = `<svg class="icon" viewBox="0 0 512 512" style="fill: ${iconData.c}"><path d="${iconData.p}"/></svg>`;
                 
-                const x = Math.random() * (window.innerWidth - 120);
+                const x = Math.random() * (window.innerWidth - 120)+50;
                 const y = Math.random() * (container.offsetHeight - 120);
                 const rot = (Math.random() - 0.5) * 50;
                 
@@ -194,16 +164,16 @@ function drag(e) {
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 const rect = card.getBoundingClientRect();
-                offsetX = clientX - rect.left;
+                offsetX = clientX;// - rect.left;
                 offsetY = clientY - rect.top;
                 card.style.transition = 'none';
             };
 
             const onMove = (e) => {
                 if (activeCard !== card) return;
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                card.style.left = `${clientX - offsetX}px`;
+                const clientX = e.touches ? e.touches[0].clientX-50 : e.clientX-50;
+                const clientY = e.touches ? e.touches[0].clientY-50 : e.clientY-50;
+                card.style.left = `${clientX}px`;
                 card.style.top = `${clientY - offsetY - 80}px`; // Adjusted offset
             };
 
