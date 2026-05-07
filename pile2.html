@@ -2,26 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Match: Web Edition</title>
+    <title>Neon Match: Pro Web Edition</title>
     <style>
         :root {
             --bg: #0a0a0c;
             --neon: #00bfff;
             --match: #00ffcc;
+            --error: #ff0055;
         }
 
         body {
             margin: 0;
             background: var(--bg);
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             overflow: hidden;
-            /* Prevents blue highlighting while dragging */
             user-select: none; 
             -webkit-user-select: none;
         }
@@ -31,8 +31,9 @@
             width: 800px;
             height: 500px;
             border: 2px solid #222;
-            background: rgba(255,255,255,0.02);
+            background: radial-gradient(circle at center, #111 0%, #050505 100%);
             border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
         .card {
@@ -45,57 +46,75 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
+            font-size: 45px;
             cursor: grab;
-            box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             z-index: 2;
-            transition: transform 0.1s;
-            touch-action: none; /* Prevents browser scrolling while dragging */
+            /* Transition top/left for the 'return' animation */
+            transition: transform 0.1s, border-color 0.3s, box-shadow 0.3s;
+            touch-action: none;
         }
 
-        .card:active { cursor: grabbing; scale: 1.05; }
+        /* Smoothing the return trip */
+        .returning {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card:active { cursor: grabbing; scale: 1.08; }
 
         .slot {
             position: absolute;
             width: 110px;
             height: 150px;
-            border: 2px dashed #444;
-            border-radius: 10px;
+            border: 2px dashed #333;
+            border-radius: 12px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 2px;
             color: #444;
-            z-index: 1;
+            transition: all 0.2s;
+        }
+
+        /* Hover effect when dragging over the right slot */
+        .slot.drag-over {
+            border-color: var(--neon);
+            background: rgba(0, 191, 255, 0.05);
+            color: var(--neon);
         }
 
         .matched {
-            border-color: var(--match) !important;
+            border: 2px solid var(--match) !important;
             box-shadow: 0 0 20px var(--match);
+            color: var(--match) !important;
             pointer-events: none;
+            z-index: 1;
         }
 
-        #ui { margin-bottom: 20px; text-align: center; }
-        h1 { margin: 0; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
+        #ui { margin-bottom: 30px; text-align: center; }
+        h1 { margin: 0; font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); }
+        p { opacity: 0.6; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <div id="ui">
         <h1>NEON MATCH</h1>
-        <p>Drag the Emoji to its Name</p>
+        <p>Drop the element into its designated terminal</p>
     </div>
 
     <div id="game-board">
-        <!-- Slots (Targets) -->
-        <div class="slot" style="top:175px; left:50px;" data-match="fire">FIRE</div>
-        <div class="slot" style="top:175px; left:350px;" data-match="water">WATER</div>
-        <div class="slot" style="top:175px; left:650px;" data-match="bolt">BOLT</div>
+        <!-- Slots -->
+        <div class="slot" style="top:250px; left:100px;" data-match="fire">FIRE</div>
+        <div class="slot" style="top:250px; left:350px;" data-match="water">WATER</div>
+        <div class="slot" style="top:250px; left:600px;" data-match="bolt">BOLT</div>
 
-        <!-- Cards (Draggables) -->
-        <div class="card" id="fire" style="top:20px; left:20px;">🔥</div>
-        <div class="card" id="water" style="top:20px; left:140px;">💧</div>
-        <div class="card" id="bolt" style="top:20px; left:260px;">⚡</div>
+        <!-- Cards -->
+        <div class="card" id="fire" style="top:40px; left:100px;" data-start-x="100" data-start-y="40">🔥</div>
+        <div class="card" id="water" style="top:40px; left:350px;" data-start-x="350" data-start-y="40">💧</div>
+        <div class="card" id="bolt" style="top:40px; left:600px;" data-start-x="600" data-start-y="40">⚡</div>
     </div>
 
 <script>
@@ -113,16 +132,14 @@
 
     function startDrag(e) {
         activeCard = e.target;
-        const rect = activeCard.getBoundingClientRect();
+        activeCard.classList.remove('returning'); // Interrupt return anim if clicked
         
-        // Calculate where inside the card the user clicked
+        const rect = activeCard.getBoundingClientRect();
         offsetX = e.clientX - rect.left;
         offsetY = e.clientY - rect.top;
 
         activeCard.style.zIndex = 1000;
         
-        // Attach move and up listeners to window so dragging is smooth 
-        // even if the mouse leaves the card area
         window.addEventListener('pointermove', drag);
         window.addEventListener('pointerup', endDrag);
     }
@@ -131,13 +148,21 @@
         if (!activeCard) return;
 
         const boardRect = board.getBoundingClientRect();
-        
-        // Calculate position relative to the board
         let x = e.clientX - boardRect.left - offsetX;
         let y = e.clientY - boardRect.top - offsetY;
 
         activeCard.style.left = x + 'px';
         activeCard.style.top = y + 'px';
+
+        // Check for "Hover" feedback
+        const cardRect = activeCard.getBoundingClientRect();
+        slots.forEach(slot => {
+            if (isOverlapping(cardRect, slot.getBoundingClientRect())) {
+                slot.classList.add('drag-over');
+            } else {
+                slot.classList.remove('drag-over');
+            }
+        });
     }
 
     function endDrag(e) {
@@ -148,17 +173,10 @@
 
         slots.forEach(slot => {
             const slotRect = slot.getBoundingClientRect();
-            
-            // Overlap detection
-            const isOverlapping = !(
-                cardRect.right < slotRect.left || 
-                cardRect.left > slotRect.right || 
-                cardRect.bottom < slotRect.top || 
-                cardRect.top > slotRect.bottom
-            );
+            slot.classList.remove('drag-over');
 
-            if (isOverlapping && slot.dataset.match === activeCard.id) {
-                // Snap to slot
+            if (isOverlapping(cardRect, slotRect) && slot.dataset.match === activeCard.id) {
+                // SUCCESS MATCH
                 const boardRect = board.getBoundingClientRect();
                 activeCard.style.left = (slotRect.left - boardRect.left + 5) + 'px';
                 activeCard.style.top = (slotRect.top - boardRect.top + 5) + 'px';
@@ -169,13 +187,24 @@
             }
         });
 
+        // IF NO MATCH: Snap back to start
         if (!matched) {
-            // Optional: return to start position logic could go here
+            activeCard.classList.add('returning');
+            activeCard.style.left = activeCard.dataset.startX + 'px';
+            activeCard.style.top = activeCard.dataset.startY + 'px';
+            activeCard.style.zIndex = 2;
         }
 
         window.removeEventListener('pointermove', drag);
         window.removeEventListener('pointerup', endDrag);
         activeCard = null;
+    }
+
+    function isOverlapping(rect1, rect2) {
+        return !(rect1.right < rect2.left || 
+                 rect1.left > rect2.right || 
+                 rect1.bottom < rect2.top || 
+                 rect1.top > rect2.bottom);
     }
 </script>
 </body>
