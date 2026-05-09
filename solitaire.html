@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Klondike Mobile</title>
+    <title>Klondike Mobile Fixed</title>
     <style>
         :root {
             --bg: #1a5e20;
@@ -11,38 +11,21 @@
             --card-h: 19vw;
             --radius: 4px;
         }
-
-        body {
-            margin: 0; background: var(--bg); font-family: sans-serif;
-            overflow: hidden; touch-action: none; user-select: none;
-        }
-
-        #table {
-            display: grid; grid-template-rows: auto 1fr;
-            gap: 15px; padding: 10px; max-width: 500px; margin: 0 auto;
-        }
-
+        body { margin: 0; background: var(--bg); font-family: sans-serif; overflow: hidden; touch-action: none; user-select: none; }
+        #table { display: grid; grid-template-rows: auto 1fr; gap: 15px; padding: 10px; max-width: 500px; margin: 0 auto; }
         .row { display: flex; justify-content: space-between; height: var(--card-h); }
-        .slot {
-            width: var(--card-w); height: var(--card-h);
-            border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius);
-            position: relative;
-        }
-
+        .slot { width: var(--card-w); height: var(--card-h); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius); position: relative; }
         .card {
-            width: var(--card-w); height: var(--card-h);
-            background: white; border-radius: var(--radius);
+            width: var(--card-w); height: var(--card-h); background: white; border-radius: var(--radius);
             position: absolute; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; font-size: 1.2rem; font-weight: bold;
-            transition: transform 0.1s; pointer-events: auto;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: bold; pointer-events: auto;
         }
-
-        .card.back { background: #0d47a1; color: transparent; border: 2px solid #fff; }
+        .card.back { background: #0d47a1; color: transparent; border: 1px solid #fff; }
         .card.red { color: #d32f2f; }
         .card.black { color: #212121; }
-        
         .dragging { opacity: 0.5; z-index: 1000 !important; pointer-events: none; }
+        #deck.empty { background: rgba(255,255,255,0.1); border: 1px dashed #fff; }
     </style>
 </head>
 <body>
@@ -50,17 +33,17 @@
 <div id="table">
     <div class="row">
         <div style="display:flex; gap:2vw">
-            <div id="deck" class="slot card back" onclick="draw()"></div>
+            <div id="deck" class="slot card back" onclick="handleDeckClick()"></div>
             <div id="waste" class="slot"></div>
         </div>
         <div id="foundations" style="display:flex; gap:2vw">
-            <div class="slot foundation" data-suit="any"></div>
-            <div class="slot foundation" data-suit="any"></div>
-            <div class="slot foundation" data-suit="any"></div>
-            <div class="slot foundation" data-suit="any"></div>
+            <div class="slot foundation"></div>
+            <div class="slot foundation"></div>
+            <div class="slot foundation"></div>
+            <div class="slot foundation"></div>
         </div>
     </div>
-    <div class="row" id="tableau" style="height: 70vh;">
+    <div class="row" id="tableau" style="height: 70vh; margin-top: 20px;">
         <div class="slot tableau" id="t0"></div>
         <div class="slot tableau" id="t1"></div>
         <div class="slot tableau" id="t2"></div>
@@ -74,33 +57,35 @@
 <script>
 const SUITS = ['♠', '♥', '♣', '♦'];
 const VALS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-let deck = [], draggedEl = null, startSlot = null;
+let deckArr = [], draggedEl = null;
 
 function init() {
-    deck = [];
-    SUITS.forEach(s => VALS.forEach(v => deck.push({s, v, r: (s==='♥'||s==='♦'), val: VALS.indexOf(v)+1})));
-    deck.sort(() => Math.random() - 0.5);
+    deckArr = [];
+    SUITS.forEach(s => VALS.forEach((v, i) => deckArr.push({s, v, r: (s==='♥'||s==='♦'), val: i+1})));
+    deckArr.sort(() => Math.random() - 0.5);
     
     document.querySelectorAll('.slot').forEach(s => s.innerHTML = '');
-    
+    document.getElementById('deck').className = 'slot card back';
+
     for(let i=0; i<7; i++) {
         for(let j=i; j<7; j++) {
-            let card = deck.pop();
-            addCard(`t${j}`, card, i === j);
+            let cardData = deckArr.pop();
+            addCardToSlot(`t${j}`, cardData, i === j);
         }
     }
 }
 
-function addCard(slotId, card, faceUp) {
+function addCardToSlot(slotId, cardData, faceUp) {
     const slot = typeof slotId === 'string' ? document.getElementById(slotId) : slotId;
     const div = document.createElement('div');
-    div.className = `card ${faceUp ? (card.r ? 'red' : 'black') : 'back'}`;
-    div.dataset.val = card.val; div.dataset.suit = card.s; div.dataset.red = card.r;
+    div.className = `card ${faceUp ? (cardData.r ? 'red' : 'black') : 'back'}`;
+    div.dataset.val = cardData.val;
+    div.dataset.suit = cardData.s;
+    div.dataset.red = cardData.r;
     div.dataset.up = faceUp;
     
     if(faceUp) {
-        div.innerHTML = `<div>${card.v}</div><div>${card.s}</div>`;
-        div.draggable = true;
+        div.innerHTML = `<span>${cardData.v}</span><span>${cardData.s}</span>`;
         div.onmousedown = div.ontouchstart = dragStart;
     }
 
@@ -109,26 +94,35 @@ function addCard(slotId, card, faceUp) {
     slot.appendChild(div);
 }
 
-function draw() {
+function handleDeckClick() {
     const waste = document.getElementById('waste');
-    if (deck.length === 0) {
-        // Simple recycle: move all waste back to deck
-        const cards = Array.from(waste.children).reverse();
-        cards.forEach(c => {
-            deck.push({v: c.innerText.split('\n')[0], s: c.dataset.suit, r: c.dataset.red==='true', val: parseInt(c.dataset.val)});
+    const deckEl = document.getElementById('deck');
+
+    if (deckArr.length > 0) {
+        const cardData = deckArr.pop();
+        addCardToSlot('waste', cardData, true);
+        if (deckArr.length === 0) deckEl.classList.add('empty');
+    } else {
+        // Recycle Waste back to Deck
+        const wasteCards = Array.from(waste.children).reverse();
+        if (wasteCards.length === 0) return;
+        
+        wasteCards.forEach(c => {
+            deckArr.push({
+                v: VALS[parseInt(c.dataset.val)-1],
+                s: c.dataset.suit,
+                r: c.dataset.red === 'true',
+                val: parseInt(c.dataset.val)
+            });
             c.remove();
         });
-        return;
+        deckEl.classList.remove('empty');
     }
-    const card = deck.pop();
-    waste.innerHTML = ''; // Only show top card of waste
-    addCard('waste', card, true);
 }
 
 function dragStart(e) {
-    if (this.dataset.up === 'false') return;
+    e.stopPropagation();
     draggedEl = this;
-    startSlot = this.parentElement;
     this.classList.add('dragging');
 }
 
@@ -136,51 +130,43 @@ document.onmouseup = document.ontouchend = (e) => {
     if (!draggedEl) return;
     draggedEl.classList.remove('dragging');
     
-    const touch = e.changedTouches ? e.changedTouches[0] : e;
-    const target = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.slot');
+    const loc = e.changedTouches ? e.changedTouches[0] : e;
+    const target = document.elementFromPoint(loc.clientX, loc.clientY)?.closest('.slot');
     
     if (target && isValidMove(draggedEl, target)) {
-        moveCard(draggedEl, target);
+        const oldSlot = draggedEl.parentElement;
+        target.appendChild(draggedEl);
+        
+        // Fix position
+        draggedEl.style.top = target.classList.contains('tableau') ? (target.children.length - 1) * 20 + 'px' : '0';
+        
+        // Reveal next card in tableau
+        if (oldSlot.classList.contains('tableau') && oldSlot.lastElementChild) {
+            const next = oldSlot.lastElementChild;
+            if (next.dataset.up === 'false') {
+                const data = { v: VALS[next.dataset.val-1], s: next.dataset.suit, r: next.dataset.red==='true', val: next.dataset.val };
+                next.remove();
+                addCardToSlot(oldSlot, data, true);
+            }
+        }
     }
-    
     draggedEl = null;
 };
 
 function isValidMove(card, slot) {
     const top = slot.lastElementChild;
-    const cardVal = parseInt(card.dataset.val);
-    const cardRed = card.dataset.red === 'true';
+    const cVal = parseInt(card.dataset.val);
+    const cRed = card.dataset.red === 'true';
 
-    // To Tableau
     if (slot.classList.contains('tableau')) {
-        if (!top) return cardVal === 13; // Only Kings on empty
-        const topVal = parseInt(top.dataset.val);
-        const topRed = top.dataset.red === 'true';
-        return (cardVal === topVal - 1) && (cardRed !== topRed);
+        if (!top) return cVal === 13; // King on Empty
+        return (cVal === parseInt(top.dataset.val) - 1) && (cRed !== (top.dataset.red === 'true'));
     }
-    
-    // To Foundation
     if (slot.classList.contains('foundation')) {
-        if (!top) return cardVal === 1; // Only Aces
-        return (card.dataset.suit === top.dataset.suit) && (cardVal === parseInt(top.dataset.val) + 1);
+        if (!top) return cVal === 1; // Ace on Empty
+        return (card.dataset.suit === top.dataset.suit) && (cVal === parseInt(top.dataset.val) + 1);
     }
     return false;
-}
-
-function moveCard(card, slot) {
-    const oldSlot = card.parentElement;
-    slot.appendChild(card);
-    card.style.top = slot.classList.contains('tableau') ? (slot.children.length - 1) * 20 + 'px' : '0';
-    
-    // Flip top card of old slot
-    if (oldSlot.lastElementChild && oldSlot.classList.contains('tableau')) {
-        const top = oldSlot.lastElementChild;
-        if (top.dataset.up === 'false') {
-            const c = {v: VALS[top.dataset.val-1], s: top.dataset.suit, r: top.dataset.red==='true', val: top.dataset.val};
-            top.remove();
-            addCard(oldSlot, c, true);
-        }
-    }
 }
 
 init();
