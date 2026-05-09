@@ -1,19 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Solitaire Proportional</title>
+    <title>Klondike Solitaire</title>
     <style>
         :root {
-            --card-aspect: 1.4; /* Height to width ratio */
+            --card-aspect: 1.4;
+            --bg: #1a5e20;
         }
+        * { box-sizing: border-box; touch-action: none; user-select: none; }
         body { 
-            background: #1a5e20; margin: 0; padding: 10px; 
-            font-family: sans-serif; overflow: hidden; touch-action: none; 
+            background: var(--bg); margin: 0; padding: 10px; 
+            font-family: sans-serif; overflow: hidden; height: 100vh;
         }
         
-        /* The Board: 7 Equal Columns */
         #game-board { 
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -35,41 +36,42 @@
             width: 100%; height: 100%; background: white; border-radius: 4px;
             position: absolute; box-shadow: 0 2px 4px rgba(0,0,0,0.4);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 4vw; font-weight: bold; top: 0; left: 0;
-            max-font-size: 20px;
+            font-size: 16px; font-weight: bold; top: 0; left: 0;
         }
-
-        @media (min-width: 500px) { .card { font-size: 18px; } }
 
         .card.back { background: #0d47a1; border: 1px solid white; color: transparent !important; }
         .card.red { color: #d32f2f; }
         .card.black { color: #212121; }
 
-        /* Top Row Spacing */
         .header-space { grid-column: span 1; } 
 
         #deck-button { width: 100%; height: 100%; cursor: pointer; z-index: 10; }
+        
         #restart { 
             grid-column: span 7; margin-bottom: 10px; padding: 10px; 
             border-radius: 5px; border: none; background: #eee; font-weight: bold;
+            cursor: pointer;
         }
+
+        /* Adjust font for very small screens */
+        @media (max-width: 400px) { .card { font-size: 12px; } }
     </style>
 </head>
 <body>
 
 <div id="game-board">
-    <button id="restart" onclick="location.reload()">Restart Game</button>
+    <button id="restart" onclick="location.reload()">New Game</button>
     
-    <!-- Top Row: Deck(1), Waste(1), Empty(1), Foundations(4) -->
+    <!-- Top Row -->
     <div class="slot"><div id="deck-button" class="card back"></div></div>
     <div id="waste" class="slot"></div>
-    <div class="header-space"></div> <!-- Spacer -->
+    <div class="header-space"></div>
     <div class="slot foundation" id="f0"></div>
     <div class="slot foundation" id="f1"></div>
     <div class="slot foundation" id="f2"></div>
     <div class="slot foundation" id="f3"></div>
 
-    <!-- Tableau Row: 7 Columns -->
+    <!-- Tableau -->
     <div class="slot tableau" id="t0"></div>
     <div class="slot tableau" id="t1"></div>
     <div class="slot tableau" id="t2"></div>
@@ -92,8 +94,6 @@ function init() {
     }));
     deck.sort(() => Math.random() - 0.5);
 
-    document.querySelectorAll('.slot').forEach(s => s.innerHTML = '');
-
     for (let i = 0; i < 7; i++) {
         for (let j = i; j < 7; j++) {
             createCard(`t${j}`, deck.pop(), i === j);
@@ -113,7 +113,6 @@ function createCard(targetId, data, isFaceUp) {
     if (isFaceUp) {
         card.innerHTML = `<div>${data.v}</div><div>${data.s}</div>`;
         card.onpointerdown = (e) => { 
-            // Only allow dragging the TOP card of any pile
             if (card !== card.parentElement.lastElementChild) return;
             e.stopPropagation(); 
             dragged = card; 
@@ -124,7 +123,7 @@ function createCard(targetId, data, isFaceUp) {
     if (target.classList.contains('tableau')) {
         card.style.top = (target.children.length * 22) + 'px';
     } else {
-        card.style.top = '0px'; // Reset for waste/foundations
+        card.style.top = '0px';
     }
     target.appendChild(card);
 }
@@ -134,10 +133,8 @@ document.getElementById('deck-button').onpointerdown = function(e) {
     const waste = document.getElementById('waste');
     
     if (deck.length > 0) {
-        // Draw card and add it to the TOP of the waste pile
         createCard(waste, deck.pop(), true);
     } else {
-        // Recycle Waste: take all cards from waste, reverse them, put back in deck
         const wasteCards = Array.from(waste.children);
         if (wasteCards.length === 0) return;
         
@@ -161,11 +158,8 @@ document.onpointerup = (e) => {
     if (target && checkMove(dragged, target)) {
         const parent = dragged.parentElement;
         target.appendChild(dragged);
-        
-        // Correct the visual stacking
         dragged.style.top = target.classList.contains('tableau') ? ((target.children.length - 1) * 22) + 'px' : '0';
         
-        // If we just moved a card out of the tableau, flip the one beneath it
         if (parent.classList.contains('tableau') && parent.lastElementChild) {
             const next = parent.lastElementChild;
             if (next.dataset.up === 'false') {
@@ -189,15 +183,13 @@ function checkMove(card, slot) {
     const top = slot.lastElementChild;
     const cardRank = parseInt(card.dataset.rank);
     
-    // Tableau Rules: Descending rank, alternating colors
     if (slot.classList.contains('tableau')) {
-        if (!top) return cardRank === 13; // King only on empty
+        if (!top) return cardRank === 13;
         return (cardRank === parseInt(top.dataset.rank) - 1) && (card.dataset.color !== top.dataset.color);
     }
     
-    // Foundation Rules: Ascending rank, same suit
     if (slot.classList.contains('foundation')) {
-        if (!top) return cardRank === 1; // Ace only on empty
+        if (!top) return cardRank === 1;
         return (card.dataset.suit === top.dataset.suit) && (cardRank === parseInt(top.dataset.rank) + 1);
     }
     return false;
