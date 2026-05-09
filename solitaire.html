@@ -3,205 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Solitaire</title>
+    <title>Klondike Mobile</title>
     <style>
         :root {
-            --bg-color: #2e7d32;
-            --card-width: 12vw;
-            --card-height: 18vw;
-            --card-radius: 4px;
-            --gap: 2vw;
+            --bg: #1a5e20;
+            --card-w: 13vw;
+            --card-h: 19vw;
+            --radius: 4px;
         }
 
         body {
-            margin: 0;
-            padding: 10px;
-            background-color: var(--bg-color);
-            font-family: sans-serif;
-            overflow: hidden;
-            touch-action: none; /* Prevents scrolling while dragging */
+            margin: 0; background: var(--bg); font-family: sans-serif;
+            overflow: hidden; touch-action: none; user-select: none;
         }
 
-        #game-board {
-            display: grid;
-            grid-template-rows: var(--card-height) 1fr;
-            gap: 20px;
-            max-width: 600px;
-            margin: 0 auto;
+        #table {
+            display: grid; grid-template-rows: auto 1fr;
+            gap: 15px; padding: 10px; max-width: 500px; margin: 0 auto;
         }
 
-        .row {
-            display: flex;
-            justify-content: space-between;
-            height: var(--card-height);
-        }
-
+        .row { display: flex; justify-content: space-between; height: var(--card-h); }
         .slot {
-            width: var(--card-width);
-            height: var(--card-height);
-            border: 2px solid rgba(0,0,0,0.2);
-            border-radius: var(--card-radius);
+            width: var(--card-w); height: var(--card-h);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius);
             position: relative;
         }
 
         .card {
-            width: var(--card-width);
-            height: var(--card-height);
-            background: white;
-            border-radius: var(--card-radius);
-            position: absolute;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            user-select: none;
-            cursor: pointer;
+            width: var(--card-w); height: var(--card-h);
+            background: white; border-radius: var(--radius);
+            position: absolute; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; font-size: 1.2rem; font-weight: bold;
+            transition: transform 0.1s; pointer-events: auto;
         }
 
-        .card.back {
-            background: #1565c0;
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,.1) 5px, rgba(255,255,255,.1) 10px);
-        }
-
+        .card.back { background: #0d47a1; color: transparent; border: 2px solid #fff; }
         .card.red { color: #d32f2f; }
         .card.black { color: #212121; }
-
-        .tableau-column {
-            width: var(--card-width);
-            position: relative;
-        }
-
-        .card-stack {
-            margin-top: 25px; /* Offset for stacked cards */
-        }
-
-        #controls {
-            position: fixed;
-            bottom: 20px;
-            left: 0; right: 0;
-            text-align: center;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 1rem;
-            border-radius: 20px;
-            border: none;
-            background: #fff;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
+        
+        .dragging { opacity: 0.5; z-index: 1000 !important; pointer-events: none; }
     </style>
 </head>
 <body>
 
-<div id="game-board">
-    <!-- Top Row: Deck, Waste, and Foundations -->
+<div id="table">
     <div class="row">
-        <div style="display: flex; gap: var(--gap);">
-            <div id="deck" class="slot card back" onclick="drawCard()"></div>
+        <div style="display:flex; gap:2vw">
+            <div id="deck" class="slot card back" onclick="draw()"></div>
             <div id="waste" class="slot"></div>
         </div>
-        <div style="display: flex; gap: var(--gap);">
-            <div id="f-0" class="slot foundation" data-suit="♠"></div>
-            <div id="f-1" class="slot foundation" data-suit="♥"></div>
-            <div id="f-2" class="slot foundation" data-suit="♣"></div>
-            <div id="f-3" class="slot foundation" data-suit="♦"></div>
+        <div id="foundations" style="display:flex; gap:2vw">
+            <div class="slot foundation" data-suit="any"></div>
+            <div class="slot foundation" data-suit="any"></div>
+            <div class="slot foundation" data-suit="any"></div>
+            <div class="slot foundation" data-suit="any"></div>
         </div>
     </div>
-
-    <!-- Bottom Row: Tableau -->
-    <div class="row" id="tableau">
-        <div class="tableau-column" id="t-0"></div>
-        <div class="tableau-column" id="t-1"></div>
-        <div class="tableau-column" id="t-2"></div>
-        <div class="tableau-column" id="t-3"></div>
-        <div class="tableau-column" id="t-4"></div>
-        <div class="tableau-column" id="t-5"></div>
-        <div class="tableau-column" id="t-6"></div>
+    <div class="row" id="tableau" style="height: 70vh;">
+        <div class="slot tableau" id="t0"></div>
+        <div class="slot tableau" id="t1"></div>
+        <div class="slot tableau" id="t2"></div>
+        <div class="slot tableau" id="t3"></div>
+        <div class="slot tableau" id="t4"></div>
+        <div class="slot tableau" id="t5"></div>
+        <div class="slot tableau" id="t6"></div>
     </div>
-</div>
-
-<div id="controls">
-    <button onclick="initGame()">New Game</button>
 </div>
 
 <script>
-    const suits = ['♠', '♥', '♣', '♦'];
-    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-    let deck = [];
-    let waste = [];
+const SUITS = ['♠', '♥', '♣', '♦'];
+const VALS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+let deck = [], draggedEl = null, startSlot = null;
 
-    function initGame() {
-        deck = [];
-        waste = [];
-        document.querySelectorAll('.slot, .tableau-column').forEach(el => el.innerHTML = '');
-        
-        // Create Deck
-        for (let s of suits) {
-            for (let v of values) {
-                deck.push({ suit: s, value: v, color: (s === '♥' || s === '♦') ? 'red' : 'black', faceUp: false });
-            }
-        }
-        
-        // Shuffle
-        deck.sort(() => Math.random() - 0.5);
-
-        // Deal Tableau
-        for (let i = 0; i < 7; i++) {
-            for (let j = i; j < 7; j++) {
-                let card = deck.pop();
-                if (i === j) card.faceUp = true;
-                renderCard(card, `t-${j}`);
-            }
+function init() {
+    deck = [];
+    SUITS.forEach(s => VALS.forEach(v => deck.push({s, v, r: (s==='♥'||s==='♦'), val: VALS.indexOf(v)+1})));
+    deck.sort(() => Math.random() - 0.5);
+    
+    document.querySelectorAll('.slot').forEach(s => s.innerHTML = '');
+    
+    for(let i=0; i<7; i++) {
+        for(let j=i; j<7; j++) {
+            let card = deck.pop();
+            addCard(`t${j}`, card, i === j);
         }
     }
+}
 
-    function renderCard(card, containerId) {
-        const container = document.getElementById(containerId);
-        const cardEl = document.createElement('div');
-        cardEl.className = `card ${card.faceUp ? card.color : 'back'}`;
-        if (card.faceUp) {
-            cardEl.innerHTML = `<span>${card.value}</span><span>${card.suit}</span>`;
-            cardEl.onclick = (e) => {
-                e.stopPropagation();
-                tryMoveToFoundation(card, cardEl);
-            };
-        }
-        
-        // Simple stacking logic
-        const children = container.children.length;
-        if (containerId.startsWith('t-')) {
-            cardEl.style.top = (children * 20) + 'px';
-        }
-        
-        container.appendChild(cardEl);
+function addCard(slotId, card, faceUp) {
+    const slot = typeof slotId === 'string' ? document.getElementById(slotId) : slotId;
+    const div = document.createElement('div');
+    div.className = `card ${faceUp ? (card.r ? 'red' : 'black') : 'back'}`;
+    div.dataset.val = card.val; div.dataset.suit = card.s; div.dataset.red = card.r;
+    div.dataset.up = faceUp;
+    
+    if(faceUp) {
+        div.innerHTML = `<div>${card.v}</div><div>${card.s}</div>`;
+        div.draggable = true;
+        div.onmousedown = div.ontouchstart = dragStart;
     }
 
-    function drawCard() {
-        if (deck.length === 0) {
-            // Reset deck from waste (simplified)
-            return;
+    const offset = slot.classList.contains('tableau') ? slot.children.length * 20 : 0;
+    div.style.top = offset + 'px';
+    slot.appendChild(div);
+}
+
+function draw() {
+    const waste = document.getElementById('waste');
+    if (deck.length === 0) {
+        // Simple recycle: move all waste back to deck
+        const cards = Array.from(waste.children).reverse();
+        cards.forEach(c => {
+            deck.push({v: c.innerText.split('\n')[0], s: c.dataset.suit, r: c.dataset.red==='true', val: parseInt(c.dataset.val)});
+            c.remove();
+        });
+        return;
+    }
+    const card = deck.pop();
+    waste.innerHTML = ''; // Only show top card of waste
+    addCard('waste', card, true);
+}
+
+function dragStart(e) {
+    if (this.dataset.up === 'false') return;
+    draggedEl = this;
+    startSlot = this.parentElement;
+    this.classList.add('dragging');
+}
+
+document.onmouseup = document.ontouchend = (e) => {
+    if (!draggedEl) return;
+    draggedEl.classList.remove('dragging');
+    
+    const touch = e.changedTouches ? e.changedTouches[0] : e;
+    const target = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.slot');
+    
+    if (target && isValidMove(draggedEl, target)) {
+        moveCard(draggedEl, target);
+    }
+    
+    draggedEl = null;
+};
+
+function isValidMove(card, slot) {
+    const top = slot.lastElementChild;
+    const cardVal = parseInt(card.dataset.val);
+    const cardRed = card.dataset.red === 'true';
+
+    // To Tableau
+    if (slot.classList.contains('tableau')) {
+        if (!top) return cardVal === 13; // Only Kings on empty
+        const topVal = parseInt(top.dataset.val);
+        const topRed = top.dataset.red === 'true';
+        return (cardVal === topVal - 1) && (cardRed !== topRed);
+    }
+    
+    // To Foundation
+    if (slot.classList.contains('foundation')) {
+        if (!top) return cardVal === 1; // Only Aces
+        return (card.dataset.suit === top.dataset.suit) && (cardVal === parseInt(top.dataset.val) + 1);
+    }
+    return false;
+}
+
+function moveCard(card, slot) {
+    const oldSlot = card.parentElement;
+    slot.appendChild(card);
+    card.style.top = slot.classList.contains('tableau') ? (slot.children.length - 1) * 20 + 'px' : '0';
+    
+    // Flip top card of old slot
+    if (oldSlot.lastElementChild && oldSlot.classList.contains('tableau')) {
+        const top = oldSlot.lastElementChild;
+        if (top.dataset.up === 'false') {
+            const c = {v: VALS[top.dataset.val-1], s: top.dataset.suit, r: top.dataset.red==='true', val: top.dataset.val};
+            top.remove();
+            addCard(oldSlot, c, true);
         }
-        let card = deck.pop();
-        card.faceUp = true;
-        const wasteEl = document.getElementById('waste');
-        wasteEl.innerHTML = '';
-        renderCard(card, 'waste');
     }
+}
 
-    function tryMoveToFoundation(card, el) {
-        // Simple Auto-move logic for foundations
-        // In a full game, you'd implement Drag and Drop
-        const fIndex = suits.indexOf(card.suit);
-        const foundation = document.getElementById(`f-${fIndex}`);
-        foundation.appendChild(el);
-        el.style.top = '0';
-    }
-
-    initGame();
+init();
 </script>
 </body>
 </html>
