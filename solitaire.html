@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Klondike Solitaire - Stack Drag</title>
+    <title>Klondike Solitaire - Auto Move</title>
     <style>
         :root { --card-aspect: 1.4; --bg: #1a5e20; }
         * { box-sizing: border-box; touch-action: none; user-select: none; }
         body { background: var(--bg); margin: 0; padding: 10px; font-family: sans-serif; overflow: hidden; height: 100vh; }
         #game-board { display: grid; grid-template-columns: repeat(7, 1fr); grid-gap: 8px; max-width: 600px; margin: 0 auto; }
         .slot { width: 100%; aspect-ratio: 1 / var(--card-aspect); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; position: relative; background: rgba(0,0,0,0.1); }
-        .card { width: 100%; height: 100%; background: white; border-radius: 4px; position: absolute; box-shadow: 0 2px 4px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; top: 0; left: 0; transition: transform 0.1s ease; }
+        .card { width: 100%; height: 100%; background: white; border-radius: 4px; position: absolute; box-shadow: 0 2px 4px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; top: 0; left: 0; }
         .card.back { background: #0d47a1; border: 1px solid white; color: transparent !important; }
         .card.red { color: #d32f2f; }
         .card.black { color: #212121; }
@@ -45,7 +45,8 @@
 const suits = ['♠', '♥', '♣', '♦'];
 const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 let deck = [];
-let dragStack = []; // Store the array of cards being moved
+let dragStack = [];
+let lastClickTime = 0;
 
 function init() {
     deck = [];
@@ -73,16 +74,22 @@ function createCard(targetId, data, isFaceUp) {
         card.innerHTML = `<div>${data.v}</div><div>${data.s}</div>`;
         card.onpointerdown = (e) => { 
             e.stopPropagation();
-            const parent = card.parentElement;
+            const now = Date.now();
             
-            // Foundation and Waste only allow dragging the TOP card
+            // Double Click Detection (within 300ms)
+            if (now - lastClickTime < 300 && card === card.parentElement.lastElementChild) {
+                tryAutoMove(card);
+                lastClickTime = 0;
+                return;
+            }
+            lastClickTime = now;
+
+            const parent = card.parentElement;
             if ((parent.classList.contains('foundation') || parent.id === 'waste') && card !== parent.lastElementChild) return;
             
-            // Identify stack: this card and all cards following it in the pile
             const children = Array.from(parent.children);
             const startIndex = children.indexOf(card);
             dragStack = children.slice(startIndex);
-            
             dragStack.forEach(c => c.classList.add('dragging'));
         };
     }
@@ -93,6 +100,34 @@ function createCard(targetId, data, isFaceUp) {
         card.style.top = '0px';
     }
     target.appendChild(card);
+}
+
+function tryAutoMove(card) {
+    const foundations = document.querySelectorAll('.foundation');
+    for (let f of foundations) {
+        if (checkMove(card, f)) {
+            const oldParent = card.parentElement;
+            executeMove(card, f);
+            
+            // Reveal card in old tableau slot if necessary
+            if (oldParent.classList.contains('tableau') && oldParent.lastElementChild) {
+                const next = oldParent.lastElementChild;
+                if (next.dataset.up === 'false') {
+                    const d = { v: values[next.dataset.rank-1], s: next.dataset.suit, color: next.dataset.color, rank: parseInt(next.dataset.rank) };
+                    next.remove();
+                    createCard(oldParent, d, true);
+                }
+            }
+            break; 
+        }
+    }
+}
+
+function executeMove(card, targetSlot) {
+    targetSlot.appendChild(card);
+    card.style.top = targetSlot.classList.contains('tableau') ? ((targetSlot.children.length - 1) * 22) + 'px' : '0';
+    card.classList.remove('dragging');
+    card.style.zIndex = "";
 }
 
 document.getElementById('deck-button').onpointerdown = function(e) {
@@ -117,23 +152,14 @@ document.onpointerup = (e) => {
     const firstCard = dragStack[0];
     const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.slot');
     
-    // Validate move using the BOTTOM card of the stack we are holding
     if (target && checkMove(firstCard, target)) {
-        // Foundation only accepts one card at a time
         if (target.classList.contains('foundation') && dragStack.length > 1) {
             cancelDrag();
             return;
         }
-
         const oldParent = firstCard.parentElement;
-        
-        // Move every card in the stack
-        dragStack.forEach(card => {
-            target.appendChild(card);
-            card.style.top = target.classList.contains('tableau') ? ((target.children.length - 1) * 22) + 'px' : '0';
-        });
+        dragStack.forEach(card => executeMove(card, target));
 
-        // Flip card in the old pile
         if (oldParent.classList.contains('tableau') && oldParent.lastElementChild) {
             const next = oldParent.lastElementChild;
             if (next.dataset.up === 'false') {
