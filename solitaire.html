@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Solitaire</title>
+    <style>
+        :root {
+            --bg-color: #2e7d32;
+            --card-width: 12vw;
+            --card-height: 18vw;
+            --card-radius: 4px;
+            --gap: 2vw;
+        }
+
+        body {
+            margin: 0;
+            padding: 10px;
+            background-color: var(--bg-color);
+            font-family: sans-serif;
+            overflow: hidden;
+            touch-action: none; /* Prevents scrolling while dragging */
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-rows: var(--card-height) 1fr;
+            gap: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            height: var(--card-height);
+        }
+
+        .slot {
+            width: var(--card-width);
+            height: var(--card-height);
+            border: 2px solid rgba(0,0,0,0.2);
+            border-radius: var(--card-radius);
+            position: relative;
+        }
+
+        .card {
+            width: var(--card-width);
+            height: var(--card-height);
+            background: white;
+            border-radius: var(--card-radius);
+            position: absolute;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .card.back {
+            background: #1565c0;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,.1) 5px, rgba(255,255,255,.1) 10px);
+        }
+
+        .card.red { color: #d32f2f; }
+        .card.black { color: #212121; }
+
+        .tableau-column {
+            width: var(--card-width);
+            position: relative;
+        }
+
+        .card-stack {
+            margin-top: 25px; /* Offset for stacked cards */
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 0; right: 0;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 20px;
+            border: none;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-board">
+    <!-- Top Row: Deck, Waste, and Foundations -->
+    <div class="row">
+        <div style="display: flex; gap: var(--gap);">
+            <div id="deck" class="slot card back" onclick="drawCard()"></div>
+            <div id="waste" class="slot"></div>
+        </div>
+        <div style="display: flex; gap: var(--gap);">
+            <div id="f-0" class="slot foundation" data-suit="♠"></div>
+            <div id="f-1" class="slot foundation" data-suit="♥"></div>
+            <div id="f-2" class="slot foundation" data-suit="♣"></div>
+            <div id="f-3" class="slot foundation" data-suit="♦"></div>
+        </div>
+    </div>
+
+    <!-- Bottom Row: Tableau -->
+    <div class="row" id="tableau">
+        <div class="tableau-column" id="t-0"></div>
+        <div class="tableau-column" id="t-1"></div>
+        <div class="tableau-column" id="t-2"></div>
+        <div class="tableau-column" id="t-3"></div>
+        <div class="tableau-column" id="t-4"></div>
+        <div class="tableau-column" id="t-5"></div>
+        <div class="tableau-column" id="t-6"></div>
+    </div>
+</div>
+
+<div id="controls">
+    <button onclick="initGame()">New Game</button>
+</div>
+
+<script>
+    const suits = ['♠', '♥', '♣', '♦'];
+    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    let deck = [];
+    let waste = [];
+
+    function initGame() {
+        deck = [];
+        waste = [];
+        document.querySelectorAll('.slot, .tableau-column').forEach(el => el.innerHTML = '');
+        
+        // Create Deck
+        for (let s of suits) {
+            for (let v of values) {
+                deck.push({ suit: s, value: v, color: (s === '♥' || s === '♦') ? 'red' : 'black', faceUp: false });
+            }
+        }
+        
+        // Shuffle
+        deck.sort(() => Math.random() - 0.5);
+
+        // Deal Tableau
+        for (let i = 0; i < 7; i++) {
+            for (let j = i; j < 7; j++) {
+                let card = deck.pop();
+                if (i === j) card.faceUp = true;
+                renderCard(card, `t-${j}`);
+            }
+        }
+    }
+
+    function renderCard(card, containerId) {
+        const container = document.getElementById(containerId);
+        const cardEl = document.createElement('div');
+        cardEl.className = `card ${card.faceUp ? card.color : 'back'}`;
+        if (card.faceUp) {
+            cardEl.innerHTML = `<span>${card.value}</span><span>${card.suit}</span>`;
+            cardEl.onclick = (e) => {
+                e.stopPropagation();
+                tryMoveToFoundation(card, cardEl);
+            };
+        }
+        
+        // Simple stacking logic
+        const children = container.children.length;
+        if (containerId.startsWith('t-')) {
+            cardEl.style.top = (children * 20) + 'px';
+        }
+        
+        container.appendChild(cardEl);
+    }
+
+    function drawCard() {
+        if (deck.length === 0) {
+            // Reset deck from waste (simplified)
+            return;
+        }
+        let card = deck.pop();
+        card.faceUp = true;
+        const wasteEl = document.getElementById('waste');
+        wasteEl.innerHTML = '';
+        renderCard(card, 'waste');
+    }
+
+    function tryMoveToFoundation(card, el) {
+        // Simple Auto-move logic for foundations
+        // In a full game, you'd implement Drag and Drop
+        const fIndex = suits.indexOf(card.suit);
+        const foundation = document.getElementById(`f-${fIndex}`);
+        foundation.appendChild(el);
+        el.style.top = '0';
+    }
+
+    initGame();
+</script>
+</body>
+</html>
