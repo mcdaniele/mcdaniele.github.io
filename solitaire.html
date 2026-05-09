@@ -3,52 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Solitaire Fixed</title>
+    <title>Klondike Mobile</title>
     <style>
-        :root { --bg: #1a5e20; --card-w: 13vw; --card-h: 19vw; }
+        :root {
+            --bg: #1a5e20;
+            --card-w: 12vw; /* Smaller base width */
+            --card-h: 18vw;
+            --radius: 4px;
+        }
         * { box-sizing: border-box; touch-action: none; user-select: none; }
-        body { margin: 0; background: var(--bg); font-family: sans-serif; overflow: hidden; }
-        
-        #table { padding: 10px; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-        .row { display: flex; justify-content: space-between; height: var(--card-h); }
+        body { 
+            margin: 0; padding: 5px; background: var(--bg); 
+            font-family: sans-serif; overflow: hidden; height: 100vh;
+            display: flex; flex-direction: column;
+        }
+
+        #controls { height: 40px; display: flex; justify-content: center; align-items: center; }
+        button { padding: 5px 15px; border-radius: 15px; border: none; background: white; font-weight: bold; }
+
+        #table { 
+            flex-grow: 1; display: flex; flex-direction: column; gap: 15px; 
+            max-width: 600px; margin: 0 auto; width: 100%;
+        }
+
+        .row { display: flex; justify-content: space-between; width: 100%; height: var(--card-h); }
         
         .slot { 
             width: var(--card-w); height: var(--card-h); 
-            border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; 
-            position: relative; 
+            border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius); 
+            position: relative; background: rgba(0,0,0,0.1);
         }
 
         .card {
-            width: 100%; height: 100%; background: white; border-radius: 4px;
+            width: 100%; height: 100%; background: white; border-radius: var(--radius);
             position: absolute; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 1.1rem; font-weight: bold;
+            font-size: 1rem; font-weight: bold; left: 0; top: 0;
         }
 
         .card.back { background: #0d47a1; border: 1px solid #fff; }
         .card.red { color: #d32f2f; }
         .card.black { color: #212121; }
         
-        #deck { cursor: pointer; z-index: 100; }
-        #deck.empty::after { content: "↺"; color: white; display: block; margin-top: 25%; text-align: center; font-size: 2rem; }
+        #deck { cursor: pointer; z-index: 10; }
+        #deck.empty::after { content: "↺"; color: white; font-size: 1.5rem; }
+
+        /* Ensure tableau stacks visible */
+        .tableau { height: auto; min-height: var(--card-h); }
     </style>
 </head>
 <body>
 
+<div id="controls"><button onclick="init()">Restart Game</button></div>
+
 <div id="table">
     <div class="row">
-        <div style="display:flex; gap:2vw">
+        <div style="display:flex; gap:1.5vw">
             <div id="deck" class="slot card back"></div>
             <div id="waste" class="slot"></div>
         </div>
-        <div style="display:flex; gap:2vw">
-            <div class="slot foundation" data-suit="any"></div>
-            <div class="slot foundation" data-suit="any"></div>
-            <div class="slot foundation" data-suit="any"></div>
-            <div class="slot foundation" data-suit="any"></div>
+        <div style="display:flex; gap:1.5vw">
+            <div class="slot foundation" id="f0"></div>
+            <div class="slot foundation" id="f1"></div>
+            <div class="slot foundation" id="f2"></div>
+            <div class="slot foundation" id="f3"></div>
         </div>
     </div>
-    <div class="row" id="tableau-row" style="height: 60vh;">
+    <div class="row" id="tableau-row">
         <div class="slot tableau" id="t0"></div>
         <div class="slot tableau" id="t1"></div>
         <div class="slot tableau" id="t2"></div>
@@ -71,8 +92,10 @@ function init() {
     deckArr.sort(() => Math.random() - 0.5);
 
     document.querySelectorAll('.slot').forEach(s => s.innerHTML = '');
+    const deckEl = document.getElementById('deck');
+    deckEl.className = 'slot card back';
     
-    // Deal Tableau
+    // Deal
     for(let i=0; i<7; i++) {
         for(let j=i; j<7; j++) {
             createCard(`t${j}`, deckArr.pop(), i === j);
@@ -95,12 +118,13 @@ function createCard(slotId, data, faceUp) {
     }
 
     if(slot.classList.contains('tableau')) {
-        card.style.top = (slot.children.length * 20) + 'px';
+        card.style.top = (slot.children.length * 3.5) + 'vw'; // Stack offset in relative units
     }
     slot.appendChild(card);
 }
 
-function drawCard() {
+document.getElementById('deck').onpointerdown = (e) => {
+    e.preventDefault();
     const waste = document.getElementById('waste');
     const deckEl = document.getElementById('deck');
 
@@ -121,18 +145,12 @@ function drawCard() {
         waste.innerHTML = '';
         deckEl.className = 'slot card back';
     }
-}
-
-// Attach listener to deck
-document.getElementById('deck').addEventListener('pointerdown', (e) => {
-    e.stopPropagation();
-    drawCard();
-});
+};
 
 function dragStart(e) {
-    if (this.parentElement.id === 'deck') return;
+    e.stopPropagation();
     draggedEl = this;
-    this.style.zIndex = 1000;
+    this.style.zIndex = "1000";
 }
 
 document.onpointerup = (e) => {
@@ -142,9 +160,8 @@ document.onpointerup = (e) => {
     if (target && isValidMove(draggedEl, target)) {
         const oldSlot = draggedEl.parentElement;
         target.appendChild(draggedEl);
-        draggedEl.style.top = target.classList.contains('tableau') ? (target.children.length - 1) * 20 + 'px' : '0';
+        draggedEl.style.top = target.classList.contains('tableau') ? ((target.children.length - 1) * 3.5) + 'vw' : '0';
         
-        // Flip under
         if (oldSlot.classList.contains('tableau') && oldSlot.lastElementChild) {
             const top = oldSlot.lastElementChild;
             if (top.dataset.up === 'false') {
