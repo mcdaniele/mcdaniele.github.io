@@ -3,103 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Klondike Solitaire - Auto Move</title>
+    <title>Klondike Solitaire - Final Fix</title>
     <style>
-        :root { --card-aspect: 1.4; --bg: #1a5e20; }
+        :root { --card-aspect: 1.4; --bg: #1a5e20; --transit: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1); }
         * { box-sizing: border-box; touch-action: none; user-select: none; }
-        body { background: var(--bg); margin: 0; padding: 10px; font-family: sans-serif; overflow: hidden; height: 100vh; }
-        #game-board { display: grid; grid-template-columns: repeat(7, 1fr); grid-gap: 8px; max-width: 600px; margin: 0 auto; }
-        .slot { width: 100%; aspect-ratio: 1 / var(--card-aspect); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; position: relative; background: rgba(0,0,0,0.1); }
-        .card { width: 100%; height: 100%; background: white; border-radius: 4px; position: absolute; box-shadow: 0 2px 4px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; top: 0; left: 0; }
-        .card.back { background: #0d47a1; border: 1px solid white; color: transparent !important; }
-        .card.red { color: #d32f2f; }
-        .card.black { color: #212121; }
-        .header-space { grid-column: span 1; } 
-        #deck-button { width: 100%; height: 100%; cursor: pointer; z-index: 10; }
-        #restart { grid-column: span 7; margin-bottom: 10px; padding: 10px; border-radius: 5px; border: none; background: #eee; font-weight: bold; cursor: pointer; }
-        .dragging { opacity: 0.8; z-index: 2000 !important; transform: scale(1.05); }
-        @media (max-width: 400px) { .card { font-size: 12px; } }
+        body { background: var(--bg); margin: 0; padding: 10px; font-family: system-ui, sans-serif; overflow: hidden; height: 100vh; }
+        
+        #game-board { display: grid; grid-template-columns: repeat(7, 1fr); grid-gap: 8px; max-width: 600px; margin: 0 auto; position: relative; }
+        .slot { width: 100%; aspect-ratio: 1 / var(--card-aspect); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; position: relative; background: rgba(0,0,0,0.15); }
+
+        .card { 
+            width: 100%; height: 100%; background: white; border-radius: 6px; 
+            position: absolute; box-shadow: 0 4px 8px rgba(0,0,0,0.3); 
+            top: 0; left: 0; overflow: hidden;
+            transition: var(--transit);
+            will-change: transform;
+        }
+
+        .card-inner { position: relative; width: 100%; height: 100%; padding: 4px; pointer-events: none; }
+        .card-value { font-size: clamp(10px, 3.5vw, 16px); font-weight: 900; line-height: 1; }
+        .card-suit { font-size: clamp(8px, 3vw, 14px); }
+        .top-left { position: absolute; top: 4px; left: 4px; text-align: center; }
+        .bottom-right { position: absolute; bottom: 4px; right: 4px; text-align: center; transform: rotate(180deg); }
+
+        .card.back { 
+            background: #0d47a1; border: 2px solid white; 
+            background-image: radial-gradient(circle, #1565c0 20%, transparent 20%);
+            background-size: 10px 10px;
+        }
+        
+        .card.red { color: #e74c3c; }
+        .card.black { color: #2c3e50; }
+
+        .controls { grid-column: span 7; display: flex; gap: 10px; margin-bottom: 12px; }
+        .btn { flex: 1; padding: 12px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; color: #2c3e50; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
+        .btn:active { transform: translateY(2px); box-shadow: none; }
+        #restart { background: #f1c40f; }
+        #undo { background: #ecf0f1; }
+
+        .dragging { transition: none !important; z-index: 2000 !important; pointer-events: none; }
+        .header-space { grid-column: span 1; }
+        #deck-button { width: 100%; height: 100%; cursor: pointer; z-index: 10; position: absolute; top: 0; left: 0; }
     </style>
 </head>
 <body>
 
 <div id="game-board">
-    <button id="restart" onclick="location.reload()">New Game</button>
-    <div class="slot"><div id="deck-button" class="card back"></div></div>
-    <div id="waste" class="slot"></div>
+    <div class="controls">
+        <button id="undo" class="btn" onclick="undoMove()">UNDO</button>
+        <button id="restart" class="btn" onclick="location.reload()">NEW GAME</button>
+    </div>
+    
+    <div class="slot" id="deck-slot"><div id="deck-button" class="card back" onpointerdown="drawCard(event)"></div></div>
+    <div id="waste" class="slot game-slot"></div>
     <div class="header-space"></div>
-    <div class="slot foundation" id="f0"></div>
-    <div class="slot foundation" id="f1"></div>
-    <div class="slot foundation" id="f2"></div>
-    <div class="slot foundation" id="f3"></div>
-    <div class="slot tableau" id="t0"></div>
-    <div class="slot tableau" id="t1"></div>
-    <div class="slot tableau" id="t2"></div>
-    <div class="slot tableau" id="t3"></div>
-    <div class="slot tableau" id="t4"></div>
-    <div class="slot tableau" id="t5"></div>
-    <div class="slot tableau" id="t6"></div>
+    <div id="f0" class="slot game-slot foundation"></div>
+    <div id="f1" class="slot game-slot foundation"></div>
+    <div id="f2" class="slot game-slot foundation"></div>
+    <div id="f3" class="slot game-slot foundation"></div>
+
+    <div id="t0" class="slot game-slot tableau"></div>
+    <div id="t1" class="slot game-slot tableau"></div>
+    <div id="t2" class="slot game-slot tableau"></div>
+    <div id="t3" class="slot game-slot tableau"></div>
+    <div id="t4" class="slot game-slot tableau"></div>
+    <div id="t5" class="slot game-slot tableau"></div>
+    <div id="t6" class="slot game-slot tableau"></div>
 </div>
 
 <script>
-const suits = ['♠', '♥', '♣', '♦'];
-const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-let deck = [];
-let dragStack = [];
-let lastClickTime = 0;
+const suits = ['♠', '♥', '♣', '♦'], values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+let deck = [], dragStack = [], lastClickTime = 0, startX = 0, startY = 0, history = [];
 
-function init() {
-    deck = [];
-    suits.forEach(s => values.forEach((v, i) => {
-        deck.push({ s, v, color: (s === '♥' || s === '♦') ? 'red' : 'black', rank: i + 1 });
-    }));
-    deck.sort(() => Math.random() - 0.5);
-    for (let i = 0; i < 7; i++) {
-        for (let j = i; j < 7; j++) {
-            createCard(`t${j}`, deck.pop(), i === j);
-        }
+function saveState() {
+    const state = {
+        deck: JSON.parse(JSON.stringify(deck)),
+        slots: {}
+    };
+    document.querySelectorAll('.game-slot').forEach(slot => {
+        state.slots[slot.id] = Array.from(slot.children).map(c => ({
+            rank: parseInt(c.dataset.rank),
+            suit: c.dataset.suit,
+            val: c.dataset.val,
+            color: c.dataset.color,
+            up: c.dataset.up === "true"
+        }));
+    });
+    history.push(state);
+    if (history.length > 50) history.shift();
+}
+
+function undoMove() {
+    if (history.length === 0) return;
+    const state = history.pop();
+    deck = state.deck;
+    
+    document.querySelectorAll('.game-slot').forEach(slot => {
+        slot.innerHTML = '';
+        const savedCards = state.slots[slot.id] || [];
+        savedCards.forEach(data => {
+            const card = buildCardElement(data);
+            if (slot.classList.contains('tableau')) card.style.top = ((slot.children.length) * 25) + 'px';
+            slot.appendChild(card);
+        });
+    });
+    updateDeckVisual();
+}
+
+function buildCardElement(data) {
+    const card = document.createElement('div');
+    const isFaceUp = data.up === true;
+    card.className = `card ${isFaceUp ? data.color : 'back'}`;
+    Object.assign(card.dataset, { rank: data.rank, suit: data.suit, val: data.val, color: data.color, up: isFaceUp });
+    
+    if (isFaceUp) {
+        card.innerHTML = `<div class="card-inner"><div class="top-left"><div class="card-value">${data.val}</div><div class="card-suit">${data.suit}</div></div><div class="bottom-right"><div class="card-value">${data.val}</div><div class="card-suit">${data.suit}</div></div></div>`;
+        card.onpointerdown = startDrag;
     }
+    return card;
 }
 
 function createCard(targetId, data, isFaceUp) {
     const target = typeof targetId === 'string' ? document.getElementById(targetId) : targetId;
-    const card = document.createElement('div');
-    card.className = `card ${isFaceUp ? data.color : 'back'}`;
-    card.dataset.rank = data.rank;
-    card.dataset.suit = data.s;
-    card.dataset.color = data.color;
-    card.dataset.up = isFaceUp;
-
-    if (isFaceUp) {
-        card.innerHTML = `<div>${data.v}</div><div>${data.s}</div>`;
-        card.onpointerdown = (e) => { 
-            e.stopPropagation();
-            const now = Date.now();
-            
-            // Double Click Detection (within 300ms)
-            if (now - lastClickTime < 300 && card === card.parentElement.lastElementChild) {
-                tryAutoMove(card);
-                lastClickTime = 0;
-                return;
-            }
-            lastClickTime = now;
-
-            const parent = card.parentElement;
-            if ((parent.classList.contains('foundation') || parent.id === 'waste') && card !== parent.lastElementChild) return;
-            
-            const children = Array.from(parent.children);
-            const startIndex = children.indexOf(card);
-            dragStack = children.slice(startIndex);
-            dragStack.forEach(c => c.classList.add('dragging'));
-        };
-    }
-
-    if (target.classList.contains('tableau')) {
-        card.style.top = (target.children.length * 22) + 'px';
-    } else {
-        card.style.top = '0px';
-    }
+    const cardData = { rank: data.rank, suit: data.s, val: data.v, color: data.color, up: isFaceUp };
+    const card = buildCardElement(cardData);
+    if (target.classList.contains('tableau')) card.style.top = (target.children.length * 25) + 'px';
     target.appendChild(card);
+}
+
+function init() {
+    deck = [];
+    suits.forEach(s => values.forEach((v, i) => deck.push({ s, v, color: (s === '♥' || s === '♦') ? 'red' : 'black', rank: i + 1 })));
+    deck.sort(() => Math.random() - 0.5);
+    for (let i = 0; i < 7; i++) for (let j = i; j < 7; j++) createCard(`t${j}`, deck.pop(), i === j);
+}
+
+function startDrag(e) {
+    e.stopPropagation();
+    const card = e.currentTarget;
+    const now = Date.now();
+    if (now - lastClickTime < 300 && card === card.parentElement.lastElementChild) { 
+        saveState();
+        if (!tryAutoMove(card)) history.pop(); 
+        return; 
+    }
+    lastClickTime = now;
+
+    const parent = card.parentElement;
+    if ((parent.classList.contains('foundation') || parent.id === 'waste') && card !== parent.lastElementChild) return;
+
+    startX = e.clientX; startY = e.clientY;
+    const children = Array.from(parent.children);
+    dragStack = children.slice(children.indexOf(card));
+    dragStack.forEach(c => c.classList.add('dragging'));
+    window.addEventListener('pointermove', onDrag);
+    window.addEventListener('pointerup', endDrag);
+}
+
+function onDrag(e) {
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    dragStack.forEach(c => c.style.transform = `translate(${dx}px, ${dy}px)`);
+}
+
+function endDrag(e) {
+    window.removeEventListener('pointermove', onDrag);
+    window.removeEventListener('pointerup', endDrag);
+    const firstCard = dragStack[0], oldParent = firstCard.parentElement;
+    dragStack.forEach(c => c.style.display = 'none');
+    const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.game-slot');
+    dragStack.forEach(c => c.style.display = '');
+
+    if (target && checkMove(firstCard, target) && !(target.classList.contains('foundation') && dragStack.length > 1)) {
+        saveState();
+        dragStack.forEach(card => { card.style.transform = ''; executeMove(card, target); });
+        revealHidden(oldParent);
+    } else {
+        dragStack.forEach(c => { c.classList.remove('dragging'); c.style.transform = ''; });
+    }
+    dragStack = [];
 }
 
 function tryAutoMove(card) {
@@ -108,89 +189,51 @@ function tryAutoMove(card) {
         if (checkMove(card, f)) {
             const oldParent = card.parentElement;
             executeMove(card, f);
-            
-            // Reveal card in old tableau slot if necessary
-            if (oldParent.classList.contains('tableau') && oldParent.lastElementChild) {
-                const next = oldParent.lastElementChild;
-                if (next.dataset.up === 'false') {
-                    const d = { v: values[next.dataset.rank-1], s: next.dataset.suit, color: next.dataset.color, rank: parseInt(next.dataset.rank) };
-                    next.remove();
-                    createCard(oldParent, d, true);
-                }
-            }
-            break; 
+            revealHidden(oldParent);
+            return true;
         }
+    }
+    return false;
+}
+
+function revealHidden(parent) {
+    const next = parent?.lastElementChild;
+    if (parent?.classList.contains('tableau') && next && next.dataset.up === 'false') {
+        const d = { v: next.dataset.val, s: next.dataset.suit, color: next.dataset.color, rank: parseInt(next.dataset.rank) };
+        next.remove();
+        createCard(parent, d, true);
     }
 }
 
 function executeMove(card, targetSlot) {
     targetSlot.appendChild(card);
-    card.style.top = targetSlot.classList.contains('tableau') ? ((targetSlot.children.length - 1) * 22) + 'px' : '0';
+    card.style.top = targetSlot.classList.contains('tableau') ? ((targetSlot.children.length - 1) * 25) + 'px' : '0';
     card.classList.remove('dragging');
-    card.style.zIndex = "";
 }
 
-document.getElementById('deck-button').onpointerdown = function(e) {
-    e.stopPropagation();
+function drawCard(e) {
+    if(e) e.stopPropagation();
+    saveState();
     const waste = document.getElementById('waste');
     if (deck.length > 0) {
         createCard(waste, deck.pop(), true);
     } else {
-        const wasteCards = Array.from(waste.children);
-        if (wasteCards.length === 0) return;
-        deck = wasteCards.map(c => ({
-            v: c.children[0].innerText, s: c.dataset.suit, color: c.dataset.color, rank: parseInt(c.dataset.rank)
-        })).reverse();
+        const cards = Array.from(waste.children);
+        if (!cards.length) { history.pop(); return; }
+        deck = cards.map(c => ({ v: c.dataset.val, s: c.dataset.suit, color: c.dataset.color, rank: parseInt(c.dataset.rank) })).reverse();
         waste.innerHTML = '';
-        this.style.background = '#0d47a1';
     }
-    this.style.opacity = (deck.length === 0) ? "0.2" : "1";
-};
+    updateDeckVisual();
+}
 
-document.onpointerup = (e) => {
-    if (dragStack.length === 0) return;
-    const firstCard = dragStack[0];
-    const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.slot');
-    
-    if (target && checkMove(firstCard, target)) {
-        if (target.classList.contains('foundation') && dragStack.length > 1) {
-            cancelDrag();
-            return;
-        }
-        const oldParent = firstCard.parentElement;
-        dragStack.forEach(card => executeMove(card, target));
-
-        if (oldParent.classList.contains('tableau') && oldParent.lastElementChild) {
-            const next = oldParent.lastElementChild;
-            if (next.dataset.up === 'false') {
-                const d = { v: values[next.dataset.rank-1], s: next.dataset.suit, color: next.dataset.color, rank: parseInt(next.dataset.rank) };
-                next.remove();
-                createCard(oldParent, d, true);
-            }
-        }
-    }
-    cancelDrag();
-};
-
-function cancelDrag() {
-    dragStack.forEach(c => {
-        c.classList.remove('dragging');
-        c.style.zIndex = "";
-    });
-    dragStack = [];
+function updateDeckVisual() {
+    document.getElementById('deck-button').style.opacity = deck.length ? "1" : "0.3";
 }
 
 function checkMove(card, slot) {
-    const top = slot.lastElementChild;
-    const cardRank = parseInt(card.dataset.rank);
-    if (slot.classList.contains('tableau')) {
-        if (!top) return cardRank === 13;
-        return (cardRank === parseInt(top.dataset.rank) - 1) && (card.dataset.color !== top.dataset.color);
-    }
-    if (slot.classList.contains('foundation')) {
-        if (!top) return cardRank === 1;
-        return (card.dataset.suit === top.dataset.suit) && (cardRank === parseInt(top.dataset.rank) + 1);
-    }
+    const top = slot.lastElementChild, rank = parseInt(card.dataset.rank);
+    if (slot.classList.contains('tableau')) return !top ? rank === 13 : (rank === parseInt(top.dataset.rank) - 1 && card.dataset.color !== top.dataset.color);
+    if (slot.classList.contains('foundation')) return !top ? rank === 1 : (card.dataset.suit === top.dataset.suit && rank === parseInt(top.dataset.rank) + 1);
     return false;
 }
 
