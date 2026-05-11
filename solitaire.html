@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Klondike Solitaire - Final Fix</title>
+    <title>Klondike - Shifted Waste</title>
     <style>
         :root { --card-aspect: 1.4; --bg: #1a5e20; --transit: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1); }
         * { box-sizing: border-box; touch-action: none; user-select: none; }
@@ -35,23 +35,45 @@
         .card.red { color: #e74c3c; }
         .card.black { color: #2c3e50; }
 
-        .controls { grid-column: span 7; display: flex; gap: 10px; margin-bottom: 12px; }
-        .btn { flex: 1; padding: 12px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; color: #2c3e50; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
+        .controls { grid-column: span 7; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .btn { padding: 12px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; color: #2c3e50; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
         .btn:active { transform: translateY(2px); box-shadow: none; }
-        #restart { background: #f1c40f; }
-        #undo { background: #ecf0f1; }
+        #undo { background: #ecf0f1; flex-grow: 1; }
+        
+        .toggle-container { display: flex; align-items: center; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; color: white; font-weight: bold; font-size: 12px; gap: 8px; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #f1c40f; }
+        input:checked + .slider:before { transform: translateX(20px); }
 
         .dragging { transition: none !important; z-index: 2000 !important; pointer-events: none; }
         .header-space { grid-column: span 1; }
         #deck-button { width: 100%; height: 100%; cursor: pointer; z-index: 10; position: absolute; top: 0; left: 0; }
+        
+        /* SHIFT WASTE PILE RIGHT BY 1/4 CARD WIDTH */
+        #waste .card { left: 25%; }
+
+        /* Spread effect for draw-3 */
+        #waste .card:nth-last-child(3) { transform: translateX(-20px); }
+        #waste .card:nth-last-child(2) { transform: translateX(-10px); }
     </style>
 </head>
 <body>
 
 <div id="game-board">
     <div class="controls">
+        <div class="toggle-container">
+            <span>DRAW 1</span>
+            <label class="switch">
+                <input type="checkbox" id="draw-toggle" onchange="startNewGameWithExistingCards()">
+                <span class="slider"></span>
+            </label>
+            <span>3</span>
+        </div>
         <button id="undo" class="btn" onclick="undoMove()">UNDO</button>
-        <button id="restart" class="btn" onclick="location.reload()">NEW GAME</button>
+        <button class="btn" style="background:#f1c40f" onclick="startNewGameWithExistingCards()">NEW GAME</button>
     </div>
     
     <div class="slot" id="deck-slot"><div id="deck-button" class="card back" onpointerdown="drawCard(event)"></div></div>
@@ -73,41 +95,32 @@
 
 <script>
 const suits = ['♠', '♥', '♣', '♦'], values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-let deck = [], dragStack = [], lastClickTime = 0, startX = 0, startY = 0, history = [];
+let masterDeck = [], currentDeck = [], dragStack = [], lastClickTime = 0, startX = 0, startY = 0, history = [];
 
-function saveState() {
-    const state = {
-        deck: JSON.parse(JSON.stringify(deck)),
-        slots: {}
-    };
-    document.querySelectorAll('.game-slot').forEach(slot => {
-        state.slots[slot.id] = Array.from(slot.children).map(c => ({
-            rank: parseInt(c.dataset.rank),
-            suit: c.dataset.suit,
-            val: c.dataset.val,
-            color: c.dataset.color,
-            up: c.dataset.up === "true"
-        }));
-    });
-    history.push(state);
-    if (history.length > 50) history.shift();
+function createMasterDeck() {
+    masterDeck = [];
+    suits.forEach(s => values.forEach((v, i) => {
+        masterDeck.push({ s, v, color: (s === '♥' || s === '♦') ? 'red' : 'black', rank: i + 1 });
+    }));
 }
 
-function undoMove() {
-    if (history.length === 0) return;
-    const state = history.pop();
-    deck = state.deck;
-    
-    document.querySelectorAll('.game-slot').forEach(slot => {
-        slot.innerHTML = '';
-        const savedCards = state.slots[slot.id] || [];
-        savedCards.forEach(data => {
-            const card = buildCardElement(data);
-            if (slot.classList.contains('tableau')) card.style.top = ((slot.children.length) * 25) + 'px';
-            slot.appendChild(card);
-        });
-    });
+function startNewGameWithExistingCards() {
+    history = [];
+    document.querySelectorAll('.game-slot').forEach(slot => slot.innerHTML = '');
+    currentDeck = [...masterDeck].sort(() => Math.random() - 0.5);
+    for (let i = 0; i < 7; i++) {
+        for (let j = i; j < 7; j++) {
+            dealCard(`t${j}`, currentDeck.pop(), i === j);
+        }
+    }
     updateDeckVisual();
+}
+
+function dealCard(targetId, cardData, isFaceUp) {
+    const target = document.getElementById(targetId);
+    const card = buildCardElement({ rank: cardData.rank, suit: cardData.s, val: cardData.v, color: cardData.color, up: isFaceUp });
+    if (target.classList.contains('tableau')) card.style.top = (target.children.length * 25) + 'px';
+    target.appendChild(card);
 }
 
 function buildCardElement(data) {
@@ -115,7 +128,6 @@ function buildCardElement(data) {
     const isFaceUp = data.up === true;
     card.className = `card ${isFaceUp ? data.color : 'back'}`;
     Object.assign(card.dataset, { rank: data.rank, suit: data.suit, val: data.val, color: data.color, up: isFaceUp });
-    
     if (isFaceUp) {
         card.innerHTML = `<div class="card-inner"><div class="top-left"><div class="card-value">${data.val}</div><div class="card-suit">${data.suit}</div></div><div class="bottom-right"><div class="card-value">${data.val}</div><div class="card-suit">${data.suit}</div></div></div>`;
         card.onpointerdown = startDrag;
@@ -123,38 +135,20 @@ function buildCardElement(data) {
     return card;
 }
 
-function createCard(targetId, data, isFaceUp) {
-    const target = typeof targetId === 'string' ? document.getElementById(targetId) : targetId;
-    const cardData = { rank: data.rank, suit: data.s, val: data.v, color: data.color, up: isFaceUp };
-    const card = buildCardElement(cardData);
-    if (target.classList.contains('tableau')) card.style.top = (target.children.length * 25) + 'px';
-    target.appendChild(card);
-}
-
-function init() {
-    deck = [];
-    suits.forEach(s => values.forEach((v, i) => deck.push({ s, v, color: (s === '♥' || s === '♦') ? 'red' : 'black', rank: i + 1 })));
-    deck.sort(() => Math.random() - 0.5);
-    for (let i = 0; i < 7; i++) for (let j = i; j < 7; j++) createCard(`t${j}`, deck.pop(), i === j);
-}
-
 function startDrag(e) {
     e.stopPropagation();
     const card = e.currentTarget;
     const now = Date.now();
     if (now - lastClickTime < 300 && card === card.parentElement.lastElementChild) { 
-        saveState();
+        saveState(); 
         if (!tryAutoMove(card)) history.pop(); 
         return; 
     }
     lastClickTime = now;
-
     const parent = card.parentElement;
     if ((parent.classList.contains('foundation') || parent.id === 'waste') && card !== parent.lastElementChild) return;
-
     startX = e.clientX; startY = e.clientY;
-    const children = Array.from(parent.children);
-    dragStack = children.slice(children.indexOf(card));
+    dragStack = Array.from(parent.children).slice(Array.from(parent.children).indexOf(card));
     dragStack.forEach(c => c.classList.add('dragging'));
     window.addEventListener('pointermove', onDrag);
     window.addEventListener('pointerup', endDrag);
@@ -185,9 +179,9 @@ function endDrag(e) {
 
 function tryAutoMove(card) {
     const foundations = document.querySelectorAll('.foundation');
+    const oldParent = card.parentElement;
     for (let f of foundations) {
         if (checkMove(card, f)) {
-            const oldParent = card.parentElement;
             executeMove(card, f);
             revealHidden(oldParent);
             return true;
@@ -197,11 +191,12 @@ function tryAutoMove(card) {
 }
 
 function revealHidden(parent) {
-    const next = parent?.lastElementChild;
-    if (parent?.classList.contains('tableau') && next && next.dataset.up === 'false') {
-        const d = { v: next.dataset.val, s: next.dataset.suit, color: next.dataset.color, rank: parseInt(next.dataset.rank) };
-        next.remove();
-        createCard(parent, d, true);
+    if (!parent || !parent.classList.contains('tableau')) return;
+    const lastCard = parent.lastElementChild;
+    if (lastCard && lastCard.dataset.up === 'false') {
+        const d = { v: lastCard.dataset.val, s: lastCard.dataset.suit, color: lastCard.dataset.color, rank: parseInt(lastCard.dataset.rank) };
+        lastCard.remove();
+        dealCard(parent.id, d, true);
     }
 }
 
@@ -209,25 +204,52 @@ function executeMove(card, targetSlot) {
     targetSlot.appendChild(card);
     card.style.top = targetSlot.classList.contains('tableau') ? ((targetSlot.children.length - 1) * 25) + 'px' : '0';
     card.classList.remove('dragging');
+    card.style.transform = '';
 }
 
 function drawCard(e) {
     if(e) e.stopPropagation();
     saveState();
     const waste = document.getElementById('waste');
-    if (deck.length > 0) {
-        createCard(waste, deck.pop(), true);
+    const drawCount = document.getElementById('draw-toggle').checked ? 3 : 1;
+    if (currentDeck.length > 0) {
+        for(let i=0; i < drawCount; i++) if(currentDeck.length > 0) dealCard('waste', currentDeck.pop(), true);
     } else {
         const cards = Array.from(waste.children);
         if (!cards.length) { history.pop(); return; }
-        deck = cards.map(c => ({ v: c.dataset.val, s: c.dataset.suit, color: c.dataset.color, rank: parseInt(c.dataset.rank) })).reverse();
+        currentDeck = cards.map(c => ({ v: c.dataset.val, s: c.dataset.suit, color: c.dataset.color, rank: parseInt(c.dataset.rank) })).reverse();
         waste.innerHTML = '';
     }
     updateDeckVisual();
 }
 
+function saveState() {
+    const state = { deck: JSON.parse(JSON.stringify(currentDeck)), slots: {} };
+    document.querySelectorAll('.game-slot').forEach(slot => {
+        state.slots[slot.id] = Array.from(slot.children).map(c => ({
+            rank: parseInt(c.dataset.rank), suit: c.dataset.suit, val: c.dataset.val, color: c.dataset.color, up: c.dataset.up === "true"
+        }));
+    });
+    history.push(state);
+}
+
+function undoMove() {
+    if (history.length === 0) return;
+    const state = history.pop();
+    currentDeck = state.deck;
+    document.querySelectorAll('.game-slot').forEach(slot => {
+        slot.innerHTML = '';
+        (state.slots[slot.id] || []).forEach(data => {
+            const card = buildCardElement(data);
+            if (slot.classList.contains('tableau')) card.style.top = ((slot.children.length) * 25) + 'px';
+            slot.appendChild(card);
+        });
+    });
+    updateDeckVisual();
+}
+
 function updateDeckVisual() {
-    document.getElementById('deck-button').style.opacity = deck.length ? "1" : "0.3";
+    document.getElementById('deck-button').style.opacity = currentDeck.length ? "1" : "0.3";
 }
 
 function checkMove(card, slot) {
@@ -237,7 +259,8 @@ function checkMove(card, slot) {
     return false;
 }
 
-init();
+createMasterDeck();
+startNewGameWithExistingCards();
 </script>
 </body>
 </html>
