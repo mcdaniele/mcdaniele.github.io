@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FreeCell Solitaire - Unified</title>
+    <style>
+        :root { --card-aspect: 1.4; --bg: #2c3e50; --transit: transform 0.2s ease-out; }
+        * { box-sizing: border-box; touch-action: none; user-select: none; }
+        
+        body { 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 10px; 
+            font-family: system-ui, sans-serif; 
+            overflow: hidden; 
+            height: 100vh; 
+            color: white;
+            position: fixed;
+            width: 100%;
+        }
+        
+        #game-board { display: grid; grid-template-columns: repeat(8, 1fr); grid-gap: 6px; max-width: 800px; margin: 0 auto; }
+        .slot { width: 100%; aspect-ratio: 1 / var(--card-aspect); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; position: relative; background: rgba(0,0,0,0.2); }
+
+        .card { 
+            width: 100%; height: 100%; background: white; border-radius: 6px; 
+            position: absolute; box-shadow: 0 2px 5px rgba(0,0,0,0.4); 
+            top: 0; left: 0; overflow: hidden; transition: var(--transit); will-change: transform;
+        }
+
+        .card-inner { position: relative; width: 100%; height: 100%; padding: 4px; pointer-events: none; }
+        .card-value { font-size: clamp(10px, 3.5vw, 16px); font-weight: 900; line-height: 1; }
+        .card-suit { font-size: clamp(8px, 3vw, 14px); }
+        .top-left { position: absolute; top: 4px; left: 4px; text-align: center; }
+        .bottom-right { position: absolute; bottom: 4px; right: 4px; text-align: center; transform: rotate(180deg); }
+        
+        .card.red { color: #e74c3c; }
+        .card.black { color: #2c3e50; }
+
+        .controls { grid-column: span 8; display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; background: #ecf0f1; color: #2c3e50; box-shadow: 0 3px 0 rgba(0,0,0,0.2); }
+        .btn:active { transform: translateY(2px); box-shadow: none; }
+
+        .dragging { transition: none !important; z-index: 2000 !important; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<div id="game-board">
+    <div class="controls">
+        <button class="btn" onclick="undoMove()">UNDO (Ctrl+Z)</button>
+        <button class="btn" style="background:#f1c40f" onclick="startNewGame()">NEW GAME</button>
+    </div>
+    
+    <!-- Top Row: 4 Free Cells and 4 Foundations -->
+    <div id="c0" class="slot freecell"></div>
+    <div id="c1" class="slot freecell"></div>
+    <div id="c2" class="slot freecell"></div>
+    <div id="c3" class="slot freecell"></div>
+    <div id="f0" class="slot foundation"></div>
+    <div id="f1" class="slot foundation"></div>
+    <div id="f2" class="slot foundation"></div>
+    <div id="f3" class="slot foundation"></div>
+
+    <!-- Bottom Row: 8 Tableau Columns -->
+    <div id="t0" class="slot tableau"></div>
+    <div id="t1" class="slot tableau"></div>
+    <div id="t2" class="slot tableau"></div>
+    <div id="t3" class="slot tableau"></div>
+    <div id="t4" class="slot tableau"></div>
+    <div id="t5" class="slot tableau"></div>
+    <div id="t6" class="slot tableau"></div>
+    <div id="t7" class="slot tableau"></div>
+</div>
+
+<script>
+/** 1. GLOBALS & INPUT PREVENTION **/
+const suits = ['♠', '♥', '♣', '♦'], values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+let masterDeck = [], dragStack = [], history = [], lastClickTime = 0, startX = 0, startY = 0, isAutoWinning = false;
+
+// Zoom prevention
+document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) e.preventDefault();
+    lastTouchEnd = now;
+}, false);
+document.addEventListener('wheel', (e) => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+
+// Keyboard Shortcuts
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undoMove(); }
+    if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '-' || e.key === '0')) e.preventDefault();
+});
+
+/** 2. CORE ENGINE **/
+function createMasterDeck() {
+    masterDeck = [];
+    suits.forEach(s => values.forEach((v, i) => {
+        masterDeck.push({ suit: s, val: v, color: (s === '♥' || s === '♦') ? 'red' : 'black', rank: i + 1 });
+    }));
+}
+
+function startNewGame() {
+    history = [];
+    isAutoWinning = false;
+    document.querySelectorAll('.slot').forEach(s => s.innerHTML = '');
+    let deck = [...masterDeck].sort(() => Math.random() - 0.5);
+    deck.forEach((card, i) => dealCard(`t${i % 8}`, card));
+}
+
+function dealCard(targetId, data) {
+    const slot = document.getElementById(targetId);
+    const card = document.createElement('div');
+    card.className = `card ${data.color}`;
+    Object.assign(card.dataset, { rank: data.rank, suit: data.suit, val: data.val, color: data.color });
+    card.innerHTML = `
+        <div class="card-inner">
+            <div class="top-left"><div class="card-value">${data.val}</div><div class="card-suit">${data.suit}</div></div>
+            <div class="bottom-right"><div class="card-value">${data.val}</div><div class="card-suit">${data.suit}</div></div>
+        </div>`;
+    card.onpointerdown = startDrag;
+    if (slot.classList.contains('tableau')) card.style.top = (slot.querySelectorAll('.card').length * 28) + 'px';
+    slot.appendChild(card);
+}
+
+/** 3. DRAG & DROP LOGIC **/
+function startDrag(e) {
+    if (isAutoWinning) return;
+    e.stopPropagation();
+    const card = e.currentTarget;
+    
+    // Double-Click / Quick Tap logic
+    if (Date.now() - lastClickTime < 300) { 
+        saveState(); 
+        if (!tryAutoMove(card)) history.pop(); 
+        checkAutoWin();
+        return; 
+    }
+    lastClickTime = Date.now();
+
+    const parent = card.parentElement;
+    const cards = Array.from(parent.querySelectorAll('.card'));
+    dragStack = cards.slice(cards.indexOf(card));
+    
+    // Validate sequence for stack dragging
+    for(let i=0; i < dragStack.length-1; i++) {
+        const current = dragStack[i], next = dragStack[i+1];
+        if (parseInt(next.dataset.rank) !== parseInt(current.dataset.rank) - 1 || next.dataset.color === current.dataset.color) {
+            dragStack = []; return;
+        }
+    }
+
+    startX = e.clientX; startY = e.clientY;
+    dragStack.forEach(c => c.classList.add('dragging'));
+    window.addEventListener('pointermove', onDrag);
+    window.addEventListener('pointerup', endDrag);
+}
+
+function onDrag(e) {
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    dragStack.forEach(c => c.style.transform = `translate(${dx}px, ${dy}px)`);
+}
+
+function endDrag(e) {
+    window.removeEventListener('pointermove', onDrag);
+    window.removeEventListener('pointerup', endDrag);
+    const first = dragStack[0];
+    dragStack.forEach(c => c.style.display = 'none');
+    const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.slot');
+    dragStack.forEach(c => c.style.display = '');
+
+    if (target && checkMove(first, target) && (target.classList.contains('tableau') || dragStack.length === 1)) {
+        saveState();
+        dragStack.forEach(c => { c.style.transform = ''; executeMove(c, target); });
+        checkAutoWin();
+    } else {
+        dragStack.forEach(c => { c.classList.remove('dragging'); c.style.transform = ''; });
+    }
+    dragStack = [];
+}
+
+/** 4. RULES & AUTO-WIN **/
+function checkMove(card, slot) {
+    const top = slot.querySelector('.card:last-child');
+    const rank = parseInt(card.dataset.rank);
+    if (slot.classList.contains('freecell')) return !top;
+    if (slot.classList.contains('foundation')) return !top ? rank === 1 : (card.dataset.suit === top.dataset.suit && rank === parseInt(top.dataset.rank) + 1);
+    if (slot.classList.contains('tableau')) return !top || (rank === parseInt(top.dataset.rank) - 1 && card.dataset.color !== top.dataset.color);
+    return false;
+}
+
+function tryAutoMove(card) {
+    if (card !== card.parentElement.querySelector('.card:last-child')) return false;
+    const foundations = document.querySelectorAll('.foundation');
+    for (let f of foundations) { if (checkMove(card, f)) { executeMove(card, f); return true; } }
+    const freeCells = document.querySelectorAll('.freecell');
+    for (let c of freeCells) { if (checkMove(card, c)) { executeMove(card, c); return true; } }
+    return false;
+}
+
+function checkAutoWin() {
+    let foundations = Array.from(document.querySelectorAll('.foundation'));
+    // Safe-play rank threshold
+    let minRank = Math.min(...foundations.map(f => {
+        const top = f.querySelector('.card:last-child');
+        return top ? parseInt(top.dataset.rank) : 0;
+    }));
+
+    let candidates = Array.from(document.querySelectorAll('.tableau .card:last-child, .freecell .card'));
+    
+    for (let card of candidates) {
+        const cardRank = parseInt(card.dataset.rank);
+        if (cardRank === 1 || cardRank <= minRank + 1) {
+            for (let f of foundations) {
+                if (checkMove(card, f)) {
+                    isAutoWinning = true;
+                    setTimeout(() => {
+                        executeMove(card, f);
+                        checkAutoWin();
+                    }, 150);
+                    return;
+                }
+            }
+        }
+    }
+    isAutoWinning = false;
+}
+
+function executeMove(card, target) {
+    target.appendChild(card);
+    card.style.top = target.classList.contains('tableau') ? ((target.querySelectorAll('.card').length - 1) * 28) + 'px' : '0';
+    card.classList.remove('dragging');
+    card.style.transform = '';
+}
+
+/** 5. STATE MANAGEMENT **/
+function saveState() {
+    const state = {};
+    document.querySelectorAll('.slot').forEach(s => {
+        state[s.id] = Array.from(s.querySelectorAll('.card')).map(c => ({
+            rank: c.dataset.rank, suit: c.dataset.suit, val: c.dataset.val, color: c.dataset.color
+        }));
+    });
+    history.push(state);
+    if (history.length > 50) history.shift();
+}
+
+function undoMove() {
+    if (!history.length || isAutoWinning) return;
+    const state = history.pop();
+    document.querySelectorAll('.slot').forEach(s => {
+        s.innerHTML = '';
+        (state[s.id] || []).forEach(d => dealCard(s.id, d));
+    });
+}
+
+createMasterDeck();
+startNewGame();
+</script>
+</body>
+</html>
