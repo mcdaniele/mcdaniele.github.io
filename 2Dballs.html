@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=none">
-    <title>8 Kinetic Spheres: No Trails</title>
+    <title>8 Flat Kinetic Spheres</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; cursor: crosshair; }
         canvas { display: block; touch-action: none; }
@@ -27,16 +27,16 @@ const mouse = {
     down: false 
 };
 
-// 8 Specific sizes with unique colors
+// 8 Specific sizes with solid colors
 const ballConfigs = [
-    { r: 15, color: '#ff0055' }, // Pink-Red
-    { r: 25, color: '#00ffcc' }, // Teal
-    { r: 35, color: '#00bfff' }, // Blue
-    { r: 45, color: '#ffcc00' }, // Yellow
-    { r: 55, color: '#9d00ff' }, // Purple
-    { r: 65, color: '#ff5e00' }, // Orange
-    { r: 75, color: '#aaff00' }, // Lime
-    { r: 85, color: '#ffffff' }  // White
+    { r: 15, color: '#ff0055' }, 
+    { r: 25, color: '#00ffcc' }, 
+    { r: 35, color: '#00bfff' }, 
+    { r: 45, color: '#ffcc00' }, 
+    { r: 55, color: '#9d00ff' }, 
+    { r: 65, color: '#ff5e00' }, 
+    { r: 75, color: '#aaff00' }, 
+    { r: 85, color: '#ffffff' }  
 ];
 
 function resize() {
@@ -58,7 +58,6 @@ window.addEventListener('pointerdown', (e) => {
     mouse.y = mouse.lastY = pos.y;
     mouse.down = true;
 
-    // Hit detection (checking from largest to smallest for better overlapping selection)
     for (let i = balls.length - 1; i >= 0; i--) {
         const ball = balls[i];
         const dx = pos.x - ball.x;
@@ -91,33 +90,32 @@ window.addEventListener('pointerup', () => {
     mouse.down = false;
 });
 
-class GlowBall {
+class Ball {
     constructor(config) {
         this.r = config.r;
         this.color = config.color;
         this.x = Math.random() * (w - this.r * 2) + this.r;
         this.y = Math.random() * (h - this.r * 2) + this.r;
-        this.vx = (Math.random() - 0.5) * 8;
-        this.vy = (Math.random() - 0.5) * 8;
+        this.vx = (Math.random() - 0.5) * 10;
+        this.vy = (Math.random() - 0.5) * 10;
     }
 
     update() {
         if (grabbedBall === this) {
             this.x = mouse.x;
             this.y = mouse.y;
-            this.vx = mouse.vx; // Keep track of speed while holding
+            this.vx = mouse.vx;
             this.vy = mouse.vy;
         } else {
             this.x += this.vx;
             this.y += this.vy;
 
-            // Bounce logic
             if (this.x + this.r > w) { this.x = w - this.r; this.vx *= -1; }
             if (this.x - this.r < 0) { this.x = this.r; this.vx *= -1; }
             if (this.y + this.r > h) { this.y = h - this.r; this.vy *= -1; }
             if (this.y - this.r < 0) { this.y = this.r; this.vy *= -1; }
 
-            // Extremely low drag (Momentum)
+            // High Momentum
             this.vx *= 0.9995;
             this.vy *= 0.9995;
         }
@@ -125,23 +123,14 @@ class GlowBall {
 
     draw() {
         ctx.beginPath();
-        let grad = ctx.createRadialGradient(
-            this.x - this.r * 0.3, this.y - this.r * 0.3, this.r * 0.1,
-            this.x, this.y, this.r
-        );
-        grad.addColorStop(0, '#fff');
-        grad.addColorStop(0.2, this.color);
-        grad.addColorStop(1, '#000');
-
-        ctx.fillStyle = grad;
+        ctx.fillStyle = this.color;
         ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
         ctx.fill();
         ctx.closePath();
     }
 }
 
-// Spawn 8 balls
-ballConfigs.forEach(conf => balls.push(new GlowBall(conf)));
+ballConfigs.forEach(conf => balls.push(new Ball(conf)));
 
 function resolveCollisions() {
     for (let i = 0; i < balls.length; i++) {
@@ -163,7 +152,6 @@ function resolveCollisions() {
                 if (b1 !== grabbedBall) { b1.vx -= ax; b1.vy -= ay; }
                 if (b2 !== grabbedBall) { b2.vx += ax; b2.vy += ay; }
                 
-                // Position correction to prevent sticking
                 const overlap = (minDist - dist) / 2;
                 if (b1 !== grabbedBall) { b1.x -= Math.cos(angle) * overlap; b1.y -= Math.sin(angle) * overlap; }
                 if (b2 !== grabbedBall) { b2.x += Math.cos(angle) * overlap; b2.y += Math.sin(angle) * overlap; }
@@ -173,16 +161,12 @@ function resolveCollisions() {
 }
 
 function loop() {
-    // Standard clear for "No Trailing"
     ctx.clearRect(0, 0, w, h);
-
     resolveCollisions();
-
     balls.forEach(ball => {
         ball.update();
         ball.draw();
     });
-
     requestAnimationFrame(loop);
 }
 
