@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8 Glowing Kinetic Spheres</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; cursor: crosshair; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let w, h;
+const balls = [];
+const numBalls = 8;
+const mouse = { x: -1000, y: -1000, active: false };
+
+// Colors and Sizes for 8 unique balls
+const ballConfigs = [
+    { color: '#ff0055', r: 25 }, // Neon Red
+    { color: '#00ffcc', r: 45 }, // Teal
+    { color: '#040273', r: 35 }, // Deep Blue
+    { color: '#ffcc00', r: 75 }, // Gold
+    { color: '#9d00ff', r: 55 }, // Purple
+    { color: '#ff5e00', r: 65 }, // Orange
+    { color: '#aaff00', r: 15 }, // Lime
+    { color: '#00ff00', r: 85 }
+];
+
+function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const updateMouse = (e) => {
+    mouse.x = e.clientX || (e.touches && e.touches[0].clientX);
+    mouse.y = e.clientY || (e.touches && e.touches[0].clientY);
+    mouse.active = true;
+};
+window.addEventListener('mousemove', updateMouse);
+window.addEventListener('touchstart', updateMouse);
+window.addEventListener('touchend', () => mouse.active = false);
+
+class GlowBall {
+    constructor(config) {
+        this.r = config.r;
+        this.color = config.color;
+        this.x = Math.random() * (w - this.r * 2) + this.r;
+        this.y = Math.random() * (h - this.r * 2) + this.r;
+        this.vx = (Math.random() - 0.5) * 6;
+        this.vy = (Math.random() - 0.5) * 6;
+    }
+
+    update() {
+        // Wall Bounce
+        if (this.x + this.r > w || this.x - this.r < 0) {
+            this.vx *= -1;
+            this.x = this.x < this.r ? this.r : w - this.r; // Prevent stuck in wall
+        }
+        if (this.y + this.r > h || this.y - this.r < 0) {
+            this.vy *= -1;
+            this.y = this.y < this.r ? this.r : h - this.r;
+        }
+
+        // Mouse Interaction (Magnetic Push)
+        if (mouse.active) {
+            let dx = this.x - mouse.x;
+            let dy = this.y - mouse.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 250) {
+                let force = (250 - dist) / 250;
+                this.vx += (dx / dist) * force * 0.8;
+                this.vy += (dy / dist) * force * 0.8;
+            }
+        }
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Subtle friction
+        this.vx *= 0.995;
+        this.vy *= 0.995;
+    }
+
+    draw() {
+        ctx.beginPath();
+        // 3D Gradient for "Ball" look
+        // Moves the highlight slightly top-left
+        let gradient = ctx.createRadialGradient(
+            this.x - this.r/3, this.y - this.r/3, this.r/10,
+            this.x, this.y, this.r
+        );
+        
+        gradient.addColorStop(0, '#fff'); // Shine
+        gradient.addColorStop(0.2, this.color);
+        gradient.addColorStop(1, '#000'); // Shadow edge
+
+        ctx.fillStyle = gradient;
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.closePath();
+    }
+}
+
+// Initialize 8 unique balls
+for (let i = 0; i < numBalls; i++) {
+    balls.push(new GlowBall(ballConfigs[i]));
+}
+
+function checkCollisions() {
+    for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+            let b1 = balls[i];
+            let b2 = balls[j];
+            let dx = b2.x - b1.x;
+            let dy = b2.y - b1.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            let minDist = b1.r + b2.r;
+
+            if (dist < minDist) {
+                // Resolve collision (elastic bounce)
+                let angle = Math.atan2(dy, dx);
+                let tx = b1.x + Math.cos(angle) * minDist;
+                let ty = b1.y + Math.sin(angle) * minDist;
+                let ax = (tx - b2.x) * 0.2;
+                let ay = (ty - b2.y) * 0.2;
+                b1.vx -= ax;
+                b1.vy -= ay;
+                b2.vx += ax;
+                b2.vy += ay;
+            }
+        }
+    }
+}
+
+function loop() {
+    // This creates the "Light Trail" effect
+    // Instead of clearRect, we paint a translucent black layer
+    // Lower alpha (e.g. 0.05) means longer trails
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+    ctx.fillRect(0, 0, w, h);
+
+    checkCollisions();
+
+    balls.forEach(ball => {
+        ball.update();
+        ball.draw();
+    });
+
+    requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
