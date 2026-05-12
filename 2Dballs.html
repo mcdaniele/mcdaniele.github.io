@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=none">
-    <title>7 Glowing Spheres: Throw Edition</title>
+    <title>8 Kinetic Spheres: No Trails</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; cursor: crosshair; }
         canvas { display: block; touch-action: none; }
@@ -18,10 +18,8 @@ const ctx = canvas.getContext('2d');
 
 let w, h;
 const balls = [];
-const numBalls = 7;
 let grabbedBall = null;
 
-// Tracking mouse for throwing physics
 const mouse = { 
     x: 0, y: 0, 
     lastX: 0, lastY: 0, 
@@ -29,14 +27,16 @@ const mouse = {
     down: false 
 };
 
+// 8 Specific sizes with unique colors
 const ballConfigs = [
-    { color: '#ff0055', r: 25 }, 
-    { color: '#00ffcc', r: 45 }, 
-    { color: '#00bfff', r: 35 }, 
-    { color: '#ffcc00', r: 55 }, 
-    { color: '#9d00ff', r: 30 }, 
-    { color: '#ff5e00', r: 40 }, 
-    { color: '#aaff00', r: 20 }  
+    { r: 15, color: '#ff0055' }, // Pink-Red
+    { r: 25, color: '#00ffcc' }, // Teal
+    { r: 35, color: '#00bfff' }, // Blue
+    { r: 45, color: '#ffcc00' }, // Yellow
+    { r: 55, color: '#9d00ff' }, // Purple
+    { r: 65, color: '#ff5e00' }, // Orange
+    { r: 75, color: '#aaff00' }, // Lime
+    { r: 85, color: '#ffffff' }  // White
 ];
 
 function resize() {
@@ -46,7 +46,6 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-// Input Listeners
 const getPos = (e) => {
     const clientX = e.clientX || (e.touches && e.touches[0].clientX);
     const clientY = e.clientY || (e.touches && e.touches[0].clientY);
@@ -59,14 +58,16 @@ window.addEventListener('pointerdown', (e) => {
     mouse.y = mouse.lastY = pos.y;
     mouse.down = true;
 
-    // Check if we clicked a ball
-    balls.forEach(ball => {
+    // Hit detection (checking from largest to smallest for better overlapping selection)
+    for (let i = balls.length - 1; i >= 0; i--) {
+        const ball = balls[i];
         const dx = pos.x - ball.x;
         const dy = pos.y - ball.y;
         if (Math.sqrt(dx*dx + dy*dy) < ball.r) {
             grabbedBall = ball;
+            break; 
         }
-    });
+    }
 });
 
 window.addEventListener('pointermove', (e) => {
@@ -74,17 +75,15 @@ window.addEventListener('pointermove', (e) => {
     mouse.x = pos.x;
     mouse.y = pos.y;
     
-    // Calculate velocity of the drag
     mouse.vx = mouse.x - mouse.lastX;
     mouse.vy = mouse.y - mouse.lastY;
     
     mouse.lastX = mouse.x;
-    mouse.lastY = mouse.lastY = mouse.y;
+    mouse.lastY = mouse.y;
 });
 
 window.addEventListener('pointerup', () => {
     if (grabbedBall) {
-        // Apply throw momentum
         grabbedBall.vx = mouse.vx;
         grabbedBall.vy = mouse.vy;
     }
@@ -98,112 +97,91 @@ class GlowBall {
         this.color = config.color;
         this.x = Math.random() * (w - this.r * 2) + this.r;
         this.y = Math.random() * (h - this.r * 2) + this.r;
-        this.vx = (Math.random() - 0.5) * 10;
-        this.vy = (Math.random() - 0.5) * 10;
+        this.vx = (Math.random() - 0.5) * 8;
+        this.vy = (Math.random() - 0.5) * 8;
     }
 
     update() {
         if (grabbedBall === this) {
-            // Follow the mouse
             this.x = mouse.x;
             this.y = mouse.y;
-            this.vx = 0;
-            this.vy = 0;
+            this.vx = mouse.vx; // Keep track of speed while holding
+            this.vy = mouse.vy;
         } else {
-            // Apply Velocity
             this.x += this.vx;
             this.y += this.vy;
 
-            // Wall Bounce
-            if (this.x + this.r > w || this.x - this.r < 0) {
-                this.vx *= -1;
-                this.x = (this.x < this.r) ? this.r : w - this.r;
-            }
-            if (this.y + this.r > h || this.y - this.r < 0) {
-                this.vy *= -1;
-                this.y = (this.y < this.r) ? this.r : h - this.r;
-            }
+            // Bounce logic
+            if (this.x + this.r > w) { this.x = w - this.r; this.vx *= -1; }
+            if (this.x - this.r < 0) { this.x = this.r; this.vx *= -1; }
+            if (this.y + this.r > h) { this.y = h - this.r; this.vy *= -1; }
+            if (this.y - this.r < 0) { this.y = this.r; this.vy *= -1; }
 
-            // High Momentum / Low Drag logic
-            // 0.999 keeps them moving significantly longer than 0.99
-            this.vx *= 0.999; 
-            this.vy *= 0.999;
+            // Extremely low drag (Momentum)
+            this.vx *= 0.9995;
+            this.vy *= 0.9995;
         }
     }
 
     draw() {
         ctx.beginPath();
-        let gradient = ctx.createRadialGradient(
-            this.x - this.r/3, this.y - this.r/3, this.r/10,
+        let grad = ctx.createRadialGradient(
+            this.x - this.r * 0.3, this.y - this.r * 0.3, this.r * 0.1,
             this.x, this.y, this.r
         );
-        gradient.addColorStop(0, '#fff'); 
-        gradient.addColorStop(0.2, this.color);
-        gradient.addColorStop(1, '#000'); 
+        grad.addColorStop(0, '#fff');
+        grad.addColorStop(0.2, this.color);
+        grad.addColorStop(1, '#000');
 
-        ctx.fillStyle = gradient;
+        ctx.fillStyle = grad;
         ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
         ctx.fill();
         ctx.closePath();
     }
 }
 
-for (let i = 0; i < numBalls; i++) {
-    balls.push(new GlowBall(ballConfigs[i]));
-}
+// Spawn 8 balls
+ballConfigs.forEach(conf => balls.push(new GlowBall(conf)));
 
-function checkCollisions() {
+function resolveCollisions() {
     for (let i = 0; i < balls.length; i++) {
         for (let j = i + 1; j < balls.length; j++) {
-            let b1 = balls[i];
-            let b2 = balls[j];
-            let dx = b2.x - b1.x;
-            let dy = b2.y - b1.y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-            let minDist = b1.r + b2.r;
+            const b1 = balls[i];
+            const b2 = balls[j];
+            const dx = b2.x - b1.x;
+            const dy = b2.y - b1.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const minDist = b1.r + b2.r;
 
             if (dist < minDist) {
-                let angle = Math.atan2(dy, dx);
-                let sin = Math.sin(angle);
-                let cos = Math.cos(angle);
+                const angle = Math.atan2(dy, dx);
+                const tx = b1.x + Math.cos(angle) * minDist;
+                const ty = b1.y + Math.sin(angle) * minDist;
+                const ax = (tx - b2.x) * 0.5;
+                const ay = (ty - b2.y) * 0.5;
 
-                // Push apart to prevent overlap sticking
-                let overlap = minDist - dist;
-                if (b1 !== grabbedBall) {
-                    b1.x -= cos * (overlap / 2);
-                    b1.y -= sin * (overlap / 2);
-                }
-                if (b2 !== grabbedBall) {
-                    b2.x += cos * (overlap / 2);
-                    b2.y += sin * (overlap / 2);
-                }
-
-                // Swap momentum
-                let tempVx = b1.vx;
-                let tempVy = b1.vy;
-                b1.vx = b2.vx;
-                b1.vy = b2.vy;
-                b2.vx = tempVx;
-                b2.vy = tempVy;
+                if (b1 !== grabbedBall) { b1.vx -= ax; b1.vy -= ay; }
+                if (b2 !== grabbedBall) { b2.vx += ax; b2.vy += ay; }
+                
+                // Position correction to prevent sticking
+                const overlap = (minDist - dist) / 2;
+                if (b1 !== grabbedBall) { b1.x -= Math.cos(angle) * overlap; b1.y -= Math.sin(angle) * overlap; }
+                if (b2 !== grabbedBall) { b2.x += Math.cos(angle) * overlap; b2.y += Math.sin(angle) * overlap; }
             }
         }
     }
 }
 
 function loop() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
-    ctx.fillRect(0, 0, w, h);
+    // Standard clear for "No Trailing"
+    ctx.clearRect(0, 0, w, h);
 
-    checkCollisions();
+    resolveCollisions();
 
     balls.forEach(ball => {
         ball.update();
         ball.draw();
     });
-
-    // Update drag velocity even if no ball is grabbed for a better "feel"
-    mouse.lastX = mouse.x;
-    mouse.lastY = mouse.y;
 
     requestAnimationFrame(loop);
 }
