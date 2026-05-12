@@ -106,6 +106,10 @@ class Ball {
             this.y = mouse.y;
             this.vx = mouse.vx;
             this.vy = mouse.vy;
+            if (this.vx > 20) { this.vx = 20 }
+            if (this.vy > 20) { this.vy = 20 }
+            if (this.vx < -20) { this.vx = 20 }
+            if (this.vy < -20) { this.vy = 20 }
         } else {
             this.x += this.vx;
             this.y += this.vy;
