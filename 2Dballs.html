@@ -19,7 +19,8 @@ const ctx = canvas.getContext('2d');
 let w, h;
 const balls = [];
 let grabbedBall = null;
-
+let maxv = 25;
+    
 const mouse = { 
     x: 0, y: 0, 
     lastX: 0, lastY: 0, 
@@ -107,10 +108,10 @@ class Ball {
             this.vx = mouse.vx;
             this.vy = mouse.vy;
         } else {
-            if (this.vx > 15) { this.vx = 15 }
-            if (this.vy > 15) { this.vy = 15 }
-            if (this.vx < -15) { this.vx = 15 }
-            if (this.vy < -15) { this.vy = 15 }
+            if (this.vx > maxv) { this.vx = maxv }
+            if (this.vy > maxv) { this.vy = maxv }
+            if (this.vx < -1*maxv) { this.vx = -1*maxv }
+            if (this.vy < -1*maxv) { this.vy = -1*maxv }
             this.x += this.vx;
             this.y += this.vy;
 
