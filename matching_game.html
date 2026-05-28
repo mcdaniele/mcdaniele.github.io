@@ -47,9 +47,17 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            transition: transform 0.2s, opacity 0.4s;
+            transition: transform 0.2s, opacity 0.4s, border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
         }
-        .card.is-selected { border-color: #ecf0f1; transform: scale(1.08); }
+        
+        /* ENHANCED OUTLINE: Applies a thick golden-yellow border and inset highlight */
+        .card.is-selected { 
+            border-color: #0fc4f1; 
+            box-shadow: inset 0 0 0 4px #0fc4f1, 0 8px 16px rgba(0,0,0,0.4);
+            transform: scale(1.05); 
+        }
+        
         .card.is-matched { opacity: 0; pointer-events: none; transform: scale(0.5); }
         .icon { width: 75%; height: 75%; }
 
@@ -96,7 +104,6 @@
     </div>
 
     <script>
-        // Library of 25 unique icons
         const iconLibrary = [
             { n: 'star', p: 'M256 38l68 139 154 22-111 108 26 153-137-72-137 72 26-153-111-108 154-22z', c: '#f1c40f' },
             { n: 'heart', p: 'M462 62c-55-46-136-38-186 14L256 96l-20-20C186 24 104 16 50 62c-63 54-66 150-10 208l193 200c13 13 33 13 45 0l194-200c56-58 53-154-10-208z', c: '#e74c3c' },
@@ -126,11 +133,11 @@
         ];
 
         const levels = [
-            { r: 4, c: 4 }, // 8 pairs
-            { r: 5, c: 4 }, // 10 pairs
-            { r: 6, c: 4 }, // 12 pairs
-            { r: 6, c: 5 }, // 15 pairs
-            { r: 6, c: 6 }  // 18 pairs
+            { r: 4, c: 4 }, 
+            { r: 5, c: 4 }, 
+            { r: 6, c: 4 }, 
+            { r: 6, c: 5 }, 
+            { r: 6, c: 6 }  
         ];
 
         let currentLevelIndex = 0;
@@ -153,7 +160,6 @@
             first = null;
             matchesFound = 0;
 
-            // Pick random subset of icons for this level
             const numPairs = (level.r * level.c) / 2;
             let levelIcons = [...iconLibrary].sort(() => Math.random() - 0.5).slice(0, numPairs);
             let gameSet = [...levelIcons, ...levelIcons].sort(() => Math.random() - 0.5);
@@ -192,7 +198,7 @@
         function nextLevel() {
             if (currentLevelIndex < levels.length - 1) {
                 currentLevelIndex++;
-                setTimeout(initLevel, 600); // Small pause between levels
+                setTimeout(initLevel, 600); 
             } else {
                 triggerFinalVictory();
             }
@@ -215,7 +221,6 @@
             initLevel();
         }
 
-        // --- FIREWORKS ---
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
